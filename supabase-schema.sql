@@ -1,9 +1,9 @@
 -- ====================================================================
 -- FitForge Cloud Database Schema (Supabase PostgreSQL)
--- Run this script in your Supabase SQL Editor: https://supabase.com/dashboard/project/_/sql
+-- Safe & Idempotent (Can be run multiple times without errors)
 -- ====================================================================
 
--- 1. Profiles Table (Stores user stats, TDEE, and macro targets)
+-- 1. Profiles Table
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
@@ -27,29 +27,29 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Weekly Workout Routines (Stores scheduled exercises for each day 0-6)
+-- 2. Weekly Workout Plans
 CREATE TABLE IF NOT EXISTS public.workout_plans (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
   day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
   workout_name TEXT,
   is_rest_day BOOLEAN DEFAULT FALSE,
-  exercises JSONB DEFAULT '[]'::JSONB, -- Array of { id, name, sets, reps, weight }
+  exercises JSONB DEFAULT '[]'::JSONB,
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, day_of_week)
 );
 
--- 3. Weekly Diet Plans (Stores meal slots and planned foods for each day 0-6)
+-- 3. Weekly Diet Plans
 CREATE TABLE IF NOT EXISTS public.diet_plans (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
   day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
-  meals JSONB DEFAULT '[]'::JSONB, -- Array of { id, type, name, time, foods: [...] }
+  meals JSONB DEFAULT '[]'::JSONB,
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, day_of_week)
 );
 
--- 4. Daily Activity Logs (Stores historical logs for each date)
+-- 4. Daily History Logs
 CREATE TABLE IF NOT EXISTS public.daily_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
@@ -70,17 +70,26 @@ CREATE TABLE IF NOT EXISTS public.daily_logs (
   UNIQUE(user_id, log_date)
 );
 
--- Enable Row Level Security (RLS) on all tables for privacy
+-- Enable Row Level Security (RLS) on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.workout_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.diet_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_logs ENABLE ROW LEVEL SECURITY;
 
--- Security Policies (Users can only read and write their own data)
-CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+-- Clean up any existing policies first so this script never errors on re-run
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can manage own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can view own workout plans" ON public.workout_plans;
+DROP POLICY IF EXISTS "Users can manage own workout plans" ON public.workout_plans;
+DROP POLICY IF EXISTS "Users can view own diet plans" ON public.diet_plans;
+DROP POLICY IF EXISTS "Users can manage own diet plans" ON public.diet_plans;
+DROP POLICY IF EXISTS "Users can view own daily logs" ON public.daily_logs;
+DROP POLICY IF EXISTS "Users can manage own daily logs" ON public.daily_logs;
 
-CREATE POLICY "Users can view own workout plans" ON public.workout_plans FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can view own diet plans" ON public.diet_plans FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can view own daily logs" ON public.daily_logs FOR ALL USING (auth.uid() = user_id);
+-- Recreate clean user-scoped policies
+CREATE POLICY "Users can manage own profile" ON public.profiles FOR ALL USING (auth.uid() = id);
+CREATE POLICY "Users can manage own workout plans" ON public.workout_plans FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own diet plans" ON public.diet_plans FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own daily logs" ON public.daily_logs FOR ALL USING (auth.uid() = user_id);
