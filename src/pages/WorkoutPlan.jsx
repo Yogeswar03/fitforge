@@ -9,8 +9,8 @@ import useWorkoutStore from '../store/useWorkoutStore';
 import useDietStore from '../store/useDietStore';
 import useDailyLogStore from '../store/useDailyLogStore';
 import Button from '../components/ui/Button';
-import Modal from '../components/ui/Modal';
 import { generateId, getTodayStr, DAYS_OF_WEEK, getDayName } from '../utils/calculations';
+import { syncWorkoutPlanToCloud } from '../lib/supabaseSync';
 
 const EXERCISE_DATABASE = [
   { group: 'Chest', exercises: ['Bench Press', 'Incline Dumbbell Press', 'Cable Crossover', 'Push Ups', 'Chest Dips', 'Pec Deck Fly'] },
@@ -67,6 +67,9 @@ export default function WorkoutPlan() {
     
     // If today is this day, sync to home screen immediately!
     syncToHomeIfToday(currentPlan);
+
+    // Sync to Supabase cloud if connected
+    syncWorkoutPlanToCloud(null, activeDay, currentPlan);
 
     const isToday = activeDay === todayDayOfWeek;
     triggerNotification(

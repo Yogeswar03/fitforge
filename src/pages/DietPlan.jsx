@@ -12,6 +12,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import { generateId, getTodayStr, DAYS_OF_WEEK, getDayName } from '../utils/calculations';
 import { searchFoods } from '../data/foodDatabase';
+import { syncDietPlanToCloud } from '../lib/supabaseSync';
 
 const MEAL_TYPES = [
   { id: 'breakfast', label: 'Breakfast', icon: '🍳', defaultTime: '08:00' },
@@ -59,6 +60,9 @@ export default function DietPlan() {
   const handleSavePlan = () => {
     setDayMeals(activeDay, currentMeals);
     syncToHomeIfToday(currentMeals);
+
+    // Sync to Supabase cloud if connected
+    syncDietPlanToCloud(null, activeDay, currentMeals);
 
     const isToday = activeDay === todayDayOfWeek;
     triggerNotification(

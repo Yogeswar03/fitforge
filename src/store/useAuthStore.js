@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import supabase, { isSupabaseConfigured } from '../lib/supabase';
+import { syncProfileToCloud, loadAllUserDataFromCloud } from '../lib/supabaseSync';
 import useUserStore from './useUserStore';
 import useWorkoutStore from './useWorkoutStore';
 import useDietStore from './useDietStore';
@@ -20,11 +22,33 @@ const useAuthStore = create(
       isOnboarded: false,
       registeredUsers: {}, // { [email]: { user, isOnboarded } }
 
-      login: (email, password) => {
+      login: async (email, password) => {
         const cleanEmail = (email || '').trim().toLowerCase();
         
-        // Switch all stores to this user's data
+        // 1. Switch all local stores to this user's data
         syncUserToAllStores(cleanEmail);
+
+        let userId = Date.now().toString();
+
+        // 2. If Supabase is configured, authenticate with Supabase Cloud
+        if (isSupabaseConfigured && supabase) {
+          try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email: cleanEmail,
+              password,
+            });
+
+            if (error) {
+              console.warn('Supabase signIn error, falling back to local:', error.message);
+            } else if (data?.user) {
+              userId = data.user.id;
+              // Hydrate all data from cloud tables
+              await loadAllUserDataFromCloud(userId, cleanEmail);
+            }
+          } catch (err) {
+            console.warn('Supabase cloud login error:', err);
+          }
+        }
 
         const existingAccount = get().registeredUsers?.[cleanEmail];
         const userProfile = useUserStore.getState().profiles?.[cleanEmail];
@@ -32,10 +56,10 @@ const useAuthStore = create(
         const hasExistingProfile = !!(userProfile && userProfile.weight && userProfile.height);
         const isUserAlreadyOnboarded = existingAccount ? existingAccount.isOnboarded : hasExistingProfile;
 
-        const loggedInUser = existingAccount?.user || {
-          id: Date.now().toString(),
+        const loggedInUser = {
+          id: userId,
           email: cleanEmail,
-          name: cleanEmail.split('@')[0],
+          name: existingAccount?.user?.name || cleanEmail.split('@')[0],
           avatar: null,
         };
 
@@ -51,19 +75,46 @@ const useAuthStore = create(
             },
           },
         }));
+
+        return { success: true };
       },
 
-      register: (name, email, password) => {
+      register: async (name, email, password) => {
         const cleanEmail = (email || '').trim().toLowerCase();
+        let userId = Date.now().toString();
+
+        // 1. Switch all stores to fresh data for this new user
+        syncUserToAllStores(cleanEmail);
+
+        // 2. If Supabase is configured, create cloud user in Supabase auth.users & profiles table
+        if (isSupabaseConfigured && supabase) {
+          try {
+            const { data, error } = await supabase.auth.signUp({
+              email: cleanEmail,
+              password,
+              options: {
+                data: { name: name.trim() },
+              },
+            });
+
+            if (error) {
+              console.warn('Supabase signUp warning:', error.message);
+            } else if (data?.user) {
+              userId = data.user.id;
+              // Create initial profile row in Supabase
+              await syncProfileToCloud(userId, cleanEmail, { name: name.trim() });
+            }
+          } catch (err) {
+            console.warn('Supabase cloud register error:', err);
+          }
+        }
+
         const newUser = {
-          id: Date.now().toString(),
+          id: userId,
           name: name.trim(),
           email: cleanEmail,
           avatar: null,
         };
-
-        // Switch all stores to fresh data for this new user
-        syncUserToAllStores(cleanEmail);
 
         set((state) => ({
           user: newUser,
@@ -77,10 +128,18 @@ const useAuthStore = create(
             },
           },
         }));
+
+        return { success: true };
       },
 
-      logout: () => {
-        // Clear active user from all stores so friend/next login starts with clean slate
+      logout: async () => {
+        if (isSupabaseConfigured && supabase) {
+          try {
+            await supabase.auth.signOut();
+          } catch (e) {}
+        }
+
+        // Clear active user from all stores
         syncUserToAllStores(null);
 
         set({
@@ -99,6 +158,13 @@ const useAuthStore = create(
               isOnboarded: true,
             };
           }
+
+          // If user exists and Supabase configured, sync profile to cloud
+          if (state.user?.id && email) {
+            const profile = useUserStore.getState().profile;
+            syncProfileToCloud(state.user.id, email, profile);
+          }
+
           return {
             isOnboarded: true,
             registeredUsers: updatedUsers,
@@ -113,7 +179,6 @@ const useAuthStore = create(
     {
       name: 'fitforge-auth',
       onRehydrateStorage: () => (state) => {
-        // When auth rehydrates from localStorage on page load/refresh, sync current user to all stores
         if (state?.user?.email && state.isAuthenticated) {
           syncUserToAllStores(state.user.email);
         }
