@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import useUserStore from '../store/useUserStore';
+import { syncProfileToCloud } from '../lib/supabaseSync';
 import Button from '../components/ui/Button';
 
 const goals = [
@@ -46,14 +47,21 @@ export default function Onboarding() {
   const nextStep = () => setStep((s) => Math.min(4, s + 1));
   const prevStep = () => setStep((s) => Math.max(1, s - 1));
 
-  const handleFinish = () => {
-    setProfile({
+  const handleFinish = async () => {
+    const profilePayload = {
       ...data,
       age: Number(data.age),
       height: Number(data.height),
       weight: Number(data.weight),
-    });
+    };
+    setProfile(profilePayload);
     setOnboarded();
+
+    const authUser = useAuthStore.getState().user;
+    if (authUser?.id && authUser?.email) {
+      await syncProfileToCloud(authUser.id, authUser.email, profilePayload);
+    }
+
     navigate('/');
   };
 
