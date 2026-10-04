@@ -17,19 +17,45 @@ const useDietStore = create(
       currentEmail: null,
       weeklyPlansByUser: {}, // { [email]: weeklyDietPlan }
       weeklyPlan: getDefaultWeeklyDiet(),
+      partnerByUser: {}, // { [email]: { name, email, code, lastSyncedAt, shareCode } }
+      partner: null,
 
       setCurrentUser: (email) => {
         if (!email) {
-          set({ currentEmail: null, weeklyPlan: getDefaultWeeklyDiet() });
+          set({ currentEmail: null, weeklyPlan: getDefaultWeeklyDiet(), partner: null });
           return;
         }
         const cleanEmail = email.trim().toLowerCase();
         const existingPlan = get().weeklyPlansByUser?.[cleanEmail] || getDefaultWeeklyDiet();
+        const existingPartner = get().partnerByUser?.[cleanEmail] || null;
         set({
           currentEmail: cleanEmail,
           weeklyPlan: existingPlan,
+          partner: existingPartner,
         });
       },
+
+      setPartner: (partnerInfo) => set((state) => {
+        const email = state.currentEmail;
+        const updatedByUser = email
+          ? { ...state.partnerByUser, [email]: partnerInfo }
+          : state.partnerByUser;
+        return {
+          partner: partnerInfo,
+          partnerByUser: updatedByUser,
+        };
+      }),
+
+      setWeeklyPlan: (newWeeklyPlan) => set((state) => {
+        const email = state.currentEmail;
+        const updatedByUser = email
+          ? { ...state.weeklyPlansByUser, [email]: newWeeklyPlan }
+          : state.weeklyPlansByUser;
+        return {
+          weeklyPlan: newWeeklyPlan,
+          weeklyPlansByUser: updatedByUser,
+        };
+      }),
 
       setDayMeals: (dayOfWeek, meals) => set((state) => {
         const email = state.currentEmail;

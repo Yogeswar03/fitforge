@@ -93,3 +93,20 @@ CREATE POLICY "Users can manage own profile" ON public.profiles FOR ALL USING (a
 CREATE POLICY "Users can manage own workout plans" ON public.workout_plans FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own diet plans" ON public.diet_plans FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own daily logs" ON public.daily_logs FOR ALL USING (auth.uid() = user_id);
+
+-- 5. Gym Partner Shared Diets Table (Public Exchange for 6-character partner PINs)
+CREATE TABLE IF NOT EXISTS public.shared_diets (
+  code TEXT PRIMARY KEY,
+  owner_name TEXT,
+  owner_gender TEXT,
+  owner_calories NUMERIC,
+  plan_data JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.shared_diets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can view shared diets" ON public.shared_diets;
+DROP POLICY IF EXISTS "Public can insert shared diets" ON public.shared_diets;
+CREATE POLICY "Public can view shared diets" ON public.shared_diets FOR SELECT USING (true);
+CREATE POLICY "Public can insert shared diets" ON public.shared_diets FOR ALL USING (true);
+

@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { 
   Calendar, User, CheckCircle2, Circle, Flame, 
   Dumbbell, Utensils, Plus, Sparkles, X, ChevronRight, 
-  Apple, History, Trophy, Award, Check 
+  Apple, History, Trophy, Award, Check, Users 
 } from 'lucide-react';
 
 import useAuthStore from '../store/useAuthStore';
@@ -17,6 +17,7 @@ import { getTodayStr, getProgressPercentage, getDayName, generateId } from '../u
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import ExerciseModal from '../components/ui/ExerciseModal';
+import PartnerDietModal from '../components/ui/PartnerDietModal';
 import { getExerciseDetails } from '../data/exerciseDatabase';
 
 const TRAINER_MESSAGES = [
@@ -31,7 +32,7 @@ export default function Dashboard() {
   const { user } = useAuthStore();
   const { profile } = useUserStore();
   const { weeklyPlan: workoutWeeklyPlan } = useWorkoutStore();
-  const { weeklyPlan: dietWeeklyPlan } = useDietStore();
+  const { weeklyPlan: dietWeeklyPlan, partner } = useDietStore();
   const { 
     logs, 
     initDay, 
@@ -80,6 +81,9 @@ export default function Dashboard() {
 
   // Exercise Guide Modal
   const [selectedExerciseForModal, setSelectedExerciseForModal] = useState(null);
+
+  // Gym Partner Diet Modal
+  const [isPartnerDietModalOpen, setIsPartnerDietModalOpen] = useState(false);
 
   // Compute live nutrition
   const nutrition = useMemo(() => {
@@ -402,29 +406,49 @@ export default function Dashboard() {
 
       {/* TODAY'S DIET SECTION */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-xl font-bold flex items-center gap-2">
-            <Utensils className="text-accent2" size={22} />
-            Today's Diet
-            {meals.length > 0 && (
-              <span className="text-xs bg-dark-700 px-2.5 py-0.5 rounded-full text-accent2 font-bold">
-                {meals.filter((m) => m.completed).length}/{meals.length} Taken
-              </span>
-            )}
-          </h3>
+        <div className="flex items-center justify-between px-1 gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <Utensils className="text-accent2" size={22} />
+              Today's Diet
+              {meals.length > 0 && (
+                <span className="text-xs bg-dark-700 px-2.5 py-0.5 rounded-full text-accent2 font-bold">
+                  {meals.filter((m) => m.completed).length}/{meals.length} Taken
+                </span>
+              )}
+            </h3>
 
-          <div className="flex items-center gap-2">
+            {partner && (
+              <button
+                onClick={() => setIsPartnerDietModalOpen(true)}
+                className="text-[11px] bg-gradient-to-r from-accent/15 to-accent2/15 hover:from-accent/25 hover:to-accent2/25 text-accent border border-accent/30 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 transition-all"
+                title="Synced with gym partner"
+              >
+                <span>👫</span>
+                <span>{partner.name}</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setIsPartnerDietModalOpen(true)}
+              className="text-xs font-semibold text-accent2 hover:underline flex items-center gap-1 bg-accent2/10 px-2.5 py-1 rounded-xl"
+              title="Sync with gym partner"
+            >
+              <Users size={14} /> Partner
+            </button>
             <button
               onClick={() => navigate('/log')}
               className="text-xs font-semibold text-accent hover:underline flex items-center gap-1 bg-accent/10 px-2.5 py-1 rounded-xl"
             >
-              <Plus size={14} /> Log Food
+              <Plus size={14} /> Log
             </button>
             <button
               onClick={() => navigate('/plan/diet')}
-              className="text-xs font-semibold text-accent2 hover:underline flex items-center gap-0.5"
+              className="text-xs font-semibold text-gray-300 hover:text-white hover:underline flex items-center gap-0.5"
             >
-              Meal Plan →
+              Plan →
             </button>
           </div>
         </div>
@@ -737,6 +761,12 @@ export default function Dashboard() {
         isOpen={!!selectedExerciseForModal}
         onClose={() => setSelectedExerciseForModal(null)}
         exerciseName={selectedExerciseForModal}
+      />
+
+      {/* Gym Partner Diet Hub Modal */}
+      <PartnerDietModal
+        isOpen={isPartnerDietModalOpen}
+        onClose={() => setIsPartnerDietModalOpen(false)}
       />
     </motion.div>
   );

@@ -1,15 +1,16 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Trash2, Copy, Dumbbell, Utensils, Search, Clock, 
-  Save, Sparkles, X, Check 
+  Save, Sparkles, X, Check, Users, Heart 
 } from 'lucide-react';
 import useDietStore from '../store/useDietStore';
 import useWorkoutStore from '../store/useWorkoutStore';
 import useDailyLogStore from '../store/useDailyLogStore';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
+import PartnerDietModal from '../components/ui/PartnerDietModal';
 import { generateId, getTodayStr, DAYS_OF_WEEK, getDayName } from '../utils/calculations';
 import { searchFoods } from '../data/foodDatabase';
 import { syncDietPlanToCloud } from '../lib/supabaseSync';
@@ -26,9 +27,12 @@ const MEAL_TYPES = [
 
 export default function DietPlan() {
   const navigate = useNavigate();
-  const { weeklyPlan, setDayMeals, addMeal, removeMeal, updateMeal, copyDayPlan } = useDietStore();
+  const { weeklyPlan, setDayMeals, addMeal, removeMeal, updateMeal, copyDayPlan, partner } = useDietStore();
   const { weeklyPlan: workoutWeeklyPlan } = useWorkoutStore();
   const { syncPlan } = useDailyLogStore();
+
+  const [searchParams] = useSearchParams();
+  const partnerDietCodeFromUrl = searchParams.get('partner_diet') || '';
 
   const todayDate = new Date();
   const todayDayOfWeek = todayDate.getDay();
@@ -42,6 +46,13 @@ export default function DietPlan() {
   const [targetCopyDay, setTargetCopyDay] = useState(todayDayOfWeek === 0 ? 1 : 0);
 
   const [isAddMealModalOpen, setIsAddMealModalOpen] = useState(false);
+  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(!!partnerDietCodeFromUrl);
+
+  useEffect(() => {
+    if (partnerDietCodeFromUrl) {
+      setIsPartnerModalOpen(true);
+    }
+  }, [partnerDietCodeFromUrl]);
   const [newMealType, setNewMealType] = useState(MEAL_TYPES[0].id);
   const [newMealTime, setNewMealTime] = useState(MEAL_TYPES[0].defaultTime);
 
@@ -122,19 +133,34 @@ export default function DietPlan() {
     >
       {/* Top Header */}
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start gap-2 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold gradient-accent-text">Diet Routine</h1>
             <p className="text-gray-400 text-sm">Organize which meals you eat on each day</p>
           </div>
 
-          <button
-            onClick={handleSavePlan}
-            className="flex items-center gap-2 bg-accent text-dark-900 font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-accent/20 active:scale-95 transition-all text-sm"
-          >
-            <Save size={18} />
-            <span>Save Plan</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPartnerModalOpen(true)}
+              className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 border ${
+                partner 
+                  ? 'bg-gradient-to-r from-accent/20 to-accent2/20 border-accent/40 text-accent' 
+                  : 'bg-dark-800 hover:bg-dark-700 border-white/10 text-gray-200'
+              }`}
+              title="Sync or share diet with your gym partner"
+            >
+              <Users size={16} className={partner ? 'text-accent' : 'text-accent2'} />
+              <span>{partner ? `👫 ${partner.name}` : '👫 Gym Partner'}</span>
+            </button>
+
+            <button
+              onClick={handleSavePlan}
+              className="flex items-center gap-2 bg-accent text-dark-900 font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-accent/20 active:scale-95 transition-all text-sm"
+            >
+              <Save size={18} />
+              <span>Save Plan</span>
+            </button>
+          </div>
         </div>
 
         {/* Tab Switcher: Workout vs Diet */}
@@ -397,6 +423,13 @@ export default function DietPlan() {
           </Modal>
         )}
       </AnimatePresence>
+
+      {/* Gym Partner Diet Hub Modal */}
+      <PartnerDietModal
+        isOpen={isPartnerModalOpen}
+        onClose={() => setIsPartnerModalOpen(false)}
+        initialCode={partnerDietCodeFromUrl}
+      />
     </motion.div>
   );
 }
