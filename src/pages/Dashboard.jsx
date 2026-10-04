@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { 
   Calendar, User, CheckCircle2, Circle, Flame, 
   Dumbbell, Utensils, Plus, Sparkles, X, ChevronRight, 
-  Apple, History, Trophy, Award, Check, Users 
+  Apple, History, Trophy, Award, Check, Users, ReceiptText 
 } from 'lucide-react';
 
 import useAuthStore from '../store/useAuthStore';
@@ -197,15 +197,24 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Dedicated Navigation Icons: History, Calendar, Profile */}
-        <div className="flex items-center gap-2">
+        {/* Dedicated Navigation Icons: History, Calendar, Expenses, Profile */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Gym Expenses Splitter */}
+          <button 
+            onClick={() => navigate('/expenses')}
+            className="w-10 h-10 rounded-2xl bg-dark-800 hover:bg-dark-700 flex items-center justify-center transition-colors border border-white/5 text-emerald-400"
+            title="Gym Expenses & Splitter"
+          >
+            <ReceiptText size={18} />
+          </button>
+
           {/* Dedicated History Icon */}
           <button 
             onClick={() => navigate('/history')}
             className="w-10 h-10 rounded-2xl bg-dark-800 hover:bg-dark-700 flex items-center justify-center transition-colors border border-white/5 text-accent"
             title="View Journey History"
           >
-            <History size={20} />
+            <History size={18} />
           </button>
 
           {/* Calendar Icon */}
@@ -214,7 +223,7 @@ export default function Dashboard() {
             className="w-10 h-10 rounded-2xl bg-dark-800 hover:bg-dark-700 flex items-center justify-center transition-colors border border-white/5 text-accent2"
             title="View Calendar Grid"
           >
-            <Calendar size={20} />
+            <Calendar size={18} />
           </button>
           
           {/* Profile Icon */}

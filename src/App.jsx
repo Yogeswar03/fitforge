@@ -19,6 +19,8 @@ import DailyLog from './pages/DailyLog';
 import CalendarView from './pages/CalendarView';
 import HistoryView from './pages/HistoryView';
 import Profile from './pages/Profile';
+import ExpenseTracker from './pages/ExpenseTracker';
+import useExpenseStore from './store/useExpenseStore';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -49,6 +51,7 @@ export default function App() {
       useWorkoutStore.getState().setCurrentUser(email);
       useDietStore.getState().setCurrentUser(email);
       useDailyLogStore.getState().setCurrentUser(email);
+      useExpenseStore.getState().setCurrentUser(email);
     }
   }, [isAuthenticated, user?.email]);
 
@@ -69,6 +72,7 @@ export default function App() {
           <Route path="/log" element={<DailyLog />} />
           <Route path="/calendar" element={<CalendarView />} />
           <Route path="/history" element={<HistoryView />} />
+          <Route path="/expenses" element={<ExpenseTracker />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
