@@ -9,8 +9,11 @@ import useWorkoutStore from '../store/useWorkoutStore';
 import useDietStore from '../store/useDietStore';
 import useDailyLogStore from '../store/useDailyLogStore';
 import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import ExerciseModal from '../components/ui/ExerciseModal';
 import { generateId, getTodayStr, DAYS_OF_WEEK, getDayName } from '../utils/calculations';
 import { syncWorkoutPlanToCloud } from '../lib/supabaseSync';
+import { EXERCISE_DATABASE as DB_EXERCISES, getExerciseDetails } from '../data/exerciseDatabase';
 
 const EXERCISE_DATABASE = [
   { group: 'Chest', exercises: ['Bench Press', 'Incline Dumbbell Press', 'Cable Crossover', 'Push Ups', 'Chest Dips', 'Pec Deck Fly'] },
@@ -47,6 +50,9 @@ export default function WorkoutPlan() {
   const [newExSets, setNewExSets] = useState('3');
   const [newExReps, setNewExReps] = useState('12');
   const [newExWeight, setNewExWeight] = useState('0');
+
+  // Exercise Guide Modal
+  const [selectedExerciseForModal, setSelectedExerciseForModal] = useState(null);
 
   const triggerNotification = (msg) => {
     setNotification(msg);
@@ -319,83 +325,131 @@ export default function WorkoutPlan() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {currentPlan.exercises.map((ex, idx) => (
-                    <div 
-                      key={ex.id}
-                      className="bg-dark-800/90 rounded-2xl p-4 border border-white/5 flex flex-col gap-3"
-                    >
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-full bg-dark-700 text-accent font-bold text-xs flex items-center justify-center">
-                            {idx + 1}
-                          </span>
-                          <span className="font-bold text-white text-base">{ex.name}</span>
+                  {currentPlan.exercises.map((ex, idx) => {
+                    const details = getExerciseDetails(ex.name);
+                    return (
+                      <div 
+                        key={ex.id}
+                        className="bg-dark-800/90 rounded-2xl p-3.5 sm:p-4 border border-white/5 flex flex-col gap-3 shadow-sm"
+                      >
+                        <div className="flex justify-between items-center gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            {/* Exercise Photo Thumbnail */}
+                            <div
+                              onClick={() => setSelectedExerciseForModal(ex.name)}
+                              className="relative w-12 h-12 rounded-xl overflow-hidden bg-dark-900 border border-white/10 flex-shrink-0 group cursor-pointer hover:border-accent/60 transition-colors shadow-inner"
+                              title="Tap to view photo & form guide"
+                            >
+                              <img
+                                src={details?.image || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80'}
+                                alt={ex.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                loading="lazy"
+                                onError={(e) => {
+                                  e.target.src = 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80';
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
+                            </div>
+
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="w-5 h-5 rounded-full bg-dark-700 text-accent font-bold text-[10px] flex items-center justify-center flex-shrink-0">
+                                  {idx + 1}
+                                </span>
+                                <span className="font-bold text-white text-sm sm:text-base leading-tight truncate">
+                                  {ex.name}
+                                </span>
+                                {details?.category && (
+                                  <span className="text-[10px] px-1.5 py-0.2 bg-dark-700 text-gray-300 rounded font-medium">
+                                    {details.category}
+                                  </span>
+                                )}
+                              </div>
+                              {details?.muscle && (
+                                <p className="text-[11px] text-gray-400 truncate mt-0.5 ml-6">
+                                  {details.muscle}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedExerciseForModal(ex.name)}
+                              className="p-2 text-gray-400 hover:text-accent bg-dark-700/60 rounded-xl transition-colors"
+                              title="View Form & Technique Guide"
+                            >
+                              <Sparkles size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleRemoveExercise(ex.id)}
+                              className="p-2 text-gray-500 hover:text-red-400 bg-dark-700/60 rounded-xl transition-colors"
+                              title="Remove exercise"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => handleRemoveExercise(ex.id)}
-                          className="p-1.5 text-gray-500 hover:text-red-400 bg-dark-700 rounded-lg transition-colors"
-                          title="Remove exercise"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+
+                        {/* Sets / Reps / Weight Inputs */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="bg-dark-900/60 p-2 rounded-xl text-center">
+                            <span className="text-[10px] text-gray-400 block">Sets</span>
+                            <input 
+                              type="number"
+                              min="1"
+                              value={ex.sets}
+                              onChange={(e) => {
+                                updateExercise(activeDay, ex.id, { sets: Number(e.target.value) || 1 });
+                                syncToHomeIfToday({
+                                  ...currentPlan,
+                                  exercises: currentPlan.exercises.map(item => item.id === ex.id ? { ...item, sets: Number(e.target.value) || 1 } : item)
+                                });
+                              }}
+                              className="w-full bg-transparent text-center font-bold text-sm text-white outline-none"
+                            />
+                          </div>
+
+                          <div className="bg-dark-900/60 p-2 rounded-xl text-center">
+                            <span className="text-[10px] text-gray-400 block">Reps</span>
+                            <input 
+                              type="number"
+                              min="1"
+                              value={ex.reps}
+                              onChange={(e) => {
+                                updateExercise(activeDay, ex.id, { reps: Number(e.target.value) || 1 });
+                                syncToHomeIfToday({
+                                  ...currentPlan,
+                                  exercises: currentPlan.exercises.map(item => item.id === ex.id ? { ...item, reps: Number(e.target.value) || 1 } : item)
+                                });
+                              }}
+                              className="w-full bg-transparent text-center font-bold text-sm text-white outline-none"
+                            />
+                          </div>
+
+                          <div className="bg-dark-900/60 p-2 rounded-xl text-center">
+                            <span className="text-[10px] text-gray-400 block">Weight (kg)</span>
+                            <input 
+                              type="number"
+                              min="0"
+                              step="2.5"
+                              value={ex.weight}
+                              onChange={(e) => {
+                                updateExercise(activeDay, ex.id, { weight: Number(e.target.value) || 0 });
+                                syncToHomeIfToday({
+                                  ...currentPlan,
+                                  exercises: currentPlan.exercises.map(item => item.id === ex.id ? { ...item, weight: Number(e.target.value) || 0 } : item)
+                                });
+                              }}
+                              className="w-full bg-transparent text-center font-bold text-sm text-accent outline-none"
+                            />
+                          </div>
+                        </div>
                       </div>
-
-                      {/* Sets / Reps / Weight Inputs */}
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="bg-dark-900/60 p-2 rounded-xl text-center">
-                          <span className="text-[10px] text-gray-400 block">Sets</span>
-                          <input 
-                            type="number"
-                            min="1"
-                            value={ex.sets}
-                            onChange={(e) => {
-                              updateExercise(activeDay, ex.id, { sets: Number(e.target.value) || 1 });
-                              syncToHomeIfToday({
-                                ...currentPlan,
-                                exercises: currentPlan.exercises.map(item => item.id === ex.id ? { ...item, sets: Number(e.target.value) || 1 } : item)
-                              });
-                            }}
-                            className="w-full bg-transparent text-center font-bold text-sm text-white outline-none"
-                          />
-                        </div>
-
-                        <div className="bg-dark-900/60 p-2 rounded-xl text-center">
-                          <span className="text-[10px] text-gray-400 block">Reps</span>
-                          <input 
-                            type="number"
-                            min="1"
-                            value={ex.reps}
-                            onChange={(e) => {
-                              updateExercise(activeDay, ex.id, { reps: Number(e.target.value) || 1 });
-                              syncToHomeIfToday({
-                                ...currentPlan,
-                                exercises: currentPlan.exercises.map(item => item.id === ex.id ? { ...item, reps: Number(e.target.value) || 1 } : item)
-                              });
-                            }}
-                            className="w-full bg-transparent text-center font-bold text-sm text-white outline-none"
-                          />
-                        </div>
-
-                        <div className="bg-dark-900/60 p-2 rounded-xl text-center">
-                          <span className="text-[10px] text-gray-400 block">Weight (kg)</span>
-                          <input 
-                            type="number"
-                            min="0"
-                            step="2.5"
-                            value={ex.weight}
-                            onChange={(e) => {
-                              updateExercise(activeDay, ex.id, { weight: Number(e.target.value) || 0 });
-                              syncToHomeIfToday({
-                                ...currentPlan,
-                                exercises: currentPlan.exercises.map(item => item.id === ex.id ? { ...item, weight: Number(e.target.value) || 0 } : item)
-                              });
-                            }}
-                            className="w-full bg-transparent text-center font-bold text-sm text-accent outline-none"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -483,22 +537,69 @@ export default function WorkoutPlan() {
                   />
                 </div>
 
-                {/* Quick suggestions from database */}
+                {/* Visual Exercise Suggestions & Quick Select */}
                 <div>
-                  <div className="text-xs text-gray-400 mb-1.5">Or tap a popular exercise:</div>
-                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto no-scrollbar p-1">
-                    {EXERCISE_DATABASE.map((grp) =>
-                      grp.exercises.slice(0, 3).map((ex) => (
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-gray-400">
+                      {newExName ? 'Matching Exercises:' : 'Popular Exercises (with Visuals):'}
+                    </span>
+                    {newExName && (
+                      <button
+                        type="button"
+                        onClick={() => setNewExName('')}
+                        className="text-[11px] text-accent hover:underline"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 bg-dark-900/60 rounded-2xl border border-white/5">
+                    {(newExName 
+                      ? DB_EXERCISES.filter(e => 
+                          e.name.toLowerCase().includes(newExName.toLowerCase()) || 
+                          e.category.toLowerCase().includes(newExName.toLowerCase()) ||
+                          e.muscle.toLowerCase().includes(newExName.toLowerCase())
+                        ).slice(0, 10)
+                      : DB_EXERCISES.slice(0, 8)
+                    ).map((ex) => (
+                      <div
+                        key={ex.id}
+                        onClick={() => setNewExName(ex.name)}
+                        className={`p-2 rounded-xl flex items-center gap-2.5 cursor-pointer transition-colors border ${
+                          newExName.toLowerCase() === ex.name.toLowerCase()
+                            ? 'bg-accent/15 border-accent text-white'
+                            : 'bg-dark-800 hover:bg-dark-700/80 border-white/5 text-gray-300'
+                        }`}
+                      >
+                        <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-dark-900 flex-shrink-0 border border-white/10">
+                          <img
+                            src={ex.image}
+                            alt={ex.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.target.src = 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80';
+                            }}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-semibold text-xs text-white truncate">{ex.name}</div>
+                          <div className="text-[10px] text-gray-400 truncate">{ex.category} • {ex.equipment}</div>
+                        </div>
                         <button
                           type="button"
-                          key={ex}
-                          onClick={() => setNewExName(ex)}
-                          className="text-xs bg-dark-700 hover:bg-accent hover:text-dark-900 text-gray-300 px-3 py-1.5 rounded-lg transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedExerciseForModal(ex.name);
+                          }}
+                          className="p-1 hover:text-accent text-gray-400"
+                          title="Form guide"
                         >
-                          {ex}
+                          <Sparkles size={14} />
                         </button>
-                      ))
-                    )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -577,6 +678,13 @@ export default function WorkoutPlan() {
           </Modal>
         )}
       </AnimatePresence>
+
+      {/* Exercise Technique & Form Modal */}
+      <ExerciseModal
+        isOpen={!!selectedExerciseForModal}
+        onClose={() => setSelectedExerciseForModal(null)}
+        exerciseName={selectedExerciseForModal}
+      />
     </motion.div>
   );
 }

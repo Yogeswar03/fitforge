@@ -16,6 +16,8 @@ import useDailyLogStore from '../store/useDailyLogStore';
 import { getTodayStr, getProgressPercentage, getDayName, generateId } from '../utils/calculations';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
+import ExerciseModal from '../components/ui/ExerciseModal';
+import { getExerciseDetails } from '../data/exerciseDatabase';
 
 const TRAINER_MESSAGES = [
   "Outstanding discipline today! You crushed every set and hit your nutrition goals. Days like this build champions! 💪",
@@ -75,6 +77,9 @@ export default function Dashboard() {
 
   // Celebration Modal
   const [showCelebration, setShowCelebration] = useState(false);
+
+  // Exercise Guide Modal
+  const [selectedExerciseForModal, setSelectedExerciseForModal] = useState(null);
 
   // Compute live nutrition
   const nutrition = useMemo(() => {
@@ -308,36 +313,89 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="space-y-2.5">
-            {workouts.map((exercise) => (
-              <div
-                key={exercise.id}
-                onClick={() => handleToggleExercise(exercise.id)}
-                className={`glass-strong rounded-2xl p-4 flex items-center gap-3.5 cursor-pointer transition-all border ${
-                  exercise.completed ? 'border-accent/40 bg-dark-800/40 opacity-70' : 'border-white/5 hover:border-white/20'
-                }`}
-              >
-                <button className="flex-shrink-0 text-accent">
+            {workouts.map((exercise) => {
+              const details = getExerciseDetails(exercise.name);
+              return (
+                <div
+                  key={exercise.id}
+                  onClick={() => handleToggleExercise(exercise.id)}
+                  className={`glass-strong rounded-2xl p-3 sm:p-4 flex items-center gap-3.5 cursor-pointer transition-all border ${
+                    exercise.completed ? 'border-accent/40 bg-dark-800/40 opacity-70' : 'border-white/5 hover:border-white/20'
+                  }`}
+                >
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleExercise(exercise.id);
+                    }}
+                    className="flex-shrink-0 text-accent"
+                  >
+                    {exercise.completed ? (
+                      <CheckCircle2 size={26} className="text-accent fill-accent/20" />
+                    ) : (
+                      <Circle size={26} className="text-gray-500 hover:text-gray-300" />
+                    )}
+                  </button>
+
+                  {/* Exercise Visual Image Thumbnail */}
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedExerciseForModal(exercise.name);
+                    }}
+                    className="relative w-14 h-14 rounded-xl overflow-hidden bg-dark-900 border border-white/10 flex-shrink-0 group cursor-pointer hover:border-accent/60 transition-colors shadow-sm"
+                    title="Tap to view photo & form guide"
+                  >
+                    <img
+                      src={details?.image || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80'}
+                      alt={exercise.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
+                    <span className="absolute bottom-0.5 right-0.5 bg-black/70 text-[9px] text-accent px-1 rounded font-bold">
+                      Form
+                    </span>
+                  </div>
+
+                  <div className={`flex-1 min-w-0 ${exercise.completed ? 'line-through text-gray-400' : 'text-white'}`}>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="font-bold text-sm sm:text-base leading-snug truncate">{exercise.name}</p>
+                      {details?.category && (
+                        <span className="text-[10px] px-1.5 py-0.5 bg-dark-700 text-gray-300 rounded font-medium">
+                          {details.category}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {exercise.sets} sets × {exercise.reps} reps {exercise.weight > 0 ? `• ${exercise.weight} kg` : ''}
+                    </p>
+                  </div>
+
                   {exercise.completed ? (
-                    <CheckCircle2 size={26} className="text-accent fill-accent/20" />
+                    <span className="text-[10px] font-bold text-accent bg-accent/10 px-2.5 py-1 rounded-full flex-shrink-0">
+                      DONE
+                    </span>
                   ) : (
-                    <Circle size={26} className="text-gray-500 hover:text-gray-300" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedExerciseForModal(exercise.name);
+                      }}
+                      className="text-xs text-gray-400 hover:text-accent p-2 rounded-xl hover:bg-dark-700/60 transition-colors flex-shrink-0"
+                      title="View Exercise Form Guide"
+                    >
+                      <Sparkles size={16} />
+                    </button>
                   )}
-                </button>
-
-                <div className={`flex-1 ${exercise.completed ? 'line-through text-gray-400' : 'text-white'}`}>
-                  <p className="font-bold text-base leading-snug">{exercise.name}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {exercise.sets} sets × {exercise.reps} reps {exercise.weight > 0 ? `• ${exercise.weight} kg` : ''}
-                  </p>
                 </div>
-
-                {exercise.completed && (
-                  <span className="text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-full">
-                    DONE
-                  </span>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
@@ -673,6 +731,13 @@ export default function Dashboard() {
           </Modal>
         )}
       </AnimatePresence>
+
+      {/* Exercise Technique & Form Modal */}
+      <ExerciseModal
+        isOpen={!!selectedExerciseForModal}
+        onClose={() => setSelectedExerciseForModal(null)}
+        exerciseName={selectedExerciseForModal}
+      />
     </motion.div>
   );
 }

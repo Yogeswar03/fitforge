@@ -11,6 +11,8 @@ import {
 import useDailyLogStore from '../store/useDailyLogStore';
 import useUserStore from '../store/useUserStore';
 import Button from '../components/ui/Button';
+import ExerciseModal from '../components/ui/ExerciseModal';
+import { getExerciseDetails } from '../data/exerciseDatabase';
 
 export default function HistoryView() {
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ export default function HistoryView() {
 
   const [expandedDate, setExpandedDate] = useState(null);
   const [filterType, setFilterType] = useState('all'); // 'all' | 'completed'
+  const [selectedExerciseForModal, setSelectedExerciseForModal] = useState(null);
 
   const streak = getStreak ? getStreak() : 0;
 
@@ -236,26 +239,60 @@ export default function HistoryView() {
                           <div className="text-xs text-gray-500 italic pl-1">No workout recorded on this day.</div>
                         ) : (
                           <div className="space-y-1.5">
-                            {workouts.map((w, idx) => (
-                              <div 
-                                key={idx}
-                                className="bg-dark-800 p-2.5 rounded-xl flex items-center justify-between text-xs border border-white/5"
-                              >
-                                <div className="flex items-center gap-2">
-                                  {w.completed ? (
-                                    <CheckCircle2 size={16} className="text-accent flex-shrink-0" />
-                                  ) : (
-                                    <XCircle size={16} className="text-gray-500 flex-shrink-0" />
-                                  )}
-                                  <span className={`font-semibold ${w.completed ? 'text-white' : 'text-gray-400'}`}>
-                                    {w.name}
-                                  </span>
+                            {workouts.map((w, idx) => {
+                              const details = getExerciseDetails(w.name);
+                              return (
+                                <div 
+                                  key={idx}
+                                  className="bg-dark-800 p-2 sm:p-2.5 rounded-xl flex items-center justify-between text-xs border border-white/5 gap-2"
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    {w.completed ? (
+                                      <CheckCircle2 size={16} className="text-accent flex-shrink-0" />
+                                    ) : (
+                                      <XCircle size={16} className="text-gray-500 flex-shrink-0" />
+                                    )}
+
+                                    {/* Exercise Thumbnail */}
+                                    <div 
+                                      onClick={() => setSelectedExerciseForModal(w.name)}
+                                      className="relative w-8 h-8 rounded-lg overflow-hidden bg-dark-900 border border-white/10 flex-shrink-0 cursor-pointer hover:border-accent/60 transition-colors"
+                                      title="Tap to view form guide"
+                                    >
+                                      <img
+                                        src={details?.image || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80'}
+                                        alt={w.name}
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                        onError={(e) => {
+                                          e.target.src = 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80';
+                                        }}
+                                      />
+                                    </div>
+
+                                    <div className="min-w-0">
+                                      <span className={`font-semibold truncate block ${w.completed ? 'text-white' : 'text-gray-400'}`}>
+                                        {w.name}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    <span className="text-gray-400 text-[11px]">
+                                      {w.sets}×{w.reps} {w.weight > 0 ? `• ${w.weight}kg` : ''}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedExerciseForModal(w.name)}
+                                      className="text-gray-400 hover:text-accent p-1"
+                                      title="Form Guide"
+                                    >
+                                      <Sparkles size={13} />
+                                    </button>
+                                  </div>
                                 </div>
-                                <span className="text-gray-400">
-                                  {w.sets} sets × {w.reps} reps {w.weight > 0 ? `• ${w.weight} kg` : ''}
-                                </span>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -325,6 +362,13 @@ export default function HistoryView() {
           })
         )}
       </div>
+
+      {/* Exercise Technique & Form Modal */}
+      <ExerciseModal
+        isOpen={!!selectedExerciseForModal}
+        onClose={() => setSelectedExerciseForModal(null)}
+        exerciseName={selectedExerciseForModal}
+      />
     </motion.div>
   );
 }
