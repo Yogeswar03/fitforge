@@ -1,147 +1,271 @@
-// Comprehensive Exercise Database with photos, target muscles, equipment, and form cues
+// Comprehensive Exercise Database with animated GIFs, photos, target muscles, equipment, form cues, and common mistakes
 
 export const EXERCISE_DATABASE = [
-  // CHEST
+  // ==========================================
+  // CHEST EXERCISES (Upper, Mid, Lower & Inner)
+  // ==========================================
   {
     id: 'bench-press',
-    name: 'Bench Press',
-    aliases: ['flat bench', 'barbell bench press', 'chest press'],
+    name: 'Barbell Bench Press',
+    aliases: ['bench press', 'flat bench', 'barbell bench press', 'chest press', 'flat barbell bench'],
     category: 'Chest',
-    muscle: 'Pectoralis Major, Triceps, Anterior Deltoids',
+    subFocus: 'Overall Chest Mass & Power (Sternal Head)',
+    muscle: 'Pectoralis Major (Mid Chest), Anterior Deltoids, Triceps',
     equipment: 'Barbell & Flat Bench',
+    gif: 'https://media.giphy.com/media/26gJomDq8k24v9W8E/giphy.gif',
     image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Pin shoulder blades together into the bench and keep feet planted firmly.',
-      'Lower the bar with control until it gently touches your mid-chest.',
-      'Press explosively upwards while keeping elbows tucked at roughly 45 degrees.'
+      'Pin shoulder blades together and drive them down into the bench.',
+      'Grip the bar slightly wider than shoulder-width with wrists straight.',
+      'Lower bar with control until it gently touches your mid-chest/nipple line.',
+      'Press explosively upward while keeping elbows tucked at roughly 45 degrees.'
+    ],
+    mistakes: [
+      'Flaring elbows 90 degrees out (damages shoulder joint)',
+      'Bouncing barbell violently off the sternum',
+      'Lifting your glutes/butt off the bench during heavy drive'
     ]
   },
   {
     id: 'incline-db-press',
     name: 'Incline Dumbbell Press',
-    aliases: ['incline bench press', 'incline press', 'db incline'],
+    aliases: ['incline bench press', 'incline press', 'db incline', 'incline dumbbell press'],
     category: 'Chest',
-    muscle: 'Upper Chest (Clavicular Head), Shoulders, Triceps',
-    equipment: 'Dumbbells & Incline Bench (30-45°)',
+    subFocus: 'Upper Chest (Clavicular Head)',
+    muscle: 'Upper Chest (Clavicular Pectoral), Front Deltoids, Triceps',
+    equipment: 'Dumbbells & Incline Bench (30° - 45°)',
+    gif: 'https://media.giphy.com/media/MdRI2tmI5e7HX7P76U/giphy.gif',
     image: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Set bench to a 30-45 degree incline for upper chest focus.',
-      'Lower dumbbells until upper arms are parallel to the floor.',
-      'Press up in a slight arc without banging weights together at the top.'
+      'Set bench to a 30-45 degree angle (too high shifts focus to shoulders).',
+      'Start with dumbbells over chest with palms facing forward.',
+      'Lower dumbbells slowly until upper arms are parallel to the floor.',
+      'Press upward in a smooth arc without clanging the weights together at top.'
+    ],
+    mistakes: [
+      'Setting bench angle too high (>45° turns it into a shoulder press)',
+      'Banging dumbbells together at top (losses muscle tension)',
+      'Dropping elbows too low and overstretching the shoulder joint'
     ]
   },
   {
     id: 'push-ups',
-    name: 'Push Ups',
-    aliases: ['pushups', 'push-up', 'push up'],
+    name: 'Standard Push-Ups',
+    aliases: ['pushups', 'push-up', 'push up', 'standard pushup'],
     category: 'Chest',
-    muscle: 'Chest, Triceps, Core Stabilizers',
+    subFocus: 'Chest Endurance & Core Stability',
+    muscle: 'Pectoralis Major, Triceps Brachii, Core Stabilizers, Serratus',
     equipment: 'Bodyweight',
+    gif: 'https://media.giphy.com/media/7YCC7PTNX2TOhJQ6aW/giphy.gif',
     image: 'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Maintain a rigid plank line from heels to head with glutes squeezed.',
-      'Lower chest until 2 inches above the ground.',
-      'Push the floor away through the palms and lock out arms at the top.'
+      'Maintain a rigid plank line from heels to head with core and glutes engaged.',
+      'Place hands slightly wider than shoulder-width with fingers spread.',
+      'Lower chest until approximately 2 inches off the ground.',
+      'Push floor away firmly through palms, fully locking out arms at top.'
+    ],
+    mistakes: [
+      'Sagging hips or hyperextending lower spine',
+      'Flaring elbows out like a T-shape instead of an arrow shape',
+      'Cheating reps by only nodding head without lowering chest'
     ]
   },
   {
     id: 'cable-crossover',
-    name: 'Cable Crossover',
-    aliases: ['cable fly', 'cable flyes', 'cable crossover fly'],
+    name: 'Cable Crossover / Fly',
+    aliases: ['cable fly', 'cable flyes', 'cable crossover fly', 'cable cross over'],
     category: 'Chest',
-    muscle: 'Inner & Outer Pectorals',
-    equipment: 'Dual Cable Machine',
+    subFocus: 'Inner Chest & Continuous Pectoral Tension',
+    muscle: 'Inner & Outer Pectoralis Major, Sternal Head',
+    equipment: 'Dual Cable Machine with Single Handles',
+    gif: 'https://media.giphy.com/media/MdRI2tmI5e7HX7P76U/giphy.gif',
     image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Take a split stance and maintain a slight bend in elbows throughout.',
-      'Bring handles together across chest in a hugging motion.',
-      'Squeeze chest hard for 1 second at full contraction.'
+      'Take a staggered split stance with a slight forward torso lean.',
+      'Keep a slight bend in elbows and lock that joint angle.',
+      'Bring handles together across chest in a wide hugging movement.',
+      'Squeeze pecs hard at center for 1 full second at peak contraction.'
+    ],
+    mistakes: [
+      'Using excessive weight and turning the fly into a chest press',
+      'Bending and straightening elbows during the motion',
+      'Letting shoulders shrug up toward ears during the stretch'
     ]
   },
   {
     id: 'chest-dips',
     name: 'Chest Dips',
-    aliases: ['dips', 'parallel bar dips'],
+    aliases: ['dips', 'parallel bar dips', 'bodyweight dips'],
     category: 'Chest',
-    muscle: 'Lower Chest, Anterior Deltoids, Triceps',
-    equipment: 'Parallel Dip Bars',
+    subFocus: 'Lower Chest & Outer Pec Flare',
+    muscle: 'Lower Pectorals (Abdominal Head), Anterior Deltoids, Triceps',
+    equipment: 'Parallel Dip Station',
+    gif: 'https://media.giphy.com/media/3o7TKMGpxxHOGTazFS/giphy.gif',
     image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Lean torso forward 30 degrees to place maximum tension on chest.',
-      'Lower until shoulders are just below elbows (90 degree bend).',
-      'Push straight up through palms without shrugging shoulders.'
+      'Lean your torso forward at a 30-degree angle to place tension on chest.',
+      'Bend knees and cross ankles to prevent swinging.',
+      'Lower body until shoulders are just below elbows (90 degree bend).',
+      'Drive straight up through palms while maintaining the forward torso lean.'
+    ],
+    mistakes: [
+      'Staying completely upright (this shifts all tension to triceps)',
+      'Shrugging shoulders near ears instead of keeping scapulae depressed',
+      'Dropping too deep without proper shoulder mobility'
     ]
   },
   {
     id: 'pec-deck-fly',
-    name: 'Pec Deck Fly',
-    aliases: ['pec deck', 'machine fly', 'butterfly'],
+    name: 'Pec Deck Machine Fly',
+    aliases: ['pec deck', 'machine fly', 'butterfly', 'seated fly machine'],
     category: 'Chest',
-    muscle: 'Pectoralis Major Isolation',
-    equipment: 'Pec Deck Machine',
+    subFocus: 'Pectoral Isolation & Deep Stretch',
+    muscle: 'Pectoralis Major (Isolation)',
+    equipment: 'Pec Deck / Butterfly Machine',
+    gif: 'https://media.giphy.com/media/26gJomDq8k24v9W8E/giphy.gif',
     image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Adjust seat so handles align with mid-chest.',
-      'Keep elbows slightly bent and stationary during the movement.',
-      'Squeeze chest at the center and control the stretch on the way back.'
+      'Adjust seat height so handles align directly with your mid-chest.',
+      'Keep elbows softly bent and rigid throughout the whole range of motion.',
+      'Bring pads/handles together, squeezing your chest firmly at the center.',
+      'Control the eccentric return slowly to feel a deep chest stretch.'
+    ],
+    mistakes: [
+      'Setting seat too low or high causing shoulder impingement',
+      'Letting weights slam on the stack between repetitions',
+      'Rounding shoulders forward as you bring hands together'
+    ]
+  },
+  {
+    id: 'decline-bench-press',
+    name: 'Decline Bench Press',
+    aliases: ['decline press', 'decline db press', 'decline barbell press'],
+    category: 'Chest',
+    subFocus: 'Lower Chest Line & Cut',
+    muscle: 'Lower Pectoralis Major, Triceps',
+    equipment: 'Decline Bench & Barbell or Dumbbells',
+    gif: 'https://media.giphy.com/media/26gJomDq8k24v9W8E/giphy.gif',
+    image: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&auto=format&fit=crop&q=80',
+    cues: [
+      'Hook legs securely into the decline bench pads.',
+      'Lower weight with control directly to the lower chest line.',
+      'Press straight up to lockout, maintaining scapular retraction.'
+    ],
+    mistakes: [
+      'Failing to anchor legs securely',
+      'Lowering the bar too high toward neck',
+      'Lifting weight too fast and losing bar path'
+    ]
+  },
+  {
+    id: 'dumbbell-pullover',
+    name: 'Dumbbell Pullover',
+    aliases: ['pullover', 'db pullover', 'chest pullover'],
+    category: 'Chest',
+    subFocus: 'Chest Expansion & Serratus Anterior',
+    muscle: 'Pectoralis Major (Sternal Head), Serratus Anterior, Lats',
+    equipment: 'Flat Bench & Single Dumbbell',
+    gif: 'https://media.giphy.com/media/MdRI2tmI5e7HX7P76U/giphy.gif',
+    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80',
+    cues: [
+      'Lie perpendicular across a flat bench with upper back supported.',
+      'Hold dumbbell with both hands forming a diamond under the top plate.',
+      'Lower dumbbell in an arc behind head while keeping hips slightly low.',
+      'Pull dumbbell back over chest using your chest and serratus muscles.'
+    ],
+    mistakes: [
+      'Bending elbows too much (turns into a skull crusher)',
+      'Lifting hips excessively high during stretch',
+      'Over-extending beyond safe shoulder range'
     ]
   },
 
-  // BACK
+  // ==========================================
+  // BACK EXERCISES
+  // ==========================================
   {
     id: 'lat-pulldown',
     name: 'Lat Pulldown',
     aliases: ['pulldown', 'lat pull down', 'cable pulldown'],
     category: 'Back',
-    muscle: 'Latissimus Dorsi, Biceps, Upper Back',
+    subFocus: 'V-Taper Back Width',
+    muscle: 'Latissimus Dorsi, Biceps, Rhomboids, Lower Traps',
     equipment: 'Lat Pulldown Cable Machine',
+    gif: 'https://media.giphy.com/media/26gJomDq8k24v9W8E/giphy.gif',
     image: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Grip slightly wider than shoulder width and sit with thighs secured.',
-      'Pull elbows down towards your ribs, touching bar to upper chest.',
-      'Avoid swinging torso backward; let lats stretch fully at the top.'
+      'Grip bar slightly wider than shoulder width and anchor thighs firmly.',
+      'Lean back very slightly (10-15 degrees) and draw chest upward.',
+      'Pull elbows down and back toward ribs until bar reaches upper chest.',
+      'Resist weight on way up for a full lat stretch at top.'
+    ],
+    mistakes: [
+      'Swinging torso violently backward like a rowing motion',
+      'Pulling bar behind the neck (dangerous for cervical spine)',
+      'Using biceps rather than initiating pull with lats'
     ]
   },
   {
     id: 'pull-ups',
-    name: 'Pull Ups',
+    name: 'Wide-Grip Pull Ups',
     aliases: ['pullups', 'pull up', 'chin ups', 'chin-ups'],
     category: 'Back',
-    muscle: 'Lats, Rhomboids, Biceps, Forearms',
+    subFocus: 'Upper Lat Width & Upper Body Power',
+    muscle: 'Lats, Rhomboids, Biceps, Forearm Grip',
     equipment: 'Pull-up Bar',
+    gif: 'https://media.giphy.com/media/7YCC7PTNX2TOhJQ6aW/giphy.gif',
     image: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=400&auto=format&fit=crop&q=80',
     cues: [
       'Start from a dead hang with arms fully extended.',
-      'Drive elbows down and back to pull chin over the bar.',
-      'Lower under complete control for a 2-second negative.'
+      'Depress scapulae, then pull elbows down to lift chin over bar.',
+      'Lower under complete control for a full 2-second eccentric drop.'
+    ],
+    mistakes: [
+      'Kicking legs or kipping body for momentum',
+      'Not dropping down to full arm extension (half reps)',
+      'Reaching chin up without pulling chest to bar'
     ]
   },
   {
     id: 'barbell-row',
-    name: 'Barbell Row',
+    name: 'Bent-Over Barbell Row',
     aliases: ['bent over row', 'bent over barbell row', 'bb row'],
     category: 'Back',
-    muscle: 'Lats, Traps, Rhomboids, Posterior Deltoids',
-    equipment: 'Barbell',
+    subFocus: 'Back Thickness & Mid-Back Density',
+    muscle: 'Lats, Rhomboids, Middle & Lower Trapezius, Rear Delts',
+    equipment: 'Barbell & Weight Plates',
+    gif: 'https://media.giphy.com/media/26gJomDq8k24v9W8E/giphy.gif',
     image: 'https://images.unsplash.com/photo-1576678927484-cc907957088c?w=400&auto=format&fit=crop&q=80',
     cues: [
       'Hinge at hips with flat back, torso angled around 45 degrees.',
-      'Pull bar towards your belly button, leading with elbows.',
-      'Squeeze shoulder blades together at top without jerking torso.'
+      'Pull bar smoothly towards your belly button, leading with elbows.',
+      'Squeeze shoulder blades together firmly at top of pull.'
+    ],
+    mistakes: [
+      'Rounding lower back (dangerous spinal flexion under load)',
+      'Standing too upright and turning it into a shrug',
+      'Using leg jerk momentum to heave the bar'
     ]
   },
   {
     id: 'deadlift',
-    name: 'Deadlift',
-    aliases: ['conventional deadlift', 'barbell deadlift'],
+    name: 'Conventional Deadlift',
+    aliases: ['conventional deadlift', 'barbell deadlift', 'deadlift'],
     category: 'Back',
-    muscle: 'Erector Spinae, Glutes, Hamstrings, Traps, Lats',
+    subFocus: 'Full Posterior Chain & Core Power',
+    muscle: 'Erector Spinae, Glutes, Hamstrings, Lats, Traps',
     equipment: 'Barbell & Weight Plates',
+    gif: 'https://media.giphy.com/media/26gJomDq8k24v9W8E/giphy.gif',
     image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&auto=format&fit=crop&q=80',
     cues: [
       'Stand with bar over mid-foot, feet hip-width apart.',
-      'Grip bar, engage lats, take the slack out, and brace core tightly.',
-      'Push the floor away through heels, locking out hips and knees together.'
+      'Grip bar, engage lats, pull the slack out, and brace abdominal wall.',
+      'Push floor away through heels, locking hips and knees synchronously.'
+    ],
+    mistakes: [
+      'Rounding lumbar spine during initial lift off',
+      'Hyperextending and leaning backwards at lockout',
+      'Letting barbell drift away from shins during ascent'
     ]
   },
   {
@@ -149,43 +273,45 @@ export const EXERCISE_DATABASE = [
     name: 'Seated Cable Row',
     aliases: ['cable row', 'seated row', 'low row'],
     category: 'Back',
-    muscle: 'Mid-Back, Rhomboids, Lower Lats',
-    equipment: 'Low Pulley Cable & V-Bar',
+    subFocus: 'Mid-Back Thickness & Lower Lats',
+    muscle: 'Mid-Back, Rhomboids, Lower Lats, Biceps',
+    equipment: 'Low Pulley Cable & V-Bar Handle',
+    gif: 'https://media.giphy.com/media/MdRI2tmI5e7HX7P76U/giphy.gif',
     image: 'https://images.unsplash.com/photo-1576678927484-cc907957088c?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Sit tall with knees slightly bent; do not round lower back.',
-      'Pull handle into lower abdomen while keeping chest high.',
-      'Allow shoulders to stretch forward slightly at extension, then retract.'
-    ]
-  },
-  {
-    id: 't-bar-row',
-    name: 'T-Bar Row',
-    aliases: ['t bar row', 'tbar row'],
-    category: 'Back',
-    muscle: 'Mid Back Thickness, Lats, Trapezius',
-    equipment: 'T-Bar Row Machine / Landmine',
-    image: 'https://images.unsplash.com/photo-1576678927484-cc907957088c?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Straddle the bar with knees bent and chest lifted.',
-      'Pull weight towards upper abs, squeezing shoulder blades.',
-      'Avoid standing up as weight rises; keep hip angle rigid.'
+      'Sit tall with knees slightly bent; never round your lower back.',
+      'Pull handle into lower abdomen while puffing chest out.',
+      'Squeeze shoulder blades together and pause briefly.'
+    ],
+    mistakes: [
+      'Excessive backward torso swinging',
+      'Shrugging shoulders into ears',
+      'Pulling handle too high into upper chest'
     ]
   },
 
-  // SHOULDERS
+  // ==========================================
+  // SHOULDERS EXERCISES
+  // ==========================================
   {
     id: 'overhead-shoulder-press',
     name: 'Overhead Shoulder Press',
-    aliases: ['overhead press', 'military press', 'db shoulder press', 'shoulder press'],
+    aliases: ['overhead press', 'military press', 'db shoulder press', 'shoulder press', 'overhead db press'],
     category: 'Shoulders',
-    muscle: 'Anterior & Medial Deltoids, Triceps, Upper Chest',
-    equipment: 'Barbell or Dumbbells',
+    subFocus: 'Overall Shoulder Size & Front Delts',
+    muscle: 'Anterior & Medial Deltoids, Triceps, Upper Pecs',
+    equipment: 'Dumbbells or Barbell',
+    gif: 'https://media.giphy.com/media/MdRI2tmI5e7HX7P76U/giphy.gif',
     image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Start with weights at shoulder height, elbows slightly in front of body.',
-      'Press overhead in a straight line, locking elbows at the top.',
-      'Brace core and glutes to avoid hyperextending lower spine.'
+      'Start with weights at shoulder height with elbows slightly in front.',
+      'Press directly overhead in a straight line to full arm lockout.',
+      'Keep glutes and abs locked tight to protect lower back.'
+    ],
+    mistakes: [
+      'Excessively arching lower back to push heavier weights',
+      'Flaring elbows out to extreme sides during press',
+      'Not locking out overhead'
     ]
   },
   {
@@ -193,85 +319,66 @@ export const EXERCISE_DATABASE = [
     name: 'Dumbbell Lateral Raise',
     aliases: ['lateral raise', 'side lateral raise', 'side raises', 'lat raises'],
     category: 'Shoulders',
-    muscle: 'Lateral Deltoids (Side Shoulders)',
+    subFocus: 'Boulder Shoulder Width (Side Delts)',
+    muscle: 'Lateral (Side) Deltoids',
     equipment: 'Dumbbells',
+    gif: 'https://media.giphy.com/media/MdRI2tmI5e7HX7P76U/giphy.gif',
     image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Hold dumbbells at sides with a slight forward torso lean.',
-      'Raise arms out to sides until parallel to the floor, leading with elbows.',
-      'Lower under control without swinging hips for momentum.'
-    ]
-  },
-  {
-    id: 'front-raise',
-    name: 'Front Raise',
-    aliases: ['dumbbell front raise', 'front raises'],
-    category: 'Shoulders',
-    muscle: 'Anterior (Front) Deltoids',
-    equipment: 'Dumbbells or Cable',
-    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Raise weights directly in front to eye level with arms straight.',
-      'Pause briefly for a second at shoulder height.',
-      'Control the descent to keep constant tension on front delts.'
+      'Stand with feet hip-width apart and a slight 10° forward lean.',
+      'Raise arms out to sides until parallel to ground, leading with elbows.',
+      'Pour water motion at top with pinkies slightly higher than thumbs.'
+    ],
+    mistakes: [
+      'Swinging hips or knees to heave dumbbells up',
+      'Raising weights way above shoulder level into traps',
+      'Using weights that are too heavy for strict deltoid isolation'
     ]
   },
   {
     id: 'face-pull',
-    name: 'Face Pull',
-    aliases: ['cable face pull', 'face pulls'],
+    name: 'Cable Face Pull',
+    aliases: ['cable face pull', 'face pulls', 'face pull'],
     category: 'Shoulders',
-    muscle: 'Rear Delts, Rotator Cuff, Upper Traps',
+    subFocus: 'Rear Delts & Rotator Cuff Health',
+    muscle: 'Posterior (Rear) Deltoids, Infraspinatus, Trapezius',
     equipment: 'Cable Machine & Rope Attachment',
+    gif: 'https://media.giphy.com/media/26gJomDq8k24v9W8E/giphy.gif',
     image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&auto=format&fit=crop&q=80',
     cues: [
       'Set cable at eye level with rope attachment.',
-      'Pull rope towards your nose, pulling hands apart and rotating thumbs back.',
-      'Excellent for posture and protecting shoulder joints.'
-    ]
-  },
-  {
-    id: 'arnold-press',
-    name: 'Arnold Press',
-    aliases: ['arnold dumbbell press'],
-    category: 'Shoulders',
-    muscle: 'All 3 Deltoid Heads',
-    equipment: 'Dumbbells & Bench',
-    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Start with palms facing your chest like the top of a bicep curl.',
-      'Rotate palms outward as you press weights up overhead.',
-      'Reverse the rotation smoothly on the way down.'
+      'Pull rope towards bridge of nose, pulling hands apart laterally.',
+      'Externally rotate shoulders so thumbs point backward at end of rep.'
+    ],
+    mistakes: [
+      'Pulling too low into chin instead of forehead/nose',
+      'Letting shoulders roll forward internally',
+      'Using body momentum rather than upper back retraction'
     ]
   },
 
-  // LEGS
+  // ==========================================
+  // LEGS EXERCISES
+  // ==========================================
   {
     id: 'barbell-squat',
-    name: 'Barbell Squat',
+    name: 'Barbell Back Squat',
     aliases: ['squats', 'squat', 'back squat', 'barbell back squat'],
     category: 'Legs',
-    muscle: 'Quadriceps, Glutes, Adductors, Core',
+    subFocus: 'Quad & Glute Power & Leg Mass',
+    muscle: 'Quadriceps, Gluteus Maximus, Hamstrings, Core',
     equipment: 'Barbell & Squat Rack',
+    gif: 'https://media.giphy.com/media/fYHUeuuuFa3VFBOLzA/giphy.gif',
     image: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Rest bar securely on upper traps, feet shoulder-width apart.',
-      'Initiate by pushing hips back and knees out in line with toes.',
-      'Descend until thighs are parallel to the ground, then drive up through mid-foot.'
-    ]
-  },
-  {
-    id: 'leg-press',
-    name: 'Leg Press',
-    aliases: ['machine leg press', '45 degree leg press'],
-    category: 'Legs',
-    muscle: 'Quadriceps, Glutes, Hamstrings',
-    equipment: 'Leg Press Machine',
-    image: 'https://images.unsplash.com/photo-1534367507873-d2d7e24c797f?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Place feet shoulder-width on sled; do not lock knees at top.',
-      'Lower platform until knees are at 90 degrees without rounding lower back.',
-      'Press through full foot surface under smooth control.'
+      'Rest bar comfortably on upper traps; feet shoulder-width, toes turned out 15°.',
+      'Push hips back and bend knees, tracking knees outward over toes.',
+      'Descend until hip crease is below parallel, then drive up through mid-foot.'
+    ],
+    mistakes: [
+      'Knees caving inward (valgus collapse)',
+      'Heels lifting off the ground during descent',
+      'Rounding lower spine at the bottom (butt wink)'
     ]
   },
   {
@@ -279,85 +386,66 @@ export const EXERCISE_DATABASE = [
     name: 'Walking Lunges',
     aliases: ['lunges', 'dumbbell lunges', 'walking lunge'],
     category: 'Legs',
-    muscle: 'Quads, Glutes, Hamstrings, Balance',
+    subFocus: 'Glute & Quad Isolation, Unilateral Balance',
+    muscle: 'Glutes, Quads, Hamstrings, Hip Stabilizers',
     equipment: 'Dumbbells or Bodyweight',
+    gif: 'https://media.giphy.com/media/cXHxOJu8vEwhoApxjy/giphy.gif',
     image: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Step forward and lower back knee until 1 inch above floor.',
-      'Keep front knee directly above ankle, torso upright.',
-      'Push off front heel to step smoothly into next lunge.'
-    ]
-  },
-  {
-    id: 'leg-extension',
-    name: 'Leg Extension',
-    aliases: ['quad extension', 'machine leg extension'],
-    category: 'Legs',
-    muscle: 'Quadriceps Isolation',
-    equipment: 'Leg Extension Machine',
-    image: 'https://images.unsplash.com/photo-1534367507873-d2d7e24c797f?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Align knee joint with machine pivot axis.',
-      'Extend legs until knees are straight, holding peak contraction for 1 sec.',
-      'Resist weight on the descent to maximize muscle tension.'
-    ]
-  },
-  {
-    id: 'hamstring-curl',
-    name: 'Hamstring Curl',
-    aliases: ['leg curl', 'lying leg curl', 'seated leg curl'],
-    category: 'Legs',
-    muscle: 'Hamstrings (Biceps Femoris, Semitendinosus)',
-    equipment: 'Leg Curl Machine',
-    image: 'https://images.unsplash.com/photo-1534367507873-d2d7e24c797f?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Position pad just above heels against lower calves.',
-      'Curl heels toward glutes as far as possible without lifting hips.',
-      'Control the eccentric return over 2 to 3 seconds.'
+      'Take a long step forward and lower back knee until 1 inch off floor.',
+      'Front shin should remain vertical with front knee over ankle.',
+      'Drive up through front heel to step fluidly into next stride.'
+    ],
+    mistakes: [
+      'Taking steps that are too short and overloading knee tendon',
+      'Leaning torso drastically forward',
+      'Banging back kneecap against the hard floor'
     ]
   },
   {
     id: 'calf-raise',
-    name: 'Calf Raise',
-    aliases: ['standing calf raise', 'seated calf raise', 'calf raises'],
+    name: 'Calf Raises',
+    aliases: ['standing calf raise', 'seated calf raise', 'calf raises', 'calf raise'],
     category: 'Legs',
-    muscle: 'Gastrocnemius & Soleus (Calves)',
-    equipment: 'Calf Machine or Dumbbells',
+    subFocus: 'Calf Density & Ankle Strength',
+    muscle: 'Gastrocnemius & Soleus',
+    equipment: 'Calf Block / Dumbbells',
+    gif: 'https://media.giphy.com/media/2wXXVCek2NfkneGqz9/giphy.gif',
     image: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Lower heels below platform edge for a full deep calf stretch.',
-      'Press high on balls of feet, rising onto big toes.',
-      'Hold the peak squeeze at top for a full 2-second pause.'
+      'Lower heels below platform edge for a full 2-second deep stretch.',
+      'Drive up high onto the balls of your big toes.',
+      'Hold the top contraction for a solid 2-second squeeze.'
+    ],
+    mistakes: [
+      'Bouncing rapidly at bottom without pausing (uses Achilles tendon bounce)',
+      'Rolling weight onto outside edges of pinky toes',
+      'Bending knees to initiate movement'
     ]
   },
 
-  // ARMS
+  // ==========================================
+  // ARMS EXERCISES
+  // ==========================================
   {
     id: 'barbell-bicep-curl',
     name: 'Barbell Bicep Curl',
-    aliases: ['bicep curl', 'bicep curls', 'barbell curl', 'bb curl'],
+    aliases: ['bicep curl', 'bicep curls', 'barbell curl', 'bb curl', 'curls'],
     category: 'Arms',
-    muscle: 'Biceps Brachii, Brachialis',
+    subFocus: 'Bicep Peak & Overall Arm Mass',
+    muscle: 'Biceps Brachii (Short & Long Head), Brachialis',
     equipment: 'Barbell or EZ-Curl Bar',
+    gif: 'https://media.giphy.com/media/8xomIW1Nx983bM9RRg/giphy.gif',
     image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Pin elbows tightly to ribs; avoid swinging torso backward.',
-      'Curl bar up toward shoulders while keeping upper arms vertical.',
-      'Squeeze biceps hard at top and lower under strict control.'
-    ]
-  },
-  {
-    id: 'hammer-curl',
-    name: 'Hammer Curl',
-    aliases: ['dumbbell hammer curl', 'hammer curls'],
-    category: 'Arms',
-    muscle: 'Brachialis, Brachioradialis (Forearm & Arm Thickness)',
-    equipment: 'Dumbbells',
-    image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Hold dumbbells with palms facing each other (neutral grip).',
-      'Curl dumbbells up while maintaining thumbs-up hand orientation.',
-      'Great for building arm width and forearm grip strength.'
+      'Lock elbows into sides of ribs and stand with upright posture.',
+      'Curl weight upward toward shoulders without swinging hips.',
+      'Squeeze biceps violently at peak, then lower under a 3-second negative.'
+    ],
+    mistakes: [
+      'Swinging upper body backward to throw the weight up',
+      'Letting elbows drift forward in front of shoulders',
+      'Dropping bar quickly on the negative without tension'
     ]
   },
   {
@@ -365,134 +453,49 @@ export const EXERCISE_DATABASE = [
     name: 'Tricep Rope Pushdown',
     aliases: ['tricep pushdown', 'cable pushdown', 'rope pushdown'],
     category: 'Arms',
-    muscle: 'Triceps (Lateral and Long Head)',
+    subFocus: 'Tricep Horseshoe & Lockout Power',
+    muscle: 'Triceps Brachii (Lateral, Medial & Long Head)',
     equipment: 'Cable Machine & Rope Attachment',
+    gif: 'https://media.giphy.com/media/3o7TKMGpxxHOGTazFS/giphy.gif',
     image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Keep elbows locked into sides and lean forward slightly.',
-      'Push rope down and spread ends apart at bottom lockout.',
-      'Allow forearms to rise up to 90 degrees before next rep.'
-    ]
-  },
-  {
-    id: 'skull-crushers',
-    name: 'Skull Crushers',
-    aliases: ['lying triceps extension', 'skull crusher', 'ez bar skull crusher'],
-    category: 'Arms',
-    muscle: 'Triceps Long Head',
-    equipment: 'EZ Bar or Dumbbells & Flat Bench',
-    image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Hold bar over forehead with arms angled slightly backward.',
-      'Bend elbows to lower bar towards crown of head/forehead.',
-      'Extend forearms back to starting position without flaring elbows.'
-    ]
-  },
-  {
-    id: 'preacher-curl',
-    name: 'Preacher Curl',
-    aliases: ['ez bar preacher curl', 'machine preacher curl'],
-    category: 'Arms',
-    muscle: 'Short Head of Biceps (Peak)',
-    equipment: 'Preacher Bench & Barbell',
-    image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Rest armpits snugly on top of preacher pad.',
-      'Curl bar up without lifting elbows off the angled bench.',
-      'Prevents cheating or shoulder involvement.'
+      'Pin elbows firmly at side of ribs with a slight 15° forward lean.',
+      'Push rope down until arms lock out completely.',
+      'Spread ends of the rope outward at bottom for maximum contraction.'
+    ],
+    mistakes: [
+      'Allowing elbows to flare outward or travel up and down',
+      'Using bodyweight momentum to press the cable down',
+      'Not locking out completely at bottom'
     ]
   },
 
-  // CORE
+  // ==========================================
+  // CORE & ABS EXERCISES
+  // ==========================================
   {
     id: 'plank',
-    name: 'Plank',
-    aliases: ['forearm plank', 'core plank'],
+    name: 'Forearm Core Plank',
+    aliases: ['forearm plank', 'core plank', 'plank'],
     category: 'Core',
+    subFocus: 'Isometric Abdominal Endurance',
     muscle: 'Transverse Abdominis, Rectus Abdominis, Obliques',
     equipment: 'Exercise Mat',
+    gif: 'https://media.giphy.com/media/39wjDz1y3UI51qgv4K/giphy.gif',
     image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&auto=format&fit=crop&q=80',
     cues: [
-      'Rest on forearms with elbows directly under shoulders.',
-      'Squeeze glutes, quads, and draw belly button toward spine.',
-      'Do not allow lower back to sag or hips to hike into a tent.'
-    ]
-  },
-  {
-    id: 'hanging-leg-raise',
-    name: 'Hanging Leg Raise',
-    aliases: ['leg raise', 'hanging knee raise', 'knee raises'],
-    category: 'Core',
-    muscle: 'Lower Abdominals, Hip Flexors',
-    equipment: 'Pull-up Bar',
-    image: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Hang from bar without swinging.',
-      'Curl pelvis upward as you raise legs or knees toward chest.',
-      'Lower legs slowly without using momentum.'
-    ]
-  },
-  {
-    id: 'russian-twist',
-    name: 'Russian Twist',
-    aliases: ['weighted russian twist', 'twists'],
-    category: 'Core',
-    muscle: 'Internal & External Obliques, Rotational Core',
-    equipment: 'Medicine Ball, Dumbbell or Bodyweight',
-    image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Sit on floor with knees bent and feet elevated 3 inches.',
-      'Lean back 45 degrees to engage core.',
-      'Rotate torso side to side, touching weight to floor each side.'
-    ]
-  },
-
-  // CARDIO
-  {
-    id: 'running-treadmill',
-    name: 'Running / Treadmill',
-    aliases: ['running', 'treadmill', 'jogging', 'jog'],
-    category: 'Cardio',
-    muscle: 'Cardiovascular System, Calves, Quads, Hamstrings',
-    equipment: 'Treadmill or Outdoor Track',
-    image: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Land lightly on mid-foot with a slight forward torso lean.',
-      'Keep shoulders relaxed and arms swinging in sync.',
-      'Maintain steady rhythmic breathing.'
-    ]
-  },
-  {
-    id: 'stationary-cycling',
-    name: 'Stationary Cycling',
-    aliases: ['cycling', 'spin bike', 'bike', 'stationary bike'],
-    category: 'Cardio',
-    muscle: 'Heart, Quadriceps, Glutes, Low-Impact Endurance',
-    equipment: 'Stationary Spin Bike',
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Adjust seat height so knee has a slight bend at lowest pedal position.',
-      'Pedal in smooth circular strokes, pushing down and pulling up.',
-      'Low impact on knees and joints.'
-    ]
-  },
-  {
-    id: 'jump-rope',
-    name: 'Jump Rope',
-    aliases: ['skipping', 'skipping rope'],
-    category: 'Cardio',
-    muscle: 'Calves, Coordination, High-Calorie Burn',
-    equipment: 'Speed Jump Rope',
-    image: 'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=400&auto=format&fit=crop&q=80',
-    cues: [
-      'Turn rope with wrists rather than wide arm circles.',
-      'Stay on the balls of your feet, jumping just 1-2 inches off floor.',
-      'Land softly with slightly bent knees.'
+      'Rest on forearms with elbows directly beneath shoulder joints.',
+      'Squeeze glutes, tighten quads, and draw navel toward spine.',
+      'Keep head in line with spine looking at floor.'
+    ],
+    mistakes: [
+      'Sagging hips towards floor (strains lower back)',
+      'Hiking hips high in the air into an inverted V',
+      'Holding breath instead of deep diaphragmatic breathing'
     ]
   }
 ];
 
-// Fallback category imagery if an exercise is custom/unmatched
 export const CATEGORY_FALLBACK_IMAGES = {
   Chest: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&auto=format&fit=crop&q=80',
   Back: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=400&auto=format&fit=crop&q=80',
@@ -504,9 +507,6 @@ export const CATEGORY_FALLBACK_IMAGES = {
   General: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80'
 };
 
-/**
- * Find matching exercise details from the database by partial name
- */
 export const getExerciseDetails = (exerciseName) => {
   if (!exerciseName) return null;
   const clean = exerciseName.trim().toLowerCase();
@@ -530,20 +530,20 @@ export const getExerciseDetails = (exerciseName) => {
   if (match) return match;
 
   // 4. Keyword heuristic
-  if (clean.includes('bench') || clean.includes('chest') || clean.includes('pushup') || clean.includes('dip')) {
+  if (clean.includes('bench') || clean.includes('chest') || clean.includes('pushup') || clean.includes('dip') || clean.includes('pec')) {
     return { ...EXERCISE_DATABASE[0], name: exerciseName };
   }
   if (clean.includes('squat') || clean.includes('leg') || clean.includes('lunge') || clean.includes('calf')) {
-    return { ...EXERCISE_DATABASE.find(e => e.category === 'Legs'), name: exerciseName };
+    return { ...EXERCISE_DATABASE.find(e => e.category === 'Legs') || EXERCISE_DATABASE[0], name: exerciseName };
   }
   if (clean.includes('pull') || clean.includes('row') || clean.includes('deadlift') || clean.includes('lat')) {
-    return { ...EXERCISE_DATABASE.find(e => e.category === 'Back'), name: exerciseName };
+    return { ...EXERCISE_DATABASE.find(e => e.category === 'Back') || EXERCISE_DATABASE[0], name: exerciseName };
   }
   if (clean.includes('shoulder') || clean.includes('press') || clean.includes('lateral')) {
-    return { ...EXERCISE_DATABASE.find(e => e.category === 'Shoulders'), name: exerciseName };
+    return { ...EXERCISE_DATABASE.find(e => e.category === 'Shoulders') || EXERCISE_DATABASE[0], name: exerciseName };
   }
   if (clean.includes('curl') || clean.includes('bicep') || clean.includes('tricep') || clean.includes('arm')) {
-    return { ...EXERCISE_DATABASE.find(e => e.category === 'Arms'), name: exerciseName };
+    return { ...EXERCISE_DATABASE.find(e => e.category === 'Arms') || EXERCISE_DATABASE[0], name: exerciseName };
   }
 
   // Default fallback
@@ -551,13 +551,19 @@ export const getExerciseDetails = (exerciseName) => {
     id: 'general',
     name: exerciseName,
     category: 'Workout',
+    subFocus: 'Full Body Conditioning',
     muscle: 'Full Body & Core',
     equipment: 'Gym Equipment',
+    gif: 'https://media.giphy.com/media/26gJomDq8k24v9W8E/giphy.gif',
     image: CATEGORY_FALLBACK_IMAGES.General,
     cues: [
       'Maintain smooth, controlled cadence on both lifting and lowering phases.',
       'Breathe out during exertion, breathe in as you reset.',
       'Keep core braced and spine neutral throughout all repetitions.'
+    ],
+    mistakes: [
+      'Rushing the movement and losing control of the weight',
+      'Failing to brace core and breath properly'
     ]
   };
 };

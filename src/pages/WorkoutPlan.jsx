@@ -191,6 +191,24 @@ export default function WorkoutPlan() {
             <Utensils size={18} /> 🍽️ Diet Plan
           </button>
         </div>
+
+        {/* Exercise Guide / Form GIFs Banner */}
+        <div 
+          onClick={() => navigate('/exercises')}
+          className="glass p-3 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-dark-800 to-dark-800 cursor-pointer hover:border-purple-500/40 transition-all flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">🎥</span>
+            <div>
+              <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>Exercise Technique & GIF Library</span>
+                <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full font-bold">GIFs</span>
+              </div>
+              <div className="text-[10px] text-gray-400">View animated tutorials for Chest, Back, Legs & Shoulders</div>
+            </div>
+          </div>
+          <span className="text-xs text-purple-400 group-hover:underline font-bold">Browse →</span>
+        </div>
       </div>
 
       {/* Notification Toast */}

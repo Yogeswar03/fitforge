@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { 
   Calendar, User, CheckCircle2, Circle, Flame, 
   Dumbbell, Utensils, Plus, Sparkles, X, ChevronRight, 
-  Apple, History, Trophy, Award, Check, Users, ReceiptText, Settings 
+  Apple, History, Trophy, Award, Check, Users, ReceiptText, Settings, PlayCircle 
 } from 'lucide-react';
 
 import useAuthStore from '../store/useAuthStore';
@@ -227,8 +227,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Dedicated Navigation Icons: History, Calendar, Expenses, Profile */}
+        {/* Dedicated Navigation Icons: Guide/GIFs, History, Calendar, Expenses, Profile */}
         <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Exercise Form & GIFs Guide */}
+          <button 
+            onClick={() => navigate('/exercises')}
+            className="w-10 h-10 rounded-2xl bg-dark-800 hover:bg-dark-700 flex items-center justify-center transition-colors border border-purple-500/30 text-purple-400 hover:text-purple-300 shadow-sm shadow-purple-500/10"
+            title="Exercise Form & GIF Library (Chest, Back, Legs, etc.)"
+          >
+            <PlayCircle size={18} />
+          </button>
+
           {/* Gym Expenses Splitter */}
           <button 
             onClick={() => navigate('/expenses')}
@@ -296,6 +305,30 @@ export default function Dashboard() {
 
       {/* TODAY'S WORKOUT SECTION */}
       <section className="space-y-3">
+        {/* Banner: Exercise Technique & GIF Library */}
+        <div 
+          onClick={() => navigate('/exercises')} 
+          className="glass p-3.5 rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-dark-800 to-dark-800 cursor-pointer hover:border-purple-500/40 transition-all flex items-center justify-between group shadow-sm"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0">
+              <PlayCircle size={20} />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors flex items-center gap-1.5">
+                <span>Exercise Technique & GIF Library</span>
+                <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.2 rounded-full font-extrabold">
+                  GIFs
+                </span>
+              </div>
+              <div className="text-[10px] text-gray-400">
+                Explore how Chest, Back, Legs & Arm exercises are done with animated demos
+              </div>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-gray-500 group-hover:text-purple-400 transition-colors flex-shrink-0" />
+        </div>
+
         <div className="flex items-center justify-between px-1">
           <h3 className="text-xl font-bold flex items-center gap-2">
             <Dumbbell className="text-accent" size={22} />
@@ -308,6 +341,13 @@ export default function Dashboard() {
           </h3>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/exercises')}
+              className="text-xs font-semibold text-purple-400 hover:underline flex items-center gap-1 bg-purple-500/10 px-2.5 py-1 rounded-xl"
+              title="View Exercise GIFs & Technique Guide"
+            >
+              <PlayCircle size={14} /> Form GIFs
+            </button>
             <button
               onClick={() => setIsQuickAddExOpen(true)}
               className="text-xs font-semibold text-accent hover:underline flex items-center gap-1 bg-accent/10 px-2.5 py-1 rounded-xl"

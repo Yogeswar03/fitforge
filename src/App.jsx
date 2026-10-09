@@ -20,6 +20,7 @@ import CalendarView from './pages/CalendarView';
 import HistoryView from './pages/HistoryView';
 import Profile from './pages/Profile';
 import ExpenseTracker from './pages/ExpenseTracker';
+import ExerciseGuide from './pages/ExerciseGuide';
 import useExpenseStore from './store/useExpenseStore';
 
 // Layout
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="/calendar" element={<CalendarView />} />
           <Route path="/history" element={<HistoryView />} />
           <Route path="/expenses" element={<ExpenseTracker />} />
+          <Route path="/exercises" element={<ExerciseGuide />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
