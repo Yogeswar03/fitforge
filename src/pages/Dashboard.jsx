@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { 
   Calendar, User, CheckCircle2, Circle, Flame, 
   Dumbbell, Utensils, Plus, Sparkles, X, ChevronRight, 
-  Apple, History, Trophy, Award, Check, Users, ReceiptText 
+  Apple, History, Trophy, Award, Check, Users, ReceiptText, Settings 
 } from 'lucide-react';
 
 import useAuthStore from '../store/useAuthStore';
@@ -14,6 +14,7 @@ import useWorkoutStore from '../store/useWorkoutStore';
 import useDietStore from '../store/useDietStore';
 import useDailyLogStore from '../store/useDailyLogStore';
 import { getTodayStr, getProgressPercentage, getDayName, generateId } from '../utils/calculations';
+import { syncProfileToCloud } from '../lib/supabaseSync';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import ExerciseModal from '../components/ui/ExerciseModal';
@@ -30,7 +31,7 @@ const TRAINER_MESSAGES = [
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { profile } = useUserStore();
+  const { profile, setProfile } = useUserStore();
   const { weeklyPlan: workoutWeeklyPlan } = useWorkoutStore();
   const { weeklyPlan: dietWeeklyPlan, partner } = useDietStore();
   const { 
@@ -75,6 +76,35 @@ export default function Dashboard() {
   const [quickExSets, setQuickExSets] = useState('3');
   const [quickExReps, setQuickExReps] = useState('12');
   const [quickExWeight, setQuickExWeight] = useState('0');
+
+  // Quick Edit Target Modal state
+  const [isEditTargetsModalOpen, setIsEditTargetsModalOpen] = useState(false);
+  const [modalCalories, setModalCalories] = useState(profile?.targetCalories || 2000);
+  const [modalProtein, setModalProtein] = useState(profile?.targetProtein || 150);
+  const [modalCarbs, setModalCarbs] = useState(profile?.targetCarbs || 200);
+  const [modalFat, setModalFat] = useState(profile?.targetFat || 65);
+
+  useEffect(() => {
+    if (profile) {
+      setModalCalories(profile.targetCalories || 2000);
+      setModalProtein(profile.targetProtein || 150);
+      setModalCarbs(profile.targetCarbs || 200);
+      setModalFat(profile.targetFat || 65);
+    }
+  }, [profile?.targetCalories, profile?.targetProtein, profile?.targetCarbs, profile?.targetFat]);
+
+  const handleSaveModalTargets = (e) => {
+    e?.preventDefault();
+    const updatedTargets = {
+      targetCalories: Number(modalCalories) || 2000,
+      targetProtein: Number(modalProtein) || 150,
+      targetCarbs: Number(modalCarbs) || 200,
+      targetFat: Number(modalFat) || 65,
+    };
+    setProfile(updatedTargets);
+    syncProfileToCloud(null, user?.email, { ...profile, ...updatedTargets });
+    setIsEditTargetsModalOpen(false);
+  };
 
   // Celebration Modal
   const [showCelebration, setShowCelebration] = useState(false);
@@ -561,12 +591,21 @@ export default function Dashboard() {
           <h3 className="text-xl font-bold flex items-center gap-2">
             📊 Today's Intake vs Targets
           </h3>
-          <button 
-            onClick={() => navigate('/log')}
-            className="text-xs text-accent hover:underline font-semibold"
-          >
-            + Log More
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsEditTargetsModalOpen(true)}
+              className="text-xs text-accent2 hover:underline font-semibold flex items-center gap-1 bg-accent2/10 px-2.5 py-1 rounded-xl"
+              title="Edit Daily Targets"
+            >
+              <Settings size={13} /> Edit Targets
+            </button>
+            <button 
+              onClick={() => navigate('/log')}
+              className="text-xs text-accent hover:underline font-semibold"
+            >
+              + Log More
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3.5">
@@ -771,6 +810,99 @@ export default function Dashboard() {
         onClose={() => setSelectedExerciseForModal(null)}
         exerciseName={selectedExerciseForModal}
       />
+
+      {/* Quick Edit Targets Modal */}
+      <AnimatePresence>
+        {isEditTargetsModalOpen && (
+          <Modal 
+            isOpen={isEditTargetsModalOpen} 
+            onClose={() => setIsEditTargetsModalOpen(false)} 
+            title="🎯 Customize Daily Targets"
+          >
+            <form onSubmit={handleSaveModalTargets} className="space-y-4 pt-1">
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1">
+                  Daily Calorie Target (kcal)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="800"
+                    max="6000"
+                    required
+                    value={modalCalories === '' ? '' : modalCalories}
+                    onChange={(e) => setModalCalories(e.target.value === '' ? '' : e.target.value)}
+                    className="w-full bg-dark-700 rounded-xl py-3 px-4 text-sm text-white font-bold outline-none focus:ring-2 focus:ring-accent"
+                    placeholder="e.g. 2200"
+                  />
+                  <span className="absolute right-4 top-3 text-xs text-gray-400 font-bold">kcal</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">
+                    Protein (g)
+                  </label>
+                  <input
+                    type="number"
+                    min="20"
+                    max="400"
+                    value={modalProtein === '' ? '' : modalProtein}
+                    onChange={(e) => setModalProtein(e.target.value === '' ? '' : e.target.value)}
+                    className="w-full bg-dark-700 rounded-xl py-2.5 px-3 text-xs text-white font-bold outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">
+                    Carbs (g)
+                  </label>
+                  <input
+                    type="number"
+                    min="20"
+                    max="600"
+                    value={modalCarbs === '' ? '' : modalCarbs}
+                    onChange={(e) => setModalCarbs(e.target.value === '' ? '' : e.target.value)}
+                    className="w-full bg-dark-700 rounded-xl py-2.5 px-3 text-xs text-white font-bold outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">
+                    Fat (g)
+                  </label>
+                  <input
+                    type="number"
+                    min="10"
+                    max="200"
+                    value={modalFat === '' ? '' : modalFat}
+                    onChange={(e) => setModalFat(e.target.value === '' ? '' : e.target.value)}
+                    className="w-full bg-dark-700 rounded-xl py-2.5 px-3 text-xs text-white font-bold outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  fullWidth 
+                  onClick={() => setIsEditTargetsModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="primary" 
+                  fullWidth 
+                  type="submit"
+                >
+                  Save Targets
+                </Button>
+              </div>
+            </form>
+          </Modal>
+        )}
+      </AnimatePresence>
 
       {/* Gym Partner Diet Hub Modal */}
       <PartnerDietModal

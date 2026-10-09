@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -38,6 +38,27 @@ export default function Profile() {
   });
   const [editingTargets, setEditingTargets] = useState(false);
 
+  // Synchronize local targets state whenever the store profile changes
+  useEffect(() => {
+    if (profile) {
+      setTargets({
+        targetCalories: profile.targetCalories ?? 2000,
+        targetProtein: profile.targetProtein ?? 150,
+        targetCarbs: profile.targetCarbs ?? 200,
+        targetFat: profile.targetFat ?? 65,
+        targetFiber: profile.targetFiber ?? 30,
+        targetSteps: profile.targetSteps ?? 10000,
+      });
+    }
+  }, [
+    profile?.targetCalories,
+    profile?.targetProtein,
+    profile?.targetCarbs,
+    profile?.targetFat,
+    profile?.targetFiber,
+    profile?.targetSteps,
+  ]);
+
   // Personal Info Edit Modal State
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [editName, setEditName] = useState(user?.name || '');
@@ -62,10 +83,19 @@ export default function Profile() {
   };
 
   const handleSaveTargets = () => {
-    setProfile(targets);
-    syncProfileToCloud(null, user?.email, { ...profile, ...targets });
+    const cleanTargets = {
+      targetCalories: Number(targets.targetCalories) || 2000,
+      targetProtein: Number(targets.targetProtein) || 150,
+      targetCarbs: Number(targets.targetCarbs) || 200,
+      targetFat: Number(targets.targetFat) || 65,
+      targetFiber: Number(targets.targetFiber) || 30,
+      targetSteps: Number(targets.targetSteps) || 10000,
+    };
+    setProfile(cleanTargets);
+    setTargets(cleanTargets);
+    syncProfileToCloud(null, user?.email, { ...profile, ...cleanTargets });
     setEditingTargets(false);
-    triggerNotice('✅ Daily nutrition & activity targets updated!');
+    triggerNotice('✅ Daily nutrition & calorie targets updated!');
   };
 
   const handleOpenEditProfile = () => {
@@ -310,12 +340,32 @@ export default function Profile() {
               <Edit3 size={13} /> Customize
             </button>
           ) : (
-            <button 
-              onClick={handleSaveTargets} 
-              className="text-xs bg-accent text-dark-900 font-bold px-3 py-1 rounded-xl flex items-center gap-1 shadow-sm"
-            >
-              <Save size={14} /> Save Targets
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                type="button"
+                onClick={() => {
+                  setTargets({
+                    targetCalories: profile?.targetCalories || 2000,
+                    targetProtein: profile?.targetProtein || 150,
+                    targetCarbs: profile?.targetCarbs || 200,
+                    targetFat: profile?.targetFat || 65,
+                    targetFiber: profile?.targetFiber || 30,
+                    targetSteps: profile?.targetSteps || 10000,
+                  });
+                  setEditingTargets(false);
+                }}
+                className="text-xs text-gray-400 hover:text-white px-2 py-1 font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                onClick={handleSaveTargets} 
+                className="text-xs bg-accent text-dark-900 font-bold px-3 py-1 rounded-xl flex items-center gap-1 shadow-sm active:scale-95 transition-transform"
+              >
+                <Save size={14} /> Save Targets
+              </button>
+            </div>
           )}
         </div>
         
@@ -325,16 +375,20 @@ export default function Profile() {
             const unit = key.includes('Calories') ? 'kcal' : key.includes('Steps') ? 'steps' : 'g';
             return (
               <div key={key} className="flex justify-between items-center text-xs pb-2.5 border-b border-white/5 last:border-none">
-                <span className="text-gray-300 font-medium">{label}</span>
+                <span className="text-gray-300 font-medium capitalize">{label}</span>
                 {editingTargets ? (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <input 
                       type="number" 
-                      value={targets[key]} 
-                      onChange={(e) => setTargets({ ...targets, [key]: Number(e.target.value) })}
-                      className="w-20 bg-dark-700 text-right px-2.5 py-1 rounded-lg font-bold text-white outline-none focus:ring-1 focus:ring-accent text-xs"
+                      value={targets[key] === '' ? '' : targets[key]} 
+                      onChange={(e) => setTargets({ 
+                        ...targets, 
+                        [key]: e.target.value === '' ? '' : Number(e.target.value) 
+                      })}
+                      className="w-24 bg-dark-700 text-right px-2.5 py-1.5 rounded-lg font-bold text-white outline-none focus:ring-2 focus:ring-accent text-xs"
+                      placeholder="0"
                     />
-                    <span className="text-gray-500 text-[10px]">{unit}</span>
+                    <span className="text-gray-500 text-[10px] w-8">{unit}</span>
                   </div>
                 ) : (
                   <span className="font-bold text-white text-sm">

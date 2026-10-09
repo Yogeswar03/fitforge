@@ -49,14 +49,22 @@ const useUserStore = create(
           updatedProfile.startDate = getTodayStr();
         }
 
-        // Recalculate TDEE & Macros if required info is present
-        if (
+        const hasBodyStats =
           updatedProfile.weight &&
           updatedProfile.height &&
           updatedProfile.age &&
           updatedProfile.gender &&
-          updatedProfile.activityLevel
-        ) {
+          updatedProfile.activityLevel;
+
+        const bodyStatsChanged =
+          (data.weight !== undefined && data.weight !== currentProfile.weight) ||
+          (data.height !== undefined && data.height !== currentProfile.height) ||
+          (data.age !== undefined && data.age !== currentProfile.age) ||
+          (data.gender !== undefined && data.gender !== currentProfile.gender) ||
+          (data.goal !== undefined && data.goal !== currentProfile.goal) ||
+          (data.activityLevel !== undefined && data.activityLevel !== currentProfile.activityLevel);
+
+        if (hasBodyStats) {
           const tdee = calculateTDEE(
             updatedProfile.weight,
             updatedProfile.height,
@@ -64,13 +72,40 @@ const useUserStore = create(
             updatedProfile.gender,
             updatedProfile.activityLevel
           );
-
           updatedProfile.tdee = Math.round(tdee);
-          const macros = calculateMacros(tdee, updatedProfile.weight, updatedProfile.goal);
-          updatedProfile.targetCalories = macros.calories;
-          updatedProfile.targetProtein = macros.protein;
-          updatedProfile.targetCarbs = macros.carbs;
-          updatedProfile.targetFat = macros.fat;
+
+          // Only compute default macros if targets are not set yet, or body stats changed without explicit calorie target
+          const needsDefaultMacros =
+            (!currentProfile.targetCalories || currentProfile.targetCalories === 0) ||
+            (bodyStatsChanged && data.targetCalories === undefined);
+
+          if (needsDefaultMacros) {
+            const macros = calculateMacros(tdee, updatedProfile.weight, updatedProfile.goal);
+            if (data.targetCalories === undefined) updatedProfile.targetCalories = macros.calories;
+            if (data.targetProtein === undefined) updatedProfile.targetProtein = macros.protein;
+            if (data.targetCarbs === undefined) updatedProfile.targetCarbs = macros.carbs;
+            if (data.targetFat === undefined) updatedProfile.targetFat = macros.fat;
+          }
+        }
+
+        // Explicit targets from caller ALWAYS win!
+        if (data.targetCalories !== undefined) {
+          updatedProfile.targetCalories = Number(data.targetCalories);
+        }
+        if (data.targetProtein !== undefined) {
+          updatedProfile.targetProtein = Number(data.targetProtein);
+        }
+        if (data.targetCarbs !== undefined) {
+          updatedProfile.targetCarbs = Number(data.targetCarbs);
+        }
+        if (data.targetFat !== undefined) {
+          updatedProfile.targetFat = Number(data.targetFat);
+        }
+        if (data.targetFiber !== undefined) {
+          updatedProfile.targetFiber = Number(data.targetFiber);
+        }
+        if (data.targetSteps !== undefined) {
+          updatedProfile.targetSteps = Number(data.targetSteps);
         }
 
         const updatedProfiles = email
