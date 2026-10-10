@@ -2,26 +2,30 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Dumbbell, Search, Sparkles, Target, ShieldCheck, 
-  ChevronRight, Play, Plus, Check, ArrowLeft, Flame, Info
+  ArrowLeft, Search, Sparkles, Plus, Play, 
+  Target, Dumbbell, ChevronRight 
 } from 'lucide-react';
 import { EXERCISE_DATABASE, getExerciseDetails } from '../data/exerciseDatabase';
 import ExerciseModal from '../components/ui/ExerciseModal';
+import AnatomicalExerciseVisual from '../components/ui/AnatomicalExerciseVisual';
 import useDailyLogStore from '../store/useDailyLogStore';
+import useUserStore from '../store/useUserStore';
 import { getTodayStr, generateId } from '../utils/calculations';
 
-const CATEGORIES = [
-  { id: 'Chest', name: 'Chest', emoji: '💥', subtitle: 'Pectorals, Upper, Lower & Inner' },
-  { id: 'Back', name: 'Back', emoji: '🛡️', subtitle: 'Lats, Rhomboids & Thickness' },
-  { id: 'Shoulders', name: 'Shoulders', emoji: '⚡', subtitle: 'Front, Lateral & Rear Deltoids' },
-  { id: 'Legs', name: 'Legs', emoji: '🦵', subtitle: 'Quads, Hamstrings, Glutes & Calves' },
-  { id: 'Arms', name: 'Arms', emoji: '💪', subtitle: 'Biceps, Triceps & Forearms' },
-  { id: 'Core', name: 'Core / Abs', emoji: '🧘', subtitle: 'Upper Abs, Lower Abs & Obliques' },
-  { id: 'Cardio', name: 'Cardio', emoji: '🏃', subtitle: 'Conditioning, Heart Rate & Fat Burn' },
+const WORKOUT_DAYS = [
+  { id: 'Chest', name: 'Chest Day', emoji: '💥', subtitle: 'Upper, Mid & Lower Pecs' },
+  { id: 'Back', name: 'Pull Day (Back & Biceps)', emoji: '🛡️', subtitle: 'Lats, Rows, Rear Delts & Curls' },
+  { id: 'Shoulders', name: 'Shoulders', emoji: '⚡', subtitle: 'Overhead Press & Lateral Raises' },
+  { id: 'Legs', name: 'Leg Day', emoji: '🦵', subtitle: 'Squats, Lunges & Calves' },
+  { id: 'Arms', name: 'Arms', emoji: '💪', subtitle: 'Biceps & Triceps' },
+  { id: 'Core', name: 'Core & Abs', emoji: '🧘', subtitle: 'Planks & Core Stability' },
 ];
 
 export default function ExerciseGuide() {
   const navigate = useNavigate();
+  const { profile } = useUserStore();
+  const defaultGender = profile?.gender === 'female' ? 'female' : 'male';
+  const [activeGender, setActiveGender] = useState(defaultGender);
   const [selectedCategory, setSelectedCategory] = useState('Chest');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedExerciseName, setSelectedExerciseName] = useState(null);
@@ -66,7 +70,7 @@ export default function ExerciseGuide() {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-dark-900 text-white p-4 md:p-6 pb-36 max-w-4xl mx-auto space-y-6"
+      className="min-h-screen bg-dark-900 text-white p-4 md:p-6 pb-36 max-w-4xl mx-auto space-y-5"
     >
       {/* Toast Notification */}
       <AnimatePresence>
@@ -83,7 +87,7 @@ export default function ExerciseGuide() {
         )}
       </AnimatePresence>
 
-      {/* Header */}
+      {/* Top Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
@@ -94,28 +98,49 @@ export default function ExerciseGuide() {
           </button>
           <div>
             <h1 className="text-2xl font-black text-white flex items-center gap-2">
-              <span>🏋️ Exercise & Form Guide</span>
+              <span>Gym Workout Guide</span>
             </h1>
-            <p className="text-xs text-gray-400">Animated workout GIFs, technique & proper execution</p>
+            <p className="text-xs text-gray-400">Anatomical muscle diagrams with target areas in red</p>
           </div>
         </div>
 
-        <button
-          onClick={() => navigate('/')}
-          className="text-xs bg-dark-800 hover:bg-dark-700 text-accent font-bold px-3 py-2 rounded-xl border border-white/10"
-        >
-          Dashboard →
-        </button>
+        {/* Global Men / Women Selector */}
+        <div className="flex items-center gap-1 bg-dark-800 p-1 rounded-2xl border border-white/10 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setActiveGender('male')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+              activeGender === 'male'
+                ? 'bg-accent text-dark-900 shadow-md font-black'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <span>♂️</span>
+            <span>Men</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveGender('female')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+              activeGender === 'female'
+                ? 'bg-pink-500 text-white shadow-md font-black'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <span>♀️</span>
+            <span>Women</span>
+          </button>
+        </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Input */}
       <div className="relative">
         <Search className="absolute left-4 top-3.5 text-gray-400" size={18} />
         <input 
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search any exercise (e.g., bench press, incline, pushups, squats)..."
+          placeholder="Search exercise (e.g. bench press, lat pulldown, squats)..."
           className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent"
         />
         {searchQuery && (
@@ -128,161 +153,105 @@ export default function ExerciseGuide() {
         )}
       </div>
 
-      {/* Category Pills */}
+      {/* Workout Day Tabs */}
       {!searchQuery && (
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-          {CATEGORIES.map((cat) => (
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {WORKOUT_DAYS.map((day) => (
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
+              key={day.id}
+              onClick={() => setSelectedCategory(day.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border ${
-                selectedCategory === cat.id
+                selectedCategory === day.id
                   ? 'bg-accent text-dark-900 border-accent shadow-lg shadow-accent/20 scale-105'
                   : 'bg-dark-800 text-gray-400 border-white/5 hover:text-white hover:bg-dark-700'
               }`}
             >
-              <span>{cat.emoji}</span>
-              <span>{cat.name}</span>
+              <span>{day.emoji}</span>
+              <span>{day.name}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Category Focus Banner for Chest or Active Category */}
-      {!searchQuery && selectedCategory === 'Chest' && (
-        <div className="glass rounded-3xl p-5 border border-accent/20 relative overflow-hidden bg-gradient-to-r from-accent/10 via-dark-800 to-dark-800">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1 max-w-lg">
-              <span className="text-[10px] bg-accent/20 text-accent font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                Chest Mastery Guide
-              </span>
-              <h2 className="text-lg font-black text-white">How Chest Muscles are Trained</h2>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                The chest consists of the <strong>Upper Clavicular Head</strong> (Incline movements), 
-                <strong>Mid Sternal Head</strong> (Flat Bench & Push-Ups), and <strong>Lower Abdominal Head</strong> (Dips & Decline). 
-                Tap any exercise below to see the animated GIF and form cues!
-              </p>
-            </div>
-            <span className="text-4xl hidden sm:block">💥</span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 text-[11px]">
-            <div className="bg-dark-900/60 p-2 rounded-xl border border-white/5">
-              <span className="text-accent font-bold block">Upper Chest</span>
-              <span className="text-gray-400">Incline DB / BB Press</span>
-            </div>
-            <div className="bg-dark-900/60 p-2 rounded-xl border border-white/5">
-              <span className="text-accent2 font-bold block">Mid Chest</span>
-              <span className="text-gray-400">Flat Barbell Bench</span>
-            </div>
-            <div className="bg-dark-900/60 p-2 rounded-xl border border-white/5">
-              <span className="text-emerald-400 font-bold block">Lower Pecs</span>
-              <span className="text-gray-400">Chest Dips & Decline</span>
-            </div>
-            <div className="bg-dark-900/60 p-2 rounded-xl border border-white/5">
-              <span className="text-orange-400 font-bold block">Inner Squeeze</span>
-              <span className="text-gray-400">Cable Crossovers</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Exercise Cards Grid */}
-      <div className="space-y-3">
+      {/* Poster Style Exercise Grid */}
+      <div className="space-y-4">
         <div className="flex justify-between items-center px-1">
-          <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider">
-            {searchQuery ? `Search Results (${filteredExercises.length})` : `${selectedCategory} Exercises (${filteredExercises.length})`}
-          </h3>
-          <span className="text-xs text-gray-500">Tap for animated GIF & cues</span>
+          <div>
+            <h2 className="text-base font-extrabold text-white uppercase tracking-wider">
+              {searchQuery ? `Search Results (${filteredExercises.length})` : `${selectedCategory} Exercises`}
+            </h2>
+            <p className="text-[11px] text-gray-400">
+              Showing for {activeGender === 'female' ? 'Women ♀️' : 'Men ♂️'} • Target muscles highlighted in red
+            </p>
+          </div>
         </div>
 
         {filteredExercises.length === 0 ? (
           <div className="glass rounded-3xl p-8 text-center text-gray-400 space-y-2 border border-dashed border-dark-700">
             <Dumbbell size={36} className="mx-auto text-accent opacity-40" />
-            <p className="font-semibold text-white">No exercises found matching "{searchQuery}".</p>
-            <p className="text-xs text-gray-400">Try searching for "bench", "press", "curl", or "squat".</p>
+            <p className="font-semibold text-white">No exercises found.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredExercises.map((exercise) => {
-              const displayImage = exercise.gif || exercise.image;
               return (
                 <div
                   key={exercise.id}
-                  className="glass-strong rounded-3xl overflow-hidden border border-white/5 hover:border-accent/40 transition-all flex flex-col group"
+                  className="bg-dark-800/90 rounded-3xl p-4 border border-white/10 hover:border-accent/30 transition-all flex flex-col justify-between space-y-3"
                 >
-                  {/* Visual Header / GIF Container */}
-                  <div 
-                    onClick={() => setSelectedExerciseName(exercise.name)}
-                    className="relative w-full h-44 bg-dark-900 cursor-pointer overflow-hidden"
-                  >
-                    <img 
-                      src={displayImage}
-                      alt={exercise.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.src = exercise.image || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-black/30" />
-                    
-                    {/* GIF Tag */}
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 text-[10px] font-bold text-accent">
-                      <Play size={10} className="fill-accent text-accent" />
-                      <span>ANIMATED GIF</span>
+                  {/* Exercise Title Header */}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-accent">
+                        {exercise.category}
+                      </span>
+                      <h3 className="text-base font-extrabold text-white leading-tight">
+                        {exercise.name}
+                      </h3>
+                      <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-1">
+                        Target: <span className="text-gray-200">{exercise.muscle}</span>
+                      </p>
                     </div>
 
-                    {/* Equipment badge */}
-                    <div className="absolute top-3 right-3 bg-dark-900/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 text-[10px] text-gray-300 font-medium">
+                    <span className="text-[10px] bg-dark-900 text-gray-300 px-2.5 py-1 rounded-full border border-white/5 font-medium">
                       {exercise.equipment}
-                    </div>
-
-                    {/* Target Muscle Overlay */}
-                    <div className="absolute bottom-2.5 left-3 right-3 flex justify-between items-end">
-                      <div>
-                        <span className="text-[10px] text-accent uppercase font-black tracking-wider block">
-                          {exercise.category}
-                        </span>
-                        <h4 className="text-base font-extrabold text-white leading-tight drop-shadow-md">
-                          {exercise.name}
-                        </h4>
-                      </div>
-                    </div>
+                    </span>
                   </div>
 
-                  {/* Body Content */}
-                  <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs text-gray-300 font-semibold">
-                        <Target size={14} className="text-accent2" />
-                        <span>{exercise.muscle}</span>
-                      </div>
+                  {/* Anatomical Line Illustration (Start & Peak Position with Red Highlights) */}
+                  <div 
+                    onClick={() => setSelectedExerciseName(exercise.name)}
+                    className="cursor-pointer"
+                  >
+                    <AnatomicalExerciseVisual
+                      exerciseName={exercise.name}
+                      gender={activeGender}
+                      category={exercise.category}
+                      showSetsReps={true}
+                      defaultSets="2-3 SETS • 10-12 REPS"
+                    />
+                  </div>
 
-                      {exercise.cues && exercise.cues.length > 0 && (
-                        <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
-                          "{exercise.cues[0]}"
-                        </p>
-                      )}
-                    </div>
+                  {/* Quick Action Footer */}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedExerciseName(exercise.name)}
+                      className="flex-1 py-2.5 bg-dark-750 hover:bg-dark-700 text-white rounded-xl text-xs font-bold border border-white/10 flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <Target size={14} className="text-red-400" />
+                      <span>View Form Steps</span>
+                    </button>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        onClick={() => setSelectedExerciseName(exercise.name)}
-                        className="flex-1 py-2 px-3 bg-dark-800 hover:bg-dark-700 text-white rounded-xl text-xs font-bold border border-white/10 flex items-center justify-center gap-1.5 transition-colors"
-                      >
-                        <Play size={12} className="text-accent fill-accent" /> Form Cues
-                      </button>
-
-                      <button
-                        onClick={() => handleAddToToday(exercise)}
-                        className="py-2 px-3 bg-accent/15 hover:bg-accent/25 text-accent rounded-xl text-xs font-bold border border-accent/30 flex items-center justify-center gap-1 transition-colors"
-                        title="Add to today's workout"
-                      >
-                        <Plus size={14} /> Add
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAddToToday(exercise)}
+                      className="py-2.5 px-4 bg-accent/15 hover:bg-accent/25 text-accent rounded-xl text-xs font-bold border border-accent/30 flex items-center justify-center gap-1 transition-colors"
+                      title="Add to today's workout log"
+                    >
+                      <Plus size={14} />
+                      <span>Add</span>
+                    </button>
                   </div>
                 </div>
               );
@@ -291,11 +260,12 @@ export default function ExerciseGuide() {
         )}
       </div>
 
-      {/* Detailed Demonstration Modal */}
+      {/* Detailed Modal */}
       <ExerciseModal
         isOpen={!!selectedExerciseName}
         onClose={() => setSelectedExerciseName(null)}
         exerciseName={selectedExerciseName}
+        initialGender={activeGender}
         onAddToWorkout={() => {
           const det = getExerciseDetails(selectedExerciseName);
           if (det) handleAddToToday(det);

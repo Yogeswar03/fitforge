@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { 
   Calendar, User, CheckCircle2, Circle, Flame, 
   Dumbbell, Utensils, Plus, Sparkles, X, ChevronRight, 
-  Apple, History, Trophy, Award, Check, Users, ReceiptText, Settings, PlayCircle 
+  Apple, History, Trophy, Award, Check, Users, ReceiptText, Settings, PlayCircle, Bot 
 } from 'lucide-react';
 
 import useAuthStore from '../store/useAuthStore';
@@ -19,6 +19,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import ExerciseModal from '../components/ui/ExerciseModal';
 import PartnerDietModal from '../components/ui/PartnerDietModal';
+import AiMealAgentModal from '../components/ui/AiMealAgentModal';
 import { getExerciseDetails } from '../data/exerciseDatabase';
 
 const TRAINER_MESSAGES = [
@@ -114,6 +115,9 @@ export default function Dashboard() {
 
   // Gym Partner Diet Modal
   const [isPartnerDietModalOpen, setIsPartnerDietModalOpen] = useState(false);
+
+  // AI Meal Agent Modal
+  const [isAiMealAgentOpen, setIsAiMealAgentOpen] = useState(false);
 
   // Compute live nutrition
   const nutrition = useMemo(() => {
@@ -509,7 +513,14 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button
+              onClick={() => setIsAiMealAgentOpen(true)}
+              className="text-xs font-semibold text-accent hover:underline flex items-center gap-1 bg-accent/15 hover:bg-accent/25 px-2.5 py-1 rounded-xl border border-accent/30 transition-all shadow-sm"
+              title="Tell AI what you ate from morning to night to auto-calculate & log"
+            >
+              <Bot size={14} className="text-accent" /> AI Meal Agent
+            </button>
             <button
               onClick={() => setIsPartnerDietModalOpen(true)}
               className="text-xs font-semibold text-accent2 hover:underline flex items-center gap-1 bg-accent2/10 px-2.5 py-1 rounded-xl"
@@ -530,6 +541,28 @@ export default function Dashboard() {
               Plan →
             </button>
           </div>
+        </div>
+
+        {/* AI Meal Agent Quick Banner */}
+        <div 
+          onClick={() => setIsAiMealAgentOpen(true)} 
+          className="glass p-3 rounded-2xl border border-accent/25 bg-gradient-to-r from-accent/10 via-dark-800 to-dark-800 cursor-pointer hover:border-accent/40 transition-all flex items-center justify-between group shadow-sm"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-accent text-dark-900 flex items-center justify-center font-black flex-shrink-0 shadow-sm shadow-accent/20">
+              <Bot size={18} />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-white group-hover:text-accent transition-colors flex items-center gap-1.5">
+                <span>AI Meal Agent: Auto-Log Day Food</span>
+                <span className="text-[10px] bg-accent/20 text-accent px-1.5 py-0.2 rounded-full font-extrabold">Instant</span>
+              </div>
+              <div className="text-[10px] text-gray-400">
+                Write what you ate from morning to night → auto calculates calories, protein & logs to today
+              </div>
+            </div>
+          </div>
+          <ChevronRight size={16} className="text-gray-500 group-hover:text-accent transition-colors flex-shrink-0" />
         </div>
 
         {meals.length === 0 && loggedFoods.length === 0 ? (
@@ -948,6 +981,12 @@ export default function Dashboard() {
       <PartnerDietModal
         isOpen={isPartnerDietModalOpen}
         onClose={() => setIsPartnerDietModalOpen(false)}
+      />
+
+      {/* AI Meal Agent Modal */}
+      <AiMealAgentModal
+        isOpen={isAiMealAgentOpen}
+        onClose={() => setIsAiMealAgentOpen(false)}
       />
     </motion.div>
   );

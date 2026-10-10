@@ -259,6 +259,56 @@ const useDailyLogStore = create(
         get()._commitLogs(newLogs);
       },
 
+      batchLogAiMeals: (dateStr, newMealsList) => {
+        const { logs } = get();
+        const currentLog = logs[dateStr] || createEmptyDayLog();
+        const currentMeals = currentLog.meals || [];
+
+        const processedMeals = (newMealsList || []).map((m) => ({
+          ...m,
+          id: m.id || Date.now().toString(36) + Math.random().toString(36).substring(2, 7),
+          completed: true,
+        }));
+
+        const updatedMeals = [...currentMeals, ...processedMeals];
+
+        let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0, totalFib = 0;
+        updatedMeals.forEach((meal) => {
+          if (meal.completed) {
+            (meal.foods || []).forEach((f) => {
+              totalCal += Number(f.calories || 0);
+              totalPro += Number(f.protein || 0);
+              totalCarb += Number(f.carbs || 0);
+              totalFat += Number(f.fat || 0);
+              totalFib += Number(f.fiber || 0);
+            });
+          }
+        });
+        (currentLog.loggedFoods || []).forEach((f) => {
+          totalCal += Number(f.calories || 0);
+          totalPro += Number(f.protein || 0);
+          totalCarb += Number(f.carbs || 0);
+          totalFat += Number(f.fat || 0);
+          totalFib += Number(f.fiber || 0);
+        });
+
+        const newLogs = {
+          ...logs,
+          [dateStr]: {
+            ...currentLog,
+            meals: updatedMeals,
+            nutrition: {
+              calories: Math.round(totalCal),
+              protein: Math.round(totalPro * 10) / 10,
+              carbs: Math.round(totalCarb * 10) / 10,
+              fat: Math.round(totalFat * 10) / 10,
+              fiber: Math.round(totalFib * 10) / 10,
+            },
+          },
+        };
+        get()._commitLogs(newLogs);
+      },
+
       removeLoggedFood: (dateStr, foodId) => {
         const { logs } = get();
         const currentLog = logs[dateStr];

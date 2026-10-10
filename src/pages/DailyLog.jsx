@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { 
   Apple, Activity, Droplets, Scale, Plus, Minus, X, 
-  Search, Check, Trash2, Utensils, Sparkles 
+  Search, Check, Trash2, Utensils, Sparkles, Bot, ChevronRight 
 } from 'lucide-react';
 import useDailyLogStore from '../store/useDailyLogStore';
 import useUserStore from '../store/useUserStore';
 import { searchFoods } from '../data/foodDatabase';
 import Button from '../components/ui/Button';
+import AiMealAgentModal from '../components/ui/AiMealAgentModal';
 
 export default function DailyLog() {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
@@ -31,6 +32,7 @@ export default function DailyLog() {
   };
 
   const [activeModal, setActiveModal] = useState(null); // 'food' | 'steps' | 'water' | 'weight'
+  const [isAiAgentOpen, setIsAiAgentOpen] = useState(false);
 
   // Food Form State
   const [foodTab, setFoodTab] = useState('custom'); // 'custom' | 'search'
@@ -159,6 +161,36 @@ export default function DailyLog() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* AI Smart Nutrition Agent Banner */}
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        onClick={() => setIsAiAgentOpen(true)}
+        className="cursor-pointer bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-cyan-500/15 border border-emerald-500/30 hover:border-emerald-400/60 p-4 rounded-3xl relative overflow-hidden transition-all shadow-lg shadow-emerald-950/20"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-dark-950 shadow-md">
+              <Bot size={26} className="text-dark-900" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white text-base">AI Meal Logger Agent</span>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30 uppercase tracking-wider">
+                  Smart NLP
+                </span>
+              </div>
+              <p className="text-xs text-gray-300 mt-0.5">
+                Type what you ate from morning to night — auto-logs calories & macros!
+              </p>
+            </div>
+          </div>
+          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-emerald-400">
+            <ChevronRight size={20} />
+          </div>
+        </div>
+      </motion.div>
 
       {/* Quick Action Grid */}
       <div className="grid grid-cols-2 gap-4">
@@ -756,6 +788,12 @@ export default function DailyLog() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* AI Meal Agent Modal */}
+      <AiMealAgentModal
+        isOpen={isAiAgentOpen}
+        onClose={() => setIsAiAgentOpen(false)}
+      />
     </motion.div>
   );
 }
