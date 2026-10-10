@@ -25,7 +25,6 @@ export default function Register() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const [testOtp, setTestOtp] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -87,7 +86,6 @@ export default function Register() {
     if (res.success) {
       setOtpSent(true);
       setCountdown(30);
-      setTestOtp(res.otp);
     } else {
       setError(res.error || 'Failed to send OTP.');
     }
@@ -111,14 +109,6 @@ export default function Register() {
       navigate('/onboarding');
     } else {
       setError(res.error || 'Invalid OTP code.');
-    }
-  };
-
-  const autofillTestOtp = () => {
-    if (testOtp) {
-      setOtpCode(testOtp);
-    } else {
-      setOtpCode('123456');
     }
   };
 
@@ -247,22 +237,6 @@ export default function Register() {
                     Change
                   </button>
                 </div>
-
-                {testOtp && (
-                  <div className="p-2.5 bg-dark-800/80 border border-white/5 rounded-2xl text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-gray-300">
-                      <Sparkles size={14} className="text-yellow-400" />
-                      <span>Code: <strong className="text-accent tracking-widest">{testOtp}</strong></span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={autofillTestOtp}
-                      className="px-2.5 py-1 bg-accent/15 hover:bg-accent/25 text-accent text-[11px] font-bold rounded-lg transition-colors"
-                    >
-                      Auto-fill
-                    </button>
-                  </div>
-                )}
 
                 <div>
                   <label className="text-xs text-gray-400 font-semibold block mb-1.5">

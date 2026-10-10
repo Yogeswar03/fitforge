@@ -21,7 +21,6 @@ export default function Login() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const [testOtp, setTestOtp] = useState('');
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -78,7 +77,6 @@ export default function Login() {
     if (res.success) {
       setOtpSent(true);
       setCountdown(30);
-      setTestOtp(res.otp);
       setInfoMessage(`Verification code sent to ${fullPhone}`);
     } else {
       setError(res.error || 'Failed to send OTP. Please verify your phone number.');
@@ -107,14 +105,6 @@ export default function Login() {
       }
     } else {
       setError(res.error || 'Invalid OTP code. Please enter the correct code.');
-    }
-  };
-
-  const autofillTestOtp = () => {
-    if (testOtp) {
-      setOtpCode(testOtp);
-    } else {
-      setOtpCode('123456');
     }
   };
 
@@ -239,23 +229,6 @@ export default function Login() {
                     Change
                   </button>
                 </div>
-
-                {/* Test OTP quick-fill helper */}
-                {testOtp && (
-                  <div className="p-2.5 bg-dark-800/80 border border-white/5 rounded-2xl text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-gray-300">
-                      <Sparkles size={14} className="text-yellow-400" />
-                      <span>Code: <strong className="text-accent tracking-widest">{testOtp}</strong></span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={autofillTestOtp}
-                      className="px-2.5 py-1 bg-accent/15 hover:bg-accent/25 text-accent text-[11px] font-bold rounded-lg transition-colors"
-                    >
-                      Auto-fill
-                    </button>
-                  </div>
-                )}
 
                 <div>
                   <label className="text-xs text-gray-400 font-semibold block mb-1.5">
