@@ -14,7 +14,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { syncProfileToCloud } from '../lib/supabaseSync';
-import { formatNumber } from '../utils/calculations';
+import { formatNumber, calculateBMR, calculateBMI } from '../utils/calculations';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -148,19 +148,8 @@ export default function Profile() {
     triggerNotice('✅ Personal Profile & Calorie Targets recalculations saved!');
   };
 
-  const calculateBMI = () => {
-    if (!profile?.height || !profile?.weight) return 0;
-    const heightInMeters = profile.height / 100;
-    return (profile.weight / (heightInMeters * heightInMeters)).toFixed(1);
-  };
-
-  const getBMICategory = (bmi) => {
-    const val = Number(bmi);
-    if (val < 18.5) return 'Underweight';
-    if (val < 25) return 'Normal Weight ✨';
-    if (val < 30) return 'Overweight';
-    return 'Obese';
-  };
+  const bmiData = calculateBMI(profile?.weight, profile?.height);
+  const bmrValue = calculateBMR(profile?.weight, profile?.height, profile?.age, profile?.gender);
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -198,7 +187,9 @@ export default function Profile() {
         </div>
 
         <h1 className="text-2xl font-bold">{user?.name || 'Athlete'}</h1>
-        <p className="text-gray-400 text-xs mt-0.5">{user?.email || 'user@example.com'}</p>
+        <p className="text-gray-400 text-xs mt-0.5">
+          {user?.phone ? `📱 ${user.phone}` : (user?.email || 'user@example.com')}
+        </p>
 
         <div className="flex items-center gap-2 mt-2">
           <span className="text-xs text-accent px-3 py-1 bg-accent/10 rounded-full font-semibold capitalize">
@@ -305,21 +296,63 @@ export default function Profile() {
             <div className="font-extrabold text-xl text-white">{profile?.age || '--'} yrs</div>
           </div>
           <div className="bg-dark-800 p-3.5 rounded-2xl border border-white/5">
-            <div className="text-xs text-gray-400 mb-0.5">BMI</div>
-            <div className="font-extrabold text-xl text-accent2 flex items-center gap-1.5">
-              <span>{calculateBMI()}</span>
-              <span className="text-[10px] text-gray-400 font-normal">({getBMICategory(calculateBMI())})</span>
+            <div className="text-xs text-gray-400 mb-0.5">BMI & Category</div>
+            <div className="font-extrabold text-base flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5" style={{ color: bmiData.color }}>
+                <span className="text-lg">{bmiData.bmi || '--'}</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 bg-white/5 rounded-md">
+                  {bmiData.category}
+                </span>
+              </div>
+              {bmiData.idealWeightRange && (
+                <span className="text-[10px] text-gray-400 font-normal">
+                  Ideal: {bmiData.idealWeightRange}
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="bg-dark-800 p-4 rounded-2xl col-span-2 flex justify-between items-center border border-white/5">
-            <div>
-              <div className="text-xs text-gray-400">TDEE (Total Daily Energy Expenditure)</div>
-              <div className="font-black text-xl text-accent mt-0.5">
-                {profile?.tdee || 2200} kcal/day
+          {/* BMR Card */}
+          <div className="bg-dark-800 p-3.5 rounded-2xl border border-white/5">
+            <div className="text-xs text-gray-400 mb-0.5">BMR (Basal Metabolic)</div>
+            <div className="font-extrabold text-lg text-emerald-400">
+              {bmrValue ? `${formatNumber(bmrValue)} kcal` : '--'}
+            </div>
+            <div className="text-[10px] text-gray-400">Mifflin-St Jeor equation</div>
+          </div>
+
+          {/* TDEE Card */}
+          <div className="bg-dark-800 p-3.5 rounded-2xl border border-white/5">
+            <div className="text-xs text-gray-400 mb-0.5">TDEE (Total Expenditure)</div>
+            <div className="font-extrabold text-lg text-accent">
+              {profile?.tdee ? `${formatNumber(profile.tdee)} kcal` : '--'}
+            </div>
+            <div className="text-[10px] text-gray-400 capitalize">
+              {profile?.activityLevel?.replace('_', ' ') || 'Active'} level
+            </div>
+          </div>
+
+          {/* Hydration & Fiber formulas */}
+          <div className="bg-dark-800/90 p-3.5 rounded-2xl col-span-2 border border-white/5 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">💧</span>
+              <div>
+                <span className="text-gray-400 block text-[10px]">Scientific Hydration</span>
+                <span className="font-bold text-white">
+                  {profile?.weight ? `${Math.round(profile.weight * 35 + 500)} ml (~${Math.max(8, Math.round((profile.weight * 35 + 500) / 250))} glasses)` : '8-10 glasses'}
+                </span>
               </div>
             </div>
-            <div className="text-2xl">🔥</div>
+            <div className="h-6 w-px bg-white/10" />
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🥗</span>
+              <div>
+                <span className="text-gray-400 block text-[10px]">Optimal Fiber</span>
+                <span className="font-bold text-white">
+                  {profile?.targetFiber || Math.max(25, Math.round(((profile?.targetCalories || 2000) / 1000) * 14))}g / day
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

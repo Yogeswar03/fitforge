@@ -58,8 +58,9 @@ export default function Onboarding() {
     setOnboarded();
 
     const authUser = useAuthStore.getState().user;
-    if (authUser?.id && authUser?.email) {
-      await syncProfileToCloud(authUser.id, authUser.email, profilePayload);
+    const userIdentifier = authUser?.phone || authUser?.email;
+    if (authUser?.id && userIdentifier) {
+      await syncProfileToCloud(authUser.id, userIdentifier, profilePayload);
     }
 
     navigate('/');

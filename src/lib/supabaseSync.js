@@ -25,11 +25,14 @@ export const syncProfileToCloud = async (userId, email, profileData) => {
     const uid = await getActiveUserId(userId);
     if (!uid) return null;
 
-    const cleanEmail = (email || '').toLowerCase();
+    const userIdentifier = (email || '').toLowerCase();
+    const cleanEmail = userIdentifier.includes('@')
+      ? userIdentifier
+      : `${userIdentifier.replace(/\D/g, '') || uid}@phone.fitforge.app`;
     const payload = {
       id: uid,
       email: cleanEmail,
-      name: profileData.name || cleanEmail.split('@')[0],
+      name: profileData.name || (userIdentifier.includes('@') ? userIdentifier.split('@')[0] : `Athlete`),
       age: profileData.age ? Number(profileData.age) : null,
       height: profileData.height ? Number(profileData.height) : null,
       weight: profileData.weight ? Number(profileData.weight) : null,

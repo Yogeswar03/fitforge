@@ -80,11 +80,21 @@ const useUserStore = create(
             (bodyStatsChanged && data.targetCalories === undefined);
 
           if (needsDefaultMacros) {
-            const macros = calculateMacros(tdee, updatedProfile.weight, updatedProfile.goal);
+            const macros = calculateMacros(
+              tdee,
+              updatedProfile.weight,
+              updatedProfile.goal,
+              updatedProfile.dietPreference,
+              updatedProfile.activityLevel,
+              updatedProfile.gender
+            );
             if (data.targetCalories === undefined) updatedProfile.targetCalories = macros.calories;
             if (data.targetProtein === undefined) updatedProfile.targetProtein = macros.protein;
             if (data.targetCarbs === undefined) updatedProfile.targetCarbs = macros.carbs;
             if (data.targetFat === undefined) updatedProfile.targetFat = macros.fat;
+            if (data.targetFiber === undefined) updatedProfile.targetFiber = macros.fiber || 30;
+            if (data.targetSteps === undefined) updatedProfile.targetSteps = macros.steps || 10000;
+            if (data.targetWater === undefined) updatedProfile.targetWater = macros.waterGlasses || 8;
           }
         }
 
