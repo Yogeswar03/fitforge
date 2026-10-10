@@ -1,59 +1,180 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RefreshCw, Sparkles, Layers } from 'lucide-react';
+import { Play, Pause, Layers, Target, Dumbbell, Sparkles, User, RefreshCw, Flame } from 'lucide-react';
+import { getExerciseDetails } from '../../data/exerciseDatabase';
 
-/**
- * AnatomicalExerciseVisual Component
- * Renders clean anatomical line illustrations (start & finish positions)
- * with targeted active muscles highlighted in vivid RED, matching gym poster / MuscleWiki style.
- * Supports both Female (♀️) and Male (♂️) athletic bodies.
- */
+// Realistic athlete photos curated for both Men & Women across all major exercises
+const REALISTIC_ATHLETE_VISUALS = {
+  'bench-press': {
+    male: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Pectoralis Major (Chest)',
+    secondaryMuscles: 'Front Deltoids, Triceps',
+    category: 'Chest',
+  },
+  'incline-press': {
+    male: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Upper Chest (Clavicular Head)',
+    secondaryMuscles: 'Anterior Delts, Triceps',
+    category: 'Chest',
+  },
+  'pushups': {
+    male: 'https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Pectoralis Major & Core',
+    secondaryMuscles: 'Triceps, Serratus Anterior',
+    category: 'Chest',
+  },
+  'cable-fly': {
+    male: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Sternal Pectoralis (Mid Chest)',
+    secondaryMuscles: 'Anterior Deltoids',
+    category: 'Chest',
+  },
+  'dips': {
+    male: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Lower Chest & Triceps',
+    secondaryMuscles: 'Front Deltoids',
+    category: 'Chest',
+  },
+  'lat-pulldown': {
+    male: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Latissimus Dorsi (Lats)',
+    secondaryMuscles: 'Biceps, Rhomboids, Rear Delts',
+    category: 'Back',
+  },
+  'seated-cable-row': {
+    male: 'https://images.unsplash.com/photo-1576678927484-cc907957088c?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Rhomboids & Mid-Back',
+    secondaryMuscles: 'Lower Lats, Biceps',
+    category: 'Back',
+  },
+  'pullups': {
+    male: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Upper Lats & V-Taper',
+    secondaryMuscles: 'Biceps, Core, Grip',
+    category: 'Back',
+  },
+  'deadlift': {
+    male: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Glutes, Hamstrings & Erector Spinae',
+    secondaryMuscles: 'Lats, Traps, Forearms',
+    category: 'Back',
+  },
+  'overhead-press': {
+    male: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Anterior & Medial Deltoids (Shoulders)',
+    secondaryMuscles: 'Triceps, Upper Chest',
+    category: 'Shoulders',
+  },
+  'lateral-raise': {
+    male: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Lateral Deltoids (Side Shoulders)',
+    secondaryMuscles: 'Trapezius',
+    category: 'Shoulders',
+  },
+  'face-pull': {
+    male: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Rear Deltoids & Rotator Cuff',
+    secondaryMuscles: 'Rhomboids, Traps',
+    category: 'Shoulders',
+  },
+  'squats': {
+    male: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Quadriceps & Gluteus Maximus',
+    secondaryMuscles: 'Hamstrings, Core Stabilizers',
+    category: 'Legs',
+  },
+  'lunges': {
+    male: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Glutes & Quads (Unilateral)',
+    secondaryMuscles: 'Hamstrings, Calves',
+    category: 'Legs',
+  },
+  'calf-raise': {
+    male: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Gastrocnemius & Soleus (Calves)',
+    secondaryMuscles: 'Achilles, Ankle Stabilizers',
+    category: 'Legs',
+  },
+  'bicep-curl': {
+    male: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Biceps Brachii (Arm Peaks)',
+    secondaryMuscles: 'Brachialis, Forearms',
+    category: 'Arms',
+  },
+  'tricep-pushdown': {
+    male: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Triceps Brachii (Lateral & Medial Head)',
+    secondaryMuscles: 'Anconeus',
+    category: 'Arms',
+  },
+  'plank': {
+    male: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&auto=format&fit=crop&q=80',
+    female: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    primaryMuscle: 'Rectus Abdominis & Transverse Core',
+    secondaryMuscles: 'Glutes, Shoulders',
+    category: 'Core',
+  },
+};
+
 export default function AnatomicalExerciseVisual({ 
   exerciseName, 
   gender = 'male', 
   category = 'Chest',
   showSetsReps = true,
-  defaultSets = '3 SETS 10-12 REPS'
+  defaultSets = '3 SETS • 10-12 REPS'
 }) {
   const [activeGender, setActiveGender] = useState(gender);
-  const [viewMode, setViewMode] = useState('poster'); // 'poster' (side-by-side) | 'animated' (loop)
-  const [animStep, setAnimStep] = useState(0); // 0 = start, 1 = peak
+  const [viewMode, setViewMode] = useState('human'); // 'human' (Real Athlete) | 'anatomy' (Muscle Map)
+  const [phase, setPhase] = useState('start'); // 'start' | 'peak'
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     setActiveGender(gender);
   }, [gender]);
 
+  // Motion animation loop
   useEffect(() => {
-    if (viewMode === 'animated') {
-      const interval = setInterval(() => {
-        setAnimStep((prev) => (prev === 0 ? 1 : 0));
-      }, 1200);
-      return () => clearInterval(interval);
+    let interval;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setPhase((prev) => (prev === 'start' ? 'peak' : 'start'));
+      }, 1400);
     }
-  }, [viewMode]);
+    return () => clearInterval(interval);
+  }, [isPlaying]);
 
   const cleanName = (exerciseName || '').toLowerCase();
 
-  // Determine exercise key
-  const getExerciseType = () => {
+  // Find exercise key
+  const getExerciseKey = () => {
     if (cleanName.includes('lat pull') || cleanName.includes('pulldown')) return 'lat-pulldown';
     if (cleanName.includes('cable row') || cleanName.includes('seated row')) return 'seated-cable-row';
-    if (cleanName.includes('rear delt') || cleanName.includes('face pull')) return 'rear-delt-fly';
-    if (cleanName.includes('shrug')) return 'shrugs';
-    if (cleanName.includes('preacher')) return 'preacher-curl';
-    if (cleanName.includes('hammer')) return 'hammer-curl';
+    if (cleanName.includes('rear delt') || cleanName.includes('face pull')) return 'face-pull';
     if (cleanName.includes('bicep') || cleanName.includes('curl')) return 'bicep-curl';
     if (cleanName.includes('tricep') || cleanName.includes('pushdown')) return 'tricep-pushdown';
     if (cleanName.includes('incline')) return 'incline-press';
-    if (cleanName.includes('decline')) return 'decline-press';
     if (cleanName.includes('bench') || cleanName.includes('chest press')) return 'bench-press';
     if (cleanName.includes('pushup') || cleanName.includes('push up') || cleanName.includes('push-up')) return 'pushups';
     if (cleanName.includes('cable') && (cleanName.includes('fly') || cleanName.includes('cross'))) return 'cable-fly';
     if (cleanName.includes('dip')) return 'dips';
-    if (cleanName.includes('pec deck') || cleanName.includes('butterfly')) return 'pec-deck';
-    if (cleanName.includes('pullover')) return 'pullover';
     if (cleanName.includes('deadlift')) return 'deadlift';
-    if (cleanName.includes('row') || cleanName.includes('barbell row')) return 'barbell-row';
     if (cleanName.includes('pull up') || cleanName.includes('pullup') || cleanName.includes('chin up')) return 'pullups';
     if (cleanName.includes('squat')) return 'squats';
     if (cleanName.includes('lunge')) return 'lunges';
@@ -61,32 +182,33 @@ export default function AnatomicalExerciseVisual({
     if (cleanName.includes('overhead') || cleanName.includes('shoulder press')) return 'overhead-press';
     if (cleanName.includes('lateral raise')) return 'lateral-raise';
     if (cleanName.includes('plank')) return 'plank';
-    return 'bench-press'; // fallback
+    return 'bench-press';
   };
 
-  const type = getExerciseType();
+  const key = getExerciseKey();
+  const visualData = REALISTIC_ATHLETE_VISUALS[key] || REALISTIC_ATHLETE_VISUALS['bench-press'];
+  const details = getExerciseDetails(exerciseName) || {};
+
   const isFemale = activeGender === 'female';
+  const athletePhoto = isFemale ? visualData.female : visualData.male;
+  const primaryMuscle = details.muscle?.split(',')[0] || visualData.primaryMuscle;
+  const secondaryMuscles = details.muscle?.split(',').slice(1).join(',') || visualData.secondaryMuscles;
 
   return (
-    <div className="w-full bg-[#12121E] rounded-3xl p-4 border border-white/10 shadow-xl overflow-hidden relative">
-      {/* Top Header: Gender Toggle & View Switcher */}
-      <div className="flex justify-between items-center pb-3 border-b border-white/5">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-            Anatomical Guide
-          </span>
-          <span className="text-[10px] bg-red-500/20 text-red-400 font-extrabold px-2 py-0.5 rounded-full">
-            Target Muscles in Red
-          </span>
-        </div>
-
+    <div className="w-full bg-[#0D0D17] rounded-3xl border border-white/10 shadow-2xl overflow-hidden relative">
+      {/* ============================================================== */}
+      {/* TOP CONTROLS BAR: Gender Toggle & Visual Mode */}
+      {/* ============================================================== */}
+      <div className="flex justify-between items-center p-3 sm:p-3.5 bg-dark-900/90 border-b border-white/5 backdrop-blur-md">
         {/* Gender Toggle: Women ♀️ / Men ♂️ */}
-        <div className="flex items-center gap-1 bg-dark-900/80 p-0.5 rounded-xl border border-white/10">
+        <div className="flex items-center gap-1 bg-dark-800 p-0.5 rounded-xl border border-white/10">
           <button
             type="button"
             onClick={() => setActiveGender('male')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
-              !isFemale ? 'bg-accent text-dark-900 shadow' : 'text-gray-400 hover:text-white'
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              !isFemale 
+                ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-dark-950 shadow-md shadow-emerald-500/20' 
+                : 'text-gray-400 hover:text-white'
             }`}
           >
             <span>♂️</span>
@@ -95,67 +217,151 @@ export default function AnatomicalExerciseVisual({
           <button
             type="button"
             onClick={() => setActiveGender('female')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
-              isFemale ? 'bg-pink-500 text-white shadow' : 'text-gray-400 hover:text-white'
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              isFemale 
+                ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md shadow-pink-500/20' 
+                : 'text-gray-400 hover:text-white'
             }`}
           >
             <span>♀️</span>
             <span>Women</span>
           </button>
         </div>
+
+        {/* View Switcher: Real Human Athlete vs Anatomical Map */}
+        <div className="flex items-center gap-1 bg-dark-800 p-0.5 rounded-xl border border-white/10 text-xs">
+          <button
+            type="button"
+            onClick={() => setViewMode('human')}
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+              viewMode === 'human'
+                ? 'bg-accent/20 text-accent border border-accent/40'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <User size={13} /> Real Athlete
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('anatomy')}
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+              viewMode === 'anatomy'
+                ? 'bg-red-500/20 text-red-400 border border-red-500/40'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            <Target size={13} /> Muscle Map
+          </button>
+        </div>
       </div>
 
-      {/* Main Illustration Canvas */}
-      <div className="py-4 relative flex items-center justify-center min-h-[190px]">
-        {viewMode === 'poster' ? (
-          /* Side-by-side Start & Finish View (Poster style like uploaded image) */
-          <div className="grid grid-cols-2 gap-4 w-full max-w-md mx-auto items-center">
-            {/* Start Position */}
-            <div className="flex flex-col items-center text-center space-y-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-dark-800/80 px-2 py-0.5 rounded-md border border-white/5">
-                1. Start Form
-              </span>
-              <div className="h-40 w-full flex items-center justify-center">
-                <ExerciseSvg type={type} isFemale={isFemale} phase="start" />
+      {/* ============================================================== */}
+      {/* MAIN VISUAL CANVAS (Photo / Video with Exercise & Muscle Overlay) */}
+      {/* ============================================================== */}
+      <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden bg-black flex items-center justify-center">
+        {viewMode === 'human' ? (
+          /* REAL HUMAN ATHLETE VIEW */
+          <div className="relative w-full h-full">
+            <motion.img
+              key={`${key}-${activeGender}-${phase}`}
+              initial={{ scale: 1 }}
+              animate={{ 
+                scale: phase === 'peak' ? 1.04 : 1,
+                filter: phase === 'peak' ? 'contrast(1.08) brightness(1.02)' : 'contrast(1) brightness(1)'
+              }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+              src={athletePhoto}
+              alt={`${exerciseName} performed by ${isFemale ? 'female' : 'male'} athlete`}
+              className="w-full h-full object-cover"
+              loading="eager"
+            />
+
+            {/* Dark contrast gradient vignettes */}
+            <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/30 to-black/60 pointer-events-none" />
+
+            {/* DIRECT OVERLAY: EXERCISE NAME (Top Left) */}
+            <div className="absolute top-3 left-3 right-3 flex items-start justify-between pointer-events-none gap-2">
+              <div className="bg-dark-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/15 shadow-xl max-w-[70%]">
+                <span className="text-[10px] text-accent font-extrabold tracking-widest uppercase block">
+                  EXERCISE
+                </span>
+                <h3 className="text-sm sm:text-base font-black text-white tracking-tight leading-tight uppercase drop-shadow">
+                  {exerciseName || details.name || 'Workout Exercise'}
+                </h3>
+              </div>
+
+              {/* Phase Badge */}
+              <div className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-lg border ${
+                phase === 'peak' 
+                  ? 'bg-red-500/80 text-white border-red-400 animate-pulse' 
+                  : 'bg-dark-900/80 text-gray-200 border-white/10'
+              }`}>
+                {phase === 'start' ? '1. Start Position' : '2. Peak Squeeze 🔥'}
               </div>
             </div>
 
-            {/* Finish / Peak Contraction Position */}
-            <div className="flex flex-col items-center text-center space-y-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/20">
-                2. Peak Squeeze
-              </span>
-              <div className="h-40 w-full flex items-center justify-center">
-                <ExerciseSvg type={type} isFemale={isFemale} phase="finish" />
+            {/* DIRECT OVERLAY: TARGET MUSCLE (Bottom Banner) */}
+            <div className="absolute bottom-3 left-3 right-3 pointer-events-none space-y-1.5">
+              <div className="bg-dark-950/90 backdrop-blur-md p-3 rounded-2xl border border-white/15 shadow-2xl space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 -ml-4" />
+                    <span className="text-[11px] font-extrabold text-red-400 uppercase tracking-wider">
+                      PRIMARY MUSCLE:
+                    </span>
+                  </div>
+                  <span className="text-[10px] bg-red-500/20 text-red-300 font-bold px-2 py-0.5 rounded-full border border-red-500/30">
+                    Active Contraction
+                  </span>
+                </div>
+
+                <div className="text-xs sm:text-sm font-black text-white drop-shadow">
+                  {primaryMuscle}
+                </div>
+
+                {secondaryMuscles && (
+                  <div className="text-[10px] text-gray-300 truncate">
+                    <span className="text-gray-400">Assisting:</span> {secondaryMuscles}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         ) : (
-          /* Looping Animation Mode */
-          <div className="flex flex-col items-center justify-center w-full">
-            <div className="h-44 w-full flex items-center justify-center">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={animStep}
-                  initial={{ opacity: 0.6, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0.6, scale: 0.98 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-center justify-center"
-                >
-                  <ExerciseSvg type={type} isFemale={isFemale} phase={animStep === 0 ? 'start' : 'finish'} />
-                </motion.div>
-              </AnimatePresence>
+          /* ANATOMICAL MUSCLE MAP VIEW (Glowing Red Active Contraction) */
+          <div className="relative w-full h-full bg-[#101020] flex flex-col items-center justify-center p-6 text-center">
+            {/* Exercise & Muscle overlay inside canvas */}
+            <div className="absolute top-3 left-3 bg-dark-900/90 px-3 py-1 rounded-xl border border-white/10 text-left">
+              <span className="text-[9px] text-gray-400 uppercase font-bold block">EXERCISE FOCUS</span>
+              <span className="text-xs font-black text-white uppercase">{exerciseName}</span>
             </div>
-            <span className="text-[11px] font-bold text-gray-400 mt-2">
-              {animStep === 0 ? 'Initial Position' : 'Peak Contraction (Muscles Squeezed)'}
-            </span>
+
+            <div className="relative my-auto flex flex-col items-center">
+              {/* Anatomical Athlete Silhouette with Red Heatmap */}
+              <div className="relative w-44 h-44 flex items-center justify-center">
+                <AnatomicalSilhouette isFemale={isFemale} category={details.category || visualData.category} />
+              </div>
+
+              <div className="mt-2 space-y-0.5 bg-dark-950/80 px-4 py-2 rounded-2xl border border-red-500/30">
+                <div className="text-[10px] font-extrabold text-red-400 uppercase tracking-wider flex items-center justify-center gap-1">
+                  <Flame size={12} className="text-red-500" /> TARGET MUSCLE BURNING
+                </div>
+                <div className="text-xs font-black text-white">{primaryMuscle}</div>
+              </div>
+            </div>
+
+            <div className="absolute bottom-3 right-3 text-[10px] text-gray-400 bg-dark-900/80 px-2 py-1 rounded-lg border border-white/5">
+              Active Muscle Heatmap (Red)
+            </div>
           </div>
         )}
       </div>
 
-      {/* Bottom Footer Info Bar */}
-      <div className="pt-2 border-t border-white/5 flex justify-between items-center">
+      {/* ============================================================== */}
+      {/* BOTTOM ACTION BAR: Motion Player & Rep Cues */}
+      {/* ============================================================== */}
+      <div className="p-3 bg-dark-900/90 border-t border-white/5 flex items-center justify-between">
         <div>
           {showSetsReps && (
             <span className="text-xs font-black text-amber-400 tracking-wider">
@@ -164,22 +370,33 @@ export default function AnatomicalExerciseVisual({
           )}
         </div>
 
-        {/* View mode toggle (Side-by-side vs Animation) */}
-        <div className="flex items-center gap-1.5">
+        {/* Start / Peak / Loop Controls */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setViewMode(viewMode === 'poster' ? 'animated' : 'poster')}
-            className="text-[11px] bg-dark-800 hover:bg-dark-700 text-gray-300 px-3 py-1 rounded-xl border border-white/10 flex items-center gap-1.5 transition-colors"
+            onClick={() => setPhase(phase === 'start' ? 'peak' : 'start')}
+            className="px-2.5 py-1 bg-dark-800 hover:bg-dark-700 text-gray-200 text-xs font-bold rounded-xl border border-white/10 flex items-center gap-1 transition-colors"
           >
-            {viewMode === 'poster' ? (
+            <RefreshCw size={12} className="text-accent" />
+            <span>{phase === 'start' ? 'See Peak Form' : 'See Start Form'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsPlaying(!isPlaying)}
+            className={`px-3 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
+              isPlaying
+                ? 'bg-accent text-dark-900 shadow-md shadow-accent/20'
+                : 'bg-dark-800 hover:bg-dark-700 text-white border border-white/10'
+            }`}
+          >
+            {isPlaying ? (
               <>
-                <Play size={12} className="text-accent" />
-                <span>Loop Animation</span>
+                <Pause size={12} /> <span>Pause</span>
               </>
             ) : (
               <>
-                <Layers size={12} className="text-accent" />
-                <span>Side-by-Side</span>
+                <Play size={12} /> <span>Play Loop</span>
               </>
             )}
           </button>
@@ -190,318 +407,93 @@ export default function AnatomicalExerciseVisual({
 }
 
 /**
- * ExerciseSvg Renderer
- * Draws clean anatomical vectors with glowing red highlighted target muscles.
- * Tailors proportions for Male vs Female athletic figures.
+ * Anatomical Silhouette with Red Highlighted Target Muscles
  */
-function ExerciseSvg({ type, isFemale, phase }) {
-  const isStart = phase === 'start';
-  const bodyColor = '#D1D5DB'; // Anatomical bone/body gray
-  const highlightRed = '#FF2A4D'; // Bright red active muscle
-  const secondaryRed = '#FF6B81'; // Lighter red secondary
-  const equipmentColor = '#94A3B8'; // Machine & barbell steel
-  const benchColor = '#475569';
+function AnatomicalSilhouette({ isFemale, category = 'Chest' }) {
+  const cat = (category || '').toLowerCase();
+  const highlightRed = '#FF2A4D';
+  const neutralBody = '#475569';
 
-  // Hair & silhouette details for female
-  const headRadius = isFemale ? 9 : 10;
-  const shoulderWidth = isFemale ? 34 : 44;
-  const waistWidth = isFemale ? 20 : 26;
-  const hipWidth = isFemale ? 28 : 25;
+  const isChest = cat.includes('chest');
+  const isBack = cat.includes('back');
+  const isShoulders = cat.includes('shoulder');
+  const isArms = cat.includes('arm');
+  const isLegs = cat.includes('leg');
+  const isCore = cat.includes('core') || cat.includes('ab');
 
-  switch (type) {
-    // -----------------------------------------------------------------
-    // LAT PULLDOWN (As in reference image)
-    // -----------------------------------------------------------------
-    case 'lat-pulldown':
-      return (
-        <svg viewBox="0 0 160 160" className="w-full h-full max-h-40">
-          {/* Cable Machine Frame & Seat */}
-          <rect x="70" y="10" width="20" height="6" rx="2" fill={equipmentColor} />
-          <line x1="80" y1="16" x2="80" y2="40" stroke={equipmentColor} strokeWidth="3" />
-          <line x1="45" y1="40" x2="115" y2="40" stroke={equipmentColor} strokeWidth="4" strokeLinecap="round" />
-          <rect x="65" y="105" width="30" height="6" rx="2" fill={benchColor} />
-          <line x1="80" y1="111" x2="80" y2="150" stroke={benchColor} strokeWidth="4" />
+  return (
+    <svg viewBox="0 0 120 160" className="w-full h-full drop-shadow-2xl">
+      {/* Head */}
+      <circle cx="60" cy="20" r={isFemale ? 11 : 12} fill={neutralBody} />
 
-          {/* Torso / Back with Red Lat Highlights */}
-          {/* Head */}
-          <circle cx="80" cy={isStart ? 65 : 68} r={headRadius} fill={bodyColor} />
-          {isFemale && <path d="M72 63 Q68 70 70 76" stroke="#EC4899" strokeWidth="2.5" fill="none" />}
+      {/* Traps & Neck */}
+      <path d="M 52 30 L 68 30 L 76 42 L 44 42 Z" fill={neutralBody} />
 
-          {/* Shoulders & Upper Back (Highlighted Red) */}
-          <path
-            d={isStart 
-              ? "M62 80 Q80 75 98 80 L92 105 Q80 108 68 105 Z" 
-              : "M60 82 Q80 78 100 82 L90 105 Q80 108 70 105 Z"}
-            fill={highlightRed}
-            filter="drop-shadow(0 0 3px rgba(255,42,77,0.6))"
-          />
+      {/* Shoulders / Deltoids */}
+      <circle 
+        cx="38" cy="46" r="9" 
+        fill={isShoulders ? highlightRed : neutralBody} 
+        className={isShoulders ? 'filter drop-shadow-[0_0_8px_#ff2a4d]' : ''}
+      />
+      <circle 
+        cx="82" cy="46" r="9" 
+        fill={isShoulders ? highlightRed : neutralBody} 
+        className={isShoulders ? 'filter drop-shadow-[0_0_8px_#ff2a4d]' : ''}
+      />
 
-          {/* Arms holding the bar */}
-          {isStart ? (
-            /* Arms extended high */
-            <g stroke={bodyColor} strokeWidth="5" strokeLinecap="round">
-              <line x1="64" y1="78" x2="50" y2="42" />
-              <line x1="96" y1="78" x2="110" y2="42" />
-            </g>
-          ) : (
-            /* Arms pulling bar down to chest */
-            <g stroke={bodyColor} strokeWidth="5" strokeLinecap="round">
-              <line x1="64" y1="80" x2="52" y2="88" />
-              <line x1="52" y1="88" x2="58" y2="58" />
-              <line x1="96" y1="80" x2="108" y2="88" />
-              <line x1="108" y1="88" x2="102" y2="58" />
-            </g>
-          )}
+      {/* Chest (Pectorals) */}
+      <path
+        d={isFemale 
+          ? "M 46 44 Q 60 48 74 44 Q 72 62 60 63 Q 48 62 46 44 Z" 
+          : "M 44 43 Q 60 47 76 43 Q 76 64 60 65 Q 44 64 44 43 Z"
+        }
+        fill={isChest ? highlightRed : neutralBody}
+        className={isChest ? 'filter drop-shadow-[0_0_12px_#ff2a4d]' : ''}
+      />
 
-          {/* Cable bar location */}
-          <line 
-            x1="45" y1={isStart ? "40" : "60"} 
-            x2="115" y2={isStart ? "40" : "60"} 
-            stroke={equipmentColor} strokeWidth="4" strokeLinecap="round" 
-          />
+      {/* Arms / Biceps & Triceps */}
+      <rect 
+        x="27" y="55" width={isFemale ? "9" : "11"} height="34" rx="4" 
+        fill={isArms ? highlightRed : neutralBody} 
+        className={isArms ? 'filter drop-shadow-[0_0_8px_#ff2a4d]' : ''}
+      />
+      <rect 
+        x="84" y="55" width={isFemale ? "9" : "11"} height="34" rx="4" 
+        fill={isArms ? highlightRed : neutralBody} 
+        className={isArms ? 'filter drop-shadow-[0_0_8px_#ff2a4d]' : ''}
+      />
 
-          {/* Lower body seated */}
-          <path d="M68 106 L62 130 L45 145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" fill="none" />
-          <path d="M92 106 L98 130 L115 145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" fill="none" />
-        </svg>
-      );
+      {/* Abdominals & Core / Lats */}
+      <path
+        d={isFemale 
+          ? "M 50 63 L 70 63 L 68 95 L 52 95 Z" 
+          : "M 48 65 L 72 65 L 70 95 L 50 95 Z"
+        }
+        fill={isCore ? highlightRed : (isBack ? highlightRed : '#334155')}
+        className={(isCore || isBack) ? 'filter drop-shadow-[0_0_10px_#ff2a4d]' : ''}
+      />
 
-    // -----------------------------------------------------------------
-    // SEATED CABLE ROW (As in reference image)
-    // -----------------------------------------------------------------
-    case 'seated-cable-row':
-      return (
-        <svg viewBox="0 0 160 160" className="w-full h-full max-h-40">
-          {/* Machine Bench & Pulley */}
-          <rect x="35" y="115" width="85" height="6" rx="2" fill={benchColor} />
-          <line x1="55" y1="121" x2="55" y2="148" stroke={benchColor} strokeWidth="4" />
-          <line x1="105" y1="121" x2="105" y2="148" stroke={benchColor} strokeWidth="4" />
-          {/* Cable line */}
-          <line x1="20" y1="95" x2={isStart ? "65" : "85"} y2="95" stroke={equipmentColor} strokeWidth="2.5" strokeDasharray="3 3" />
+      {/* Hips & Glutes */}
+      <path
+        d={isFemale 
+          ? "M 48 95 L 72 95 L 78 112 L 42 112 Z" 
+          : "M 50 95 L 70 95 L 73 110 L 47 110 Z"
+        }
+        fill={isLegs ? highlightRed : neutralBody}
+        className={isLegs ? 'filter drop-shadow-[0_0_8px_#ff2a4d]' : ''}
+      />
 
-          {/* Athlete Seated (Side View) */}
-          <circle cx={isStart ? "70" : "85"} cy="70" r={headRadius} fill={bodyColor} />
-          {isFemale && <path d="M63 70 Q56 75 58 82" stroke="#EC4899" strokeWidth="2" fill="none" />}
-
-          {/* Torso with Red Back Highlight */}
-          <path
-            d={isStart 
-              ? "M67 78 L80 115 L66 115 Z" 
-              : "M82 78 L95 115 L80 115 Z"}
-            fill={highlightRed}
-            filter="drop-shadow(0 0 4px rgba(255,42,77,0.6))"
-          />
-
-          {/* Arms pulling cable V-bar */}
-          {isStart ? (
-            <line x1="68" y1="83" x2="45" y2="95" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-          ) : (
-            <path d="M85 83 L105 88 L85 95" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" fill="none" />
-          )}
-
-          {/* Legs on foot pads */}
-          <path d="M78 115 L52 110 L30 100" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" fill="none" />
-        </svg>
-      );
-
-    // -----------------------------------------------------------------
-    // BARBELL BENCH PRESS (Chest)
-    // -----------------------------------------------------------------
-    case 'bench-press':
-      return (
-        <svg viewBox="0 0 160 160" className="w-full h-full max-h-40">
-          {/* Flat Bench */}
-          <rect x="25" y="105" width="110" height="7" rx="2" fill={benchColor} />
-          <line x1="45" y1="112" x2="45" y2="150" stroke={benchColor} strokeWidth="4" />
-          <line x1="115" y1="112" x2="115" y2="150" stroke={benchColor} strokeWidth="4" />
-
-          {/* Athlete lying on bench */}
-          <circle cx="45" cy="100" r={headRadius} fill={bodyColor} />
-          {/* Torso & CHEST (Highlighted Red) */}
-          <rect x="55" y="96" width="40" height="13" rx="4" fill={highlightRed} filter="drop-shadow(0 0 4px rgba(255,42,77,0.7))" />
-          
-          {/* Legs on floor */}
-          <path d="M95 102 L115 110 L120 145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" fill="none" />
-
-          {/* Arms & Barbell */}
-          {isStart ? (
-            /* Bar lowered to chest */
-            <g>
-              <line x1="72" y1="96" x2="60" y2="86" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-              <line x1="60" y1="86" x2="72" y2="76" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-              <line x1="30" y1="74" x2="115" y2="74" stroke={equipmentColor} strokeWidth="5" strokeLinecap="round" />
-              <circle cx="34" cy="74" r="8" fill="#E2E8F0" />
-              <circle cx="111" cy="74" r="8" fill="#E2E8F0" />
-            </g>
-          ) : (
-            /* Bar pressed up to lockout */
-            <g>
-              <line x1="70" y1="96" x2="70" y2="52" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-              <line x1="30" y1="48" x2="115" y2="48" stroke={equipmentColor} strokeWidth="5" strokeLinecap="round" />
-              <circle cx="34" cy="48" r="8" fill="#E2E8F0" />
-              <circle cx="111" cy="48" r="8" fill="#E2E8F0" />
-            </g>
-          )}
-        </svg>
-      );
-
-    // -----------------------------------------------------------------
-    // INCLINE DUMBBELL PRESS (Upper Chest)
-    // -----------------------------------------------------------------
-    case 'incline-press':
-      return (
-        <svg viewBox="0 0 160 160" className="w-full h-full max-h-40">
-          {/* 30° Incline Bench */}
-          <line x1="35" y1="130" x2="90" y2="60" stroke={benchColor} strokeWidth="8" strokeLinecap="round" />
-          <line x1="55" y1="120" x2="55" y2="150" stroke={benchColor} strokeWidth="4" />
-
-          {/* Athlete reclining on 30° incline */}
-          <circle cx="85" cy="55" r={headRadius} fill={bodyColor} />
-          {/* UPPER CHEST (Highlighted Red) */}
-          <path d="M78 65 L55 95 L45 90 Z" fill={highlightRed} filter="drop-shadow(0 0 4px rgba(255,42,77,0.8))" />
-
-          {/* Dumbbells */}
-          {isStart ? (
-            /* Dumbbells down at shoulder level */
-            <g>
-              <line x1="68" y1="78" x2="55" y2="65" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-              <rect x="48" y="58" width="14" height="6" rx="2" fill="#E2E8F0" transform="rotate(30 55 61)" />
-            </g>
-          ) : (
-            /* Dumbbells pressed up */
-            <g>
-              <line x1="68" y1="75" x2="80" y2="35" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-              <rect x="73" y="28" width="16" height="6" rx="2" fill="#E2E8F0" transform="rotate(10 81 31)" />
-            </g>
-          )}
-
-          {/* Legs */}
-          <path d="M40 128 L60 135 L65 152" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" fill="none" />
-        </svg>
-      );
-
-    // -----------------------------------------------------------------
-    // PUSH UPS
-    // -----------------------------------------------------------------
-    case 'pushups':
-      return (
-        <svg viewBox="0 0 160 160" className="w-full h-full max-h-40">
-          {/* Floor line */}
-          <line x1="15" y1="135" x2="145" y2="135" stroke={equipmentColor} strokeWidth="3" />
-
-          {/* Rigid Body Line */}
-          {isStart ? (
-            /* Pushup top position */
-            <g>
-              <circle cx="118" cy="75" r={headRadius} fill={bodyColor} />
-              {/* Chest & Core Highlighted */}
-              <line x1="110" y1="82" x2="65" y2="105" stroke={highlightRed} strokeWidth="9" strokeLinecap="round" filter="drop-shadow(0 0 4px rgba(255,42,77,0.7))" />
-              <line x1="65" y1="105" x2="30" y2="130" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" />
-              {/* Arms Straight down */}
-              <line x1="106" y1="85" x2="106" y2="135" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-            </g>
-          ) : (
-            /* Pushup bottom position */
-            <g>
-              <circle cx="118" cy="115" r={headRadius} fill={bodyColor} />
-              <line x1="110" y1="120" x2="65" y2="125" stroke={highlightRed} strokeWidth="9" strokeLinecap="round" filter="drop-shadow(0 0 4px rgba(255,42,77,0.7))" />
-              <line x1="65" y1="125" x2="30" y2="132" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" />
-              {/* Elbows bent 90 degrees */}
-              <path d="M108 120 L115 105 L108 135" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" fill="none" />
-            </g>
-          )}
-        </svg>
-      );
-
-    // -----------------------------------------------------------------
-    // BARBELL SQUATS (Legs)
-    // -----------------------------------------------------------------
-    case 'squats':
-      return (
-        <svg viewBox="0 0 160 160" className="w-full h-full max-h-40">
-          <line x1="20" y1="145" x2="140" y2="145" stroke={equipmentColor} strokeWidth="3" />
-
-          {isStart ? (
-            /* Standing with Barbell */
-            <g>
-              <circle cx="80" cy="40" r={headRadius} fill={bodyColor} />
-              {/* Barbell on Traps */}
-              <line x1="35" y1="48" x2="125" y2="48" stroke={equipmentColor} strokeWidth="5" strokeLinecap="round" />
-              <circle cx="39" cy="48" r="7" fill="#E2E8F0" />
-              <circle cx="121" cy="48" r="7" fill="#E2E8F0" />
-              {/* Torso */}
-              <line x1="80" y1="48" x2="80" y2="88" stroke={bodyColor} strokeWidth="8" strokeLinecap="round" />
-              {/* Quads & Glutes Highlighted in Red */}
-              <line x1="80" y1="88" x2="72" y2="120" stroke={highlightRed} strokeWidth="8" strokeLinecap="round" filter="drop-shadow(0 0 4px rgba(255,42,77,0.7))" />
-              <line x1="80" y1="88" x2="88" y2="120" stroke={highlightRed} strokeWidth="8" strokeLinecap="round" filter="drop-shadow(0 0 4px rgba(255,42,77,0.7))" />
-              <line x1="72" y1="120" x2="70" y2="145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" />
-              <line x1="88" y1="120" x2="90" y2="145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" />
-            </g>
-          ) : (
-            /* Deep Squat 90° */
-            <g>
-              <circle cx="80" cy="75" r={headRadius} fill={bodyColor} />
-              {/* Barbell */}
-              <line x1="35" y1="83" x2="125" y2="83" stroke={equipmentColor} strokeWidth="5" strokeLinecap="round" />
-              <circle cx="39" cy="83" r="7" fill="#E2E8F0" />
-              <circle cx="121" cy="83" r="7" fill="#E2E8F0" />
-              {/* Torso Angled */}
-              <line x1="80" y1="83" x2="70" y2="110" stroke={bodyColor} strokeWidth="8" strokeLinecap="round" />
-              {/* Deep Thighs & Glutes Peak Contraction in Red */}
-              <path d="M70 110 L98 112 L85 145" stroke={highlightRed} strokeWidth="8" strokeLinecap="round" fill="none" filter="drop-shadow(0 0 5px rgba(255,42,77,0.8))" />
-            </g>
-          )}
-        </svg>
-      );
-
-    // -----------------------------------------------------------------
-    // BICEP CURLS (Arms)
-    // -----------------------------------------------------------------
-    case 'bicep-curl':
-    case 'preacher-curl':
-    case 'hammer-curl':
-      return (
-        <svg viewBox="0 0 160 160" className="w-full h-full max-h-40">
-          <line x1="20" y1="145" x2="140" y2="145" stroke={equipmentColor} strokeWidth="2" />
-          <circle cx="75" cy="40" r={headRadius} fill={bodyColor} />
-          {/* Torso */}
-          <line x1="75" y1="48" x2="75" y2="95" stroke={bodyColor} strokeWidth="9" strokeLinecap="round" />
-          {/* Legs */}
-          <line x1="75" y1="95" x2="68" y2="145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" />
-          <line x1="75" y1="95" x2="82" y2="145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" />
-
-          {/* Biceps Highlighted in Red */}
-          {isStart ? (
-            /* Arms Extended Down */
-            <g>
-              <line x1="70" y1="58" x2="70" y2="82" stroke={highlightRed} strokeWidth="6" strokeLinecap="round" filter="drop-shadow(0 0 3px rgba(255,42,77,0.6))" />
-              <line x1="70" y1="82" x2="70" y2="105" stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-              <circle cx="70" cy="108" r="6" fill="#E2E8F0" />
-            </g>
-          ) : (
-            /* Arms Curled Up (Peak Bicep Contraction) */
-            <g>
-              <path d="M70 58 L70 82 L76 62" stroke={highlightRed} strokeWidth="7" strokeLinecap="round" fill="none" filter="drop-shadow(0 0 5px rgba(255,42,77,0.9))" />
-              <circle cx="76" cy="58" r="7" fill="#E2E8F0" />
-            </g>
-          )}
-        </svg>
-      );
-
-    // -----------------------------------------------------------------
-    // DEFAULT / CHEST DIP & OTHER MOVEMENTS
-    // -----------------------------------------------------------------
-    default:
-      return (
-        <svg viewBox="0 0 160 160" className="w-full h-full max-h-40">
-          <line x1="20" y1="145" x2="140" y2="145" stroke={equipmentColor} strokeWidth="2" />
-          <circle cx="80" cy="45" r={headRadius} fill={bodyColor} />
-          <rect x="70" y="55" width="20" height="40" rx="6" fill={highlightRed} filter="drop-shadow(0 0 4px rgba(255,42,77,0.7))" />
-          <line x1="75" y1="95" x2="70" y2="145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" />
-          <line x1="85" y1="95" x2="90" y2="145" stroke={bodyColor} strokeWidth="6" strokeLinecap="round" />
-          <line x1="68" y1="62" x2={isStart ? "52" : "58"} y2={isStart ? "88" : "70"} stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-          <line x1="92" y1="62" x2={isStart ? "108" : "102"} y2={isStart ? "88" : "70"} stroke={bodyColor} strokeWidth="5" strokeLinecap="round" />
-        </svg>
-      );
-  }
+      {/* Quads & Legs */}
+      <rect 
+        x={isFemale ? "45" : "46"} y="112" width={isFemale ? "12" : "13"} height="42" rx="5" 
+        fill={isLegs ? highlightRed : neutralBody} 
+        className={isLegs ? 'filter drop-shadow-[0_0_10px_#ff2a4d]' : ''}
+      />
+      <rect 
+        x={isFemale ? "63" : "61"} y="112" width={isFemale ? "12" : "13"} height="42" rx="5" 
+        fill={isLegs ? highlightRed : neutralBody} 
+        className={isLegs ? 'filter drop-shadow-[0_0_10px_#ff2a4d]' : ''}
+      />
+    </svg>
+  );
 }
