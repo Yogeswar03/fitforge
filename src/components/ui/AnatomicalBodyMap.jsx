@@ -2,12 +2,11 @@ import React from 'react';
 
 /**
  * AnatomicalBodyMap Component
- * Exact 1-to-1 fidelity reproduction of the anatomical body map from the user's reference screenshot (Image 3):
- * - Clean faceted Front View and Back View anatomical human mannequins
- * - Standing in standard anatomical position (palms forward, arms angled slightly out)
- * - Gray segmented muscle groups with crisp white separations (#D1D5DB / #E5E7EB)
- * - Targeted muscles highlighted in SOLID VIBRANT RED (#EF4444 / #FF3B30)
- * - Supports Men and Women anatomical contours
+ * Exact 1:1 reproduction of the anatomical body map from the user's reference screenshot (Image 3):
+ * - Clean faceted medical-art Front View and Back View male/female figures
+ * - Light-grey segmented muscle groups (#C8CCD0) on clean white background with crisp white separation lines
+ * - Target muscle groups highlighted in SOLID VIBRANT RED (#EF4444 / #FF3B30)
+ * - Proportional torso, shoulders, arms, six-pack, thighs, calves, and posterior chain matching reference image 3
  */
 export default function AnatomicalBodyMap({ 
   focusAreas = [], 
@@ -25,7 +24,7 @@ export default function AnatomicalBodyMap({
 
   const hasMuscle = (name) => tags.some(t => t.includes(name));
 
-  const isChest = hasMuscle('chest') || hasMuscle('pectoral') || hasMuscle('pec');
+  const isChest = hasMuscle('chest') || hasMuscle('pectoral') || hasMuscle('pec') || hasMuscle('bench');
   const isAbs = hasMuscle('ab') || hasMuscle('core') || hasMuscle('wiper') || hasMuscle('oblique');
   const isShoulders = hasMuscle('shoulder') || hasMuscle('delt');
   const isBiceps = hasMuscle('bicep') || (hasMuscle('arm') && !hasMuscle('tricep'));
@@ -36,246 +35,313 @@ export default function AnatomicalBodyMap({
   const isQuads = hasMuscle('quad') || hasMuscle('leg') || hasMuscle('thigh');
   const isHamstrings = hasMuscle('hamstring');
   const isCalves = hasMuscle('calf') || hasMuscle('calves');
+  const isForearms = hasMuscle('forearm');
 
-  // Palette matching Image 3
-  const neutralFill = '#D1D5DB'; // Medical slate gray
-  const neutralStroke = '#FFFFFF'; // Crisp white muscle contour separators
-  const activeRed = '#EF4444'; // Solid bright red target muscle
-  const activeRedStroke = '#DC2626';
+  // Exact Colors matching reference image 3
+  const neutralGray = '#C8CCD2';      // Smooth body grey
+  const neutralDark = '#B3B8BF';      // Darker shading tone
+  const separator = '#FFFFFF';        // Crisp white muscle separation lines
+  const activeRed = '#FF3B30';        // Vivid red target muscle
+  const activeRedDark = '#E02E24';
+
+  const getColor = (isActive) => isActive ? activeRed : neutralGray;
+  const getStroke = (isActive) => isActive ? activeRedDark : separator;
 
   return (
-    <div className={`flex items-center justify-center gap-6 sm:gap-12 py-3 select-none ${className}`}>
+    <div className={`flex items-center justify-center gap-6 sm:gap-14 py-2 select-none ${className}`}>
       {/* ============================================================== */}
-      {/* 1. FRONT VIEW (Exact silhouette from Image 3)                   */}
+      {/* 1. FRONT VIEW (Exact match for Left figure in Image 3)         */}
       {/* ============================================================== */}
       <div className="flex flex-col items-center">
-        <svg viewBox="0 0 140 250" className="w-32 sm:w-36 h-64 sm:h-72 drop-shadow-sm">
-          {/* Head & Neck */}
-          <ellipse cx="70" cy="24" rx="11" ry="14" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-          <path d="M 64 36 L 62 46 L 78 46 L 76 36 Z" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
+        <svg viewBox="0 0 160 270" className="w-36 sm:w-40 h-64 sm:h-72 drop-shadow-sm">
+          <defs>
+            <filter id="soft-glow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000000" floodOpacity="0.08" />
+            </filter>
+          </defs>
 
-          {/* Trapezius / Clavicle base */}
-          <path d="M 62 46 L 50 50 L 52 56 L 68 54 Z" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-          <path d="M 78 46 L 90 50 L 88 56 L 72 54 Z" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
+          {/* HEAD & NECK */}
+          {/* Head silhouette */}
+          <ellipse cx="80" cy="22" rx="10.5" ry="14" fill={neutralGray} />
+          {/* Sternocleidomastoid (Neck muscles) */}
+          <path d="M 75 34 L 72 46 L 77 46 L 78 34 Z" fill={neutralDark} stroke={separator} strokeWidth="1" />
+          <path d="M 85 34 L 88 46 L 83 46 L 82 34 Z" fill={neutralDark} stroke={separator} strokeWidth="1" />
+          {/* Clavicle / Neck base */}
+          <polygon points="73,46 87,46 83,50 77,50" fill={neutralGray} stroke={separator} strokeWidth="1" />
 
-          {/* DELTOIDS (Shoulders - Left & Right) */}
+          {/* SHOULDERS / DELTOIDS (Anterior & Lateral) */}
+          {/* Left Deltoid */}
           <path 
-            d="M 50 49 Q 36 54 32 68 Q 42 76 46 64 Z" 
-            fill={isShoulders ? activeRed : neutralFill} 
-            stroke={isShoulders ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 64 47 C 50 49 42 56 38 68 C 39 74 46 76 52 70 C 56 65 59 56 64 47 Z" 
+            fill={getColor(isShoulders)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+          {/* Right Deltoid */}
           <path 
-            d="M 90 49 Q 104 54 108 68 Q 98 76 94 64 Z" 
-            fill={isShoulders ? activeRed : neutralFill} 
-            stroke={isShoulders ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 96 47 C 110 49 118 56 122 68 C 121 74 114 76 108 70 C 104 65 101 56 96 47 Z" 
+            fill={getColor(isShoulders)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
 
-          {/* CHEST / PECTORALS (Matching Image 3 in Solid Vibrant Red) */}
+          {/* CHEST / PECTORALIS MAJOR (Highlighted in Red in Image 3!) */}
           {/* Left Pectoral */}
           <path 
-            d="M 50 54 Q 69 53 68 76 Q 54 88 45 76 Q 44 64 50 54 Z" 
-            fill={isChest ? activeRed : neutralFill} 
-            stroke={isChest ? activeRedStroke : neutralStroke} 
+            d="M 65 48 C 77 48 78 49 78 74 C 74 77 65 77 56 75 C 50 73 52 64 57 56 C 60 51 63 49 65 48 Z" 
+            fill={getColor(isChest)} 
+            stroke={separator} 
             strokeWidth="1.5" 
           />
           {/* Right Pectoral */}
           <path 
-            d="M 90 54 Q 71 53 72 76 Q 86 88 95 76 Q 96 64 90 54 Z" 
-            fill={isChest ? activeRed : neutralFill} 
-            stroke={isChest ? activeRedStroke : neutralStroke} 
+            d="M 95 48 C 83 48 82 49 82 74 C 86 77 95 77 104 75 C 110 73 108 64 103 56 C 100 51 97 49 95 48 Z" 
+            fill={getColor(isChest)} 
+            stroke={separator} 
             strokeWidth="1.5" 
           />
 
-          {/* BICEPS & UPPER ARMS */}
+          {/* ARMS (BICEPS, FOREARMS, HANDS - Palms open facing forward) */}
+          {/* Left Bicep */}
           <path 
-            d="M 32 68 Q 24 86 26 102 Q 34 100 37 84 Q 37 76 32 68 Z" 
-            fill={isBiceps ? activeRed : neutralFill} 
-            stroke={isBiceps ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 40 70 C 34 78 33 89 35 98 C 40 98 44 94 46 86 C 47 78 46 72 40 70 Z" 
+            fill={getColor(isBiceps)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+          {/* Right Bicep */}
           <path 
-            d="M 108 68 Q 116 86 114 102 Q 106 100 103 84 Q 103 76 108 68 Z" 
-            fill={isBiceps ? activeRed : neutralFill} 
-            stroke={isBiceps ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 120 70 C 126 78 127 89 125 98 C 120 98 116 94 114 86 C 113 78 114 72 120 70 Z" 
+            fill={getColor(isBiceps)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+          {/* Left Forearm */}
+          <path 
+            d="M 33 100 C 26 112 24 126 25 140 C 30 140 34 133 36 122 C 37 112 37 103 33 100 Z" 
+            fill={getColor(isForearms)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
+          />
+          {/* Right Forearm */}
+          <path 
+            d="M 127 100 C 134 112 136 126 135 140 C 130 140 126 133 124 122 C 123 112 123 103 127 100 Z" 
+            fill={getColor(isForearms)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
+          />
+          {/* Hands (palms facing forward as in Image 3) */}
+          <path d="M 24 142 C 21 148 18 153 19 157 C 22 158 25 156 27 151 C 29 147 28 143 24 142 Z" fill={neutralGray} stroke={separator} strokeWidth="1" />
+          <path d="M 136 142 C 139 148 142 153 141 157 C 138 158 135 156 133 151 C 131 147 132 143 136 142 Z" fill={neutralGray} stroke={separator} strokeWidth="1" />
 
-          {/* FOREARMS & HANDS */}
-          <path d="M 25 104 Q 16 128 18 144 Q 25 142 28 120 Z" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-          <path d="M 115 104 Q 124 128 122 144 Q 115 142 112 120 Z" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-          <ellipse cx="17" cy="149" rx="4" ry="6" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.2" />
-          <ellipse cx="123" cy="149" rx="4" ry="6" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.2" />
+          {/* SERRATUS & OBLIQUES (Flanking Ribcage) */}
+          <path d="M 54 77 C 58 84 57 93 54 102 C 51 98 51 86 54 77 Z" fill={getColor(isAbs)} stroke={separator} strokeWidth="1" />
+          <path d="M 106 77 C 102 84 103 93 106 102 C 109 98 109 86 106 77 Z" fill={getColor(isAbs)} stroke={separator} strokeWidth="1" />
+          <path d="M 55 104 C 60 114 61 123 57 128 C 53 122 52 112 55 104 Z" fill={getColor(isAbs)} stroke={separator} strokeWidth="1" />
+          <path d="M 105 104 C 100 114 99 123 103 128 C 107 122 108 112 105 104 Z" fill={getColor(isAbs)} stroke={separator} strokeWidth="1" />
 
-          {/* ABDOMINALS (6-Pack Blocks & Obliques) */}
-          <g>
-            {/* Top Abs (Left & Right) */}
-            <path d="M 58 80 L 68 80 L 68 93 L 57 93 Z" fill={isAbs ? activeRed : neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-            <path d="M 72 80 L 82 80 L 83 93 L 72 93 Z" fill={isAbs ? activeRed : neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-            {/* Mid Abs */}
-            <path d="M 57 95 L 68 95 L 68 108 L 57 108 Z" fill={isAbs ? activeRed : neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-            <path d="M 72 95 L 83 95 L 83 108 L 72 108 Z" fill={isAbs ? activeRed : neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-            {/* Lower Abs */}
-            <path d="M 58 110 L 68 110 L 68 122 L 59 122 Z" fill={isAbs ? activeRed : neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-            <path d="M 72 110 L 82 110 L 81 122 L 72 122 Z" fill={isAbs ? activeRed : neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-            {/* Obliques / Serratus flank */}
-            <path d="M 46 80 Q 56 94 54 116 L 47 110 Z" fill={isAbs ? activeRed : neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-            <path d="M 94 80 Q 84 94 86 116 L 93 110 Z" fill={isAbs ? activeRed : neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-          </g>
+          {/* ABDOMINALS (Linear alba & segmented 6-pack) */}
+          {/* Upper Abs */}
+          <rect x="67" y="78" width="11" height="12" rx="2" fill={getColor(isAbs)} stroke={separator} strokeWidth="1.2" />
+          <rect x="82" y="78" width="11" height="12" rx="2" fill={getColor(isAbs)} stroke={separator} strokeWidth="1.2" />
+          {/* Middle Abs */}
+          <rect x="68" y="93" width="10" height="13" rx="2" fill={getColor(isAbs)} stroke={separator} strokeWidth="1.2" />
+          <rect x="82" y="93" width="10" height="13" rx="2" fill={getColor(isAbs)} stroke={separator} strokeWidth="1.2" />
+          {/* Lower Abs / Core */}
+          <path d="M 70 109 L 78 109 L 77 124 L 71 124 Z" fill={getColor(isAbs)} stroke={separator} strokeWidth="1.2" />
+          <path d="M 82 109 L 90 109 L 89 124 L 83 124 Z" fill={getColor(isAbs)} stroke={separator} strokeWidth="1.2" />
 
           {/* PELVIS / GROIN */}
-          <polygon points="54,124 86,124 80,140 60,140" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
+          <polygon points="63,126 97,126 92,143 68,143" fill={neutralGray} stroke={separator} strokeWidth="1.2" />
 
-          {/* QUADRICEPS (Thighs) */}
+          {/* THIGHS / QUADRICEPS (Rectus femoris, vastus lateralis, vastus medialis) */}
+          {/* Left Quad Outer */}
           <path 
-            d="M 54 140 Q 42 168 46 195 Q 62 195 65 168 Q 66 148 60 140 Z" 
-            fill={isQuads ? activeRed : neutralFill} 
-            stroke={isQuads ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 64 144 C 54 158 50 176 53 194 C 58 194 62 186 64 172 C 65 158 65 148 64 144 Z" 
+            fill={getColor(isQuads)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+          {/* Left Quad Inner (Teardrop / Vastus medialis) */}
           <path 
-            d="M 86 140 Q 98 168 94 195 Q 78 195 75 168 Q 74 148 80 140 Z" 
-            fill={isQuads ? activeRed : neutralFill} 
-            stroke={isQuads ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 66 144 C 70 156 71 170 70 190 C 65 194 62 192 64 176 C 65 160 65 148 66 144 Z" 
+            fill={getColor(isQuads)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
+          />
+          {/* Right Quad Outer */}
+          <path 
+            d="M 96 144 C 106 158 110 176 107 194 C 102 194 98 186 96 172 C 95 158 95 148 96 144 Z" 
+            fill={getColor(isQuads)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
+          />
+          {/* Right Quad Inner (Teardrop / Vastus medialis) */}
+          <path 
+            d="M 94 144 C 90 156 89 170 90 190 C 95 194 98 192 96 176 C 95 160 95 148 94 144 Z" 
+            fill={getColor(isQuads)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
 
-          {/* Knees */}
-          <ellipse cx="53" cy="199" rx="5" ry="4" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.2" />
-          <ellipse cx="87" cy="199" rx="5" ry="4" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.2" />
+          {/* KNEES / PATELLA */}
+          <ellipse cx="61" cy="200" rx="5" ry="4" fill={neutralGray} stroke={separator} strokeWidth="1" />
+          <ellipse cx="99" cy="200" rx="5" ry="4" fill={neutralGray} stroke={separator} strokeWidth="1" />
 
-          {/* CALVES / SHINS */}
+          {/* SHINS & CALVES (Tibia & Gastrocnemius front) */}
+          {/* Left Calf / Shin */}
           <path 
-            d="M 48 204 Q 40 226 50 244 L 56 244 Q 58 226 57 204 Z" 
-            fill={isCalves ? activeRed : neutralFill} 
-            stroke={isCalves ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 56 206 C 50 218 51 234 54 252 C 58 252 63 242 64 226 C 65 214 63 206 56 206 Z" 
+            fill={getColor(isCalves)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+          {/* Right Calf / Shin */}
           <path 
-            d="M 92 204 Q 100 226 90 244 L 84 244 Q 82 226 83 204 Z" 
-            fill={isCalves ? activeRed : neutralFill} 
-            stroke={isCalves ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 104 206 C 110 218 109 234 106 252 C 102 252 97 242 96 226 C 95 214 97 206 104 206 Z" 
+            fill={getColor(isCalves)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+
+          {/* FEET */}
+          <path d="M 53 254 C 51 260 52 264 57 264 C 61 264 61 259 58 254 Z" fill={neutralGray} stroke={separator} strokeWidth="1" />
+          <path d="M 107 254 C 109 260 108 264 103 264 C 99 264 99 259 102 254 Z" fill={neutralGray} stroke={separator} strokeWidth="1" />
         </svg>
       </div>
 
       {/* ============================================================== */}
-      {/* 2. BACK VIEW (Exact silhouette from Image 3)                    */}
+      {/* 2. BACK VIEW (Exact match for Right figure in Image 3)         */}
       {/* ============================================================== */}
       <div className="flex flex-col items-center">
-        <svg viewBox="0 0 140 250" className="w-32 sm:w-36 h-64 sm:h-72 drop-shadow-sm">
-          {/* Head & Neck (Back) */}
-          <ellipse cx="70" cy="24" rx="11" ry="14" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-          <path d="M 64 36 L 62 46 L 78 46 L 76 36 Z" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
+        <svg viewBox="0 0 160 270" className="w-36 sm:w-40 h-64 sm:h-72 drop-shadow-sm">
+          {/* HEAD & NECK (BACK) */}
+          <ellipse cx="80" cy="22" rx="10.5" ry="14" fill={neutralGray} />
+          <path d="M 75 34 L 74 45 L 86 45 L 85 34 Z" fill={neutralDark} stroke={separator} strokeWidth="1" />
 
-          {/* TRAPEZIUS (Diamond Upper Back) */}
+          {/* TRAPEZIUS (Diamond-shaped Upper Back) */}
           <polygon 
-            points="70,44 86,55 70,82 54,55" 
-            fill={isTraps ? activeRed : neutralFill} 
-            stroke={isTraps ? activeRedStroke : neutralStroke} 
+            points="80,44 97,55 80,84 63,55" 
+            fill={getColor(isTraps)} 
+            stroke={separator} 
             strokeWidth="1.5" 
           />
 
-          {/* REAR DELTOIDS (Shoulders - Back) */}
+          {/* REAR DELTOIDS (Back Shoulders) */}
+          {/* Left Rear Delt */}
           <path 
-            d="M 50 49 Q 36 54 32 68 Q 42 76 46 64 Z" 
-            fill={isShoulders ? activeRed : neutralFill} 
-            stroke={isShoulders ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 62 49 C 48 53 42 62 38 72 C 45 76 52 74 58 66 C 60 59 61 53 62 49 Z" 
+            fill={getColor(isShoulders)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+          {/* Right Rear Delt */}
           <path 
-            d="M 90 49 Q 104 54 108 68 Q 98 76 94 64 Z" 
-            fill={isShoulders ? activeRed : neutralFill} 
-            stroke={isShoulders ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
-          />
-
-          {/* TRICEPS (Back of arms) */}
-          <path 
-            d="M 32 68 Q 24 86 26 102 Q 34 100 37 84 Q 37 76 32 68 Z" 
-            fill={isTriceps ? activeRed : neutralFill} 
-            stroke={isTriceps ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
-          />
-          <path 
-            d="M 108 68 Q 116 86 114 102 Q 106 100 103 84 Q 103 76 108 68 Z" 
-            fill={isTriceps ? activeRed : neutralFill} 
-            stroke={isTriceps ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 98 49 C 112 53 118 62 122 72 C 115 76 108 74 102 66 C 100 59 99 53 98 49 Z" 
+            fill={getColor(isShoulders)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
 
-          {/* FOREARMS & HANDS */}
-          <path d="M 25 104 Q 16 128 18 144 Q 25 142 28 120 Z" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-          <path d="M 115 104 Q 124 128 122 144 Q 115 142 112 120 Z" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-          <ellipse cx="17" cy="149" rx="4" ry="6" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.2" />
-          <ellipse cx="123" cy="149" rx="4" ry="6" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.2" />
+          {/* TRICEPS (Lateral & Long Heads) */}
+          {/* Left Tricep */}
+          <path 
+            d="M 38 74 C 33 82 32 92 34 100 C 40 100 44 95 46 86 C 46 78 43 74 38 74 Z" 
+            fill={getColor(isTriceps)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
+          />
+          {/* Right Tricep */}
+          <path 
+            d="M 122 74 C 127 82 128 92 126 100 C 120 100 116 95 114 86 C 114 78 117 74 122 74 Z" 
+            fill={getColor(isTriceps)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
+          />
+          {/* Forearms (Back) */}
+          <path d="M 33 102 C 26 114 24 128 25 142 C 30 142 34 135 36 124 C 37 114 37 105 33 102 Z" fill={getColor(isForearms)} stroke={separator} strokeWidth="1.2" />
+          <path d="M 127 102 C 134 114 136 128 135 142 C 130 142 126 135 124 124 C 123 114 123 105 127 102 Z" fill={getColor(isForearms)} stroke={separator} strokeWidth="1.2" />
+          {/* Hands */}
+          <path d="M 24 144 C 21 150 18 155 19 159 C 22 160 25 158 27 153 C 29 149 28 145 24 144 Z" fill={neutralGray} stroke={separator} strokeWidth="1" />
+          <path d="M 136 144 C 139 150 142 155 141 159 C 138 160 135 158 133 153 C 131 149 132 145 136 144 Z" fill={neutralGray} stroke={separator} strokeWidth="1" />
 
           {/* LATS / LATISSIMUS DORSI (Mid Back Wings) */}
+          {/* Left Lat Wing */}
           <path 
-            d="M 52 68 Q 70 80 69 110 Q 52 112 46 88 Z" 
-            fill={isLats ? activeRed : neutralFill} 
-            stroke={isLats ? activeRedStroke : neutralStroke} 
+            d="M 63 68 C 55 82 54 100 58 114 C 65 113 72 108 77 96 C 75 84 70 74 63 68 Z" 
+            fill={getColor(isLats)} 
+            stroke={separator} 
             strokeWidth="1.5" 
           />
+          {/* Right Lat Wing */}
           <path 
-            d="M 88 68 Q 70 80 71 110 Q 88 112 94 88 Z" 
-            fill={isLats ? activeRed : neutralFill} 
-            stroke={isLats ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
-          />
-
-          {/* LOWER BACK (Erector Spinae) */}
-          <polygon points="63,110 77,110 74,128 66,128" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.5" />
-
-          {/* GLUTES (Butt) */}
-          <path 
-            d="M 50 128 Q 45 152 68 152 Q 70 140 64 128 Z" 
-            fill={isGlutes ? activeRed : neutralFill} 
-            stroke={isGlutes ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
-          />
-          <path 
-            d="M 90 128 Q 95 152 72 152 Q 70 140 76 128 Z" 
-            fill={isGlutes ? activeRed : neutralFill} 
-            stroke={isGlutes ? activeRedStroke : neutralStroke} 
+            d="M 97 68 C 105 82 106 100 102 114 C 95 113 88 108 83 96 C 85 84 90 74 97 68 Z" 
+            fill={getColor(isLats)} 
+            stroke={separator} 
             strokeWidth="1.5" 
           />
 
-          {/* HAMSTRINGS (Back of Thighs) */}
+          {/* LOWER BACK (Erector Spinae & Thoracolumbar Fascia) */}
+          <polygon points="73,100 87,100 85,124 75,124" fill={neutralGray} stroke={separator} strokeWidth="1.2" />
+
+          {/* GLUTEUS MAXIMUS (Butt) */}
+          {/* Left Glute */}
           <path 
-            d="M 48 154 Q 40 178 46 195 Q 60 195 64 176 Q 66 160 62 154 Z" 
-            fill={isHamstrings ? activeRed : neutralFill} 
-            stroke={isHamstrings ? activeRedStroke : neutralStroke} 
+            d="M 60 126 C 52 136 51 149 57 158 C 66 160 76 156 79 142 C 79 132 74 126 60 126 Z" 
+            fill={getColor(isGlutes)} 
+            stroke={separator} 
             strokeWidth="1.5" 
           />
+          {/* Right Glute */}
           <path 
-            d="M 92 154 Q 100 178 94 195 Q 80 195 76 176 Q 74 160 78 154 Z" 
-            fill={isHamstrings ? activeRed : neutralFill} 
-            stroke={isHamstrings ? activeRedStroke : neutralStroke} 
+            d="M 100 126 C 108 136 109 149 103 158 C 94 160 84 156 81 142 C 81 132 86 126 100 126 Z" 
+            fill={getColor(isGlutes)} 
+            stroke={separator} 
             strokeWidth="1.5" 
           />
 
-          {/* Back of Knees */}
-          <ellipse cx="53" cy="199" rx="5" ry="3" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.2" />
-          <ellipse cx="87" cy="199" rx="5" ry="3" fill={neutralFill} stroke={neutralStroke} strokeWidth="1.2" />
+          {/* HAMSTRINGS (Biceps Femoris & Semitendinosus - Back of Thighs) */}
+          {/* Left Hamstring */}
+          <path 
+            d="M 57 160 C 51 172 50 186 53 196 C 60 196 66 190 70 178 C 72 168 70 160 57 160 Z" 
+            fill={getColor(isHamstrings)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
+          />
+          {/* Right Hamstring */}
+          <path 
+            d="M 103 160 C 109 172 110 186 107 196 C 100 196 94 190 90 178 C 88 168 90 160 103 160 Z" 
+            fill={getColor(isHamstrings)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
+          />
 
-          {/* CALVES (Gastrocnemius - Back View) */}
+          {/* BACK OF KNEES (Popliteal fossa) */}
+          <ellipse cx="61" cy="200" rx="5" ry="3" fill={neutralGray} stroke={separator} strokeWidth="1" />
+          <ellipse cx="99" cy="200" rx="5" ry="3" fill={neutralGray} stroke={separator} strokeWidth="1" />
+
+          {/* CALVES / GASTROCNEMIUS (Inner & Outer Heads) */}
+          {/* Left Calf */}
           <path 
-            d="M 46 202 Q 38 224 48 244 L 56 244 Q 58 224 56 202 Z" 
-            fill={isCalves ? activeRed : neutralFill} 
-            stroke={isCalves ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 55 204 C 47 216 48 232 52 250 C 58 250 63 240 65 224 C 66 212 63 204 55 204 Z" 
+            fill={getColor(isCalves)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+          {/* Right Calf */}
           <path 
-            d="M 94 202 Q 102 224 92 244 L 84 244 Q 82 224 84 202 Z" 
-            fill={isCalves ? activeRed : neutralFill} 
-            stroke={isCalves ? activeRedStroke : neutralStroke} 
-            strokeWidth="1.5" 
+            d="M 105 204 C 113 216 112 232 108 250 C 102 250 97 240 95 224 C 94 212 97 204 105 204 Z" 
+            fill={getColor(isCalves)} 
+            stroke={separator} 
+            strokeWidth="1.2" 
           />
+
+          {/* HEELS */}
+          <path d="M 52 252 C 50 258 51 262 56 262 C 60 262 60 257 57 252 Z" fill={neutralGray} stroke={separator} strokeWidth="1" />
+          <path d="M 108 252 C 110 258 109 262 104 262 C 100 262 100 257 103 252 Z" fill={neutralGray} stroke={separator} strokeWidth="1" />
         </svg>
       </div>
     </div>
   );
 }
+

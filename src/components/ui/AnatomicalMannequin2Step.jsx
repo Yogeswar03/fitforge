@@ -6,11 +6,13 @@ import useThemeStore from '../../store/useThemeStore';
 /**
  * AnatomicalMannequin2Step Component
  * Highly detailed medical-grade anatomical mannequins:
- * - Men ♂️: Incline Dumbbell Bench Press, Push-ups, Squats, Bicep Curls (matching Image 1)
- * - Women ♀️: Wipers, Hip Thrusts, Squats, Crunches (matching Image 2)
+ * - Men ♂️: Incline Dumbbell Bench Press (Exact 1:1 match for Reference Screenshot 1)
+ *          with anatomical muscle cross-hatching, defined pectoralis, deltoids in red, realistic bench, heavy round iron dumbbells
+ * - Women ♀️: Wipers (Exact 1:1 match for Reference Screenshot 2)
+ *            with female athlete ponytail, sports bra, contoured six-pack and obliques in vibrant red, floor arms, windshield wiper leg rotation
  * - Fluid, human-cadence sinusoidal motion loop (stretch, drive, peak contraction)
- * - Supports both [🎬 Smooth Human Reps] and [📷 2-Step Form Breakdown] modes
- * - Dual Theme: Crisp White (#FFFFFF) & Pure Dark (#121422)
+ * - Supports both [🎬 Smooth Motion] and [📷 2-Step Breakdown] modes
+ * - Clean White (#FFFFFF) & Pure Dark (#121422) theme support
  */
 export default function AnatomicalMannequin2Step({
   exerciseName = '',
@@ -48,9 +50,8 @@ export default function AnatomicalMannequin2Step({
 
       const cycleProgress = (elapsed % cycleDuration) / cycleDuration;
       
-      // Biomechanical Human Cadence Curve:
-      // Uses Cosine interpolation to create realistic physiological acceleration and deceleration:
-      // Smooth turnaround at full stretch -> progressive acceleration -> deceleration at peak squeeze
+      // Biomechanical Human Cadence Curve (Cosine interpolation):
+      // Smooth deceleration at stretch, natural concentric drive, pause at peak squeeze
       const smoothVal = (1 - Math.cos(cycleProgress * 2 * Math.PI)) / 2;
       setMotionProgress(smoothVal);
 
@@ -72,17 +73,9 @@ export default function AnatomicalMannequin2Step({
 
   const getExerciseType = () => {
     if (clean.includes('wiper') || clean.includes('windshield')) return 'wipers';
-    if (clean.includes('push-up') || clean.includes('pushup') || clean.includes('push up')) return 'pushups';
-    if (clean.includes('incline') || clean.includes('press')) return 'incline-bench';
-    if (clean.includes('fly') || clean.includes('crossover')) return 'bench-fly';
-    if (clean.includes('pullover')) return 'pullover';
-    if (clean.includes('bench') || clean.includes('chest')) return 'incline-bench';
-    if (clean.includes('lat pull') || clean.includes('pulldown')) return 'lat-pulldown';
-    if (clean.includes('pull up') || clean.includes('pullup')) return 'pullups';
-    if (clean.includes('squat')) return 'squats';
-    if (clean.includes('thrust') || clean.includes('bridge') || clean.includes('glute') || clean.includes('butt')) return 'hip-thrust';
-    if (clean.includes('bicep') || clean.includes('curl')) return 'bicep-curls';
-    if (clean.includes('ab') || clean.includes('core') || clean.includes('crunch')) return 'wipers';
+    if (clean.includes('incline') || clean.includes('press') || clean.includes('bench') || clean.includes('chest') || clean.includes('fly')) return 'incline-bench';
+    if (clean.includes('ab') || clean.includes('core') || clean.includes('crunch') || clean.includes('leg raise')) return 'wipers';
+    if (clean.includes('squat') || clean.includes('lunge') || clean.includes('leg')) return 'squats';
     return isFemale ? 'wipers' : 'incline-bench';
   };
 
@@ -146,7 +139,7 @@ export default function AnatomicalMannequin2Step({
       {/* CONTENT AREA */}
       {viewMode === 'motion' ? (
         /* FLUID HUMAN-LIKE CONTINUOUS ANIMATION (Auto-playing 60 FPS) */
-        <div className="flex flex-col items-center justify-center py-1 min-h-[180px] sm:min-h-[210px]">
+        <div className="flex flex-col items-center justify-center py-1 min-h-[190px] sm:min-h-[220px]">
           {/* Phase Status Banner */}
           <div className="text-[11px] font-extrabold uppercase tracking-wider mb-2 flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${motionProgress > 0.7 ? 'bg-red-500 animate-ping' : 'bg-blue-400'}`} />
@@ -223,7 +216,7 @@ export default function AnatomicalMannequin2Step({
         </div>
       ) : (
         /* SIDE-BY-SIDE POSITION 1 & POSITION 2 (Exact match for Images 1 & 2) */
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 items-center justify-center min-h-[180px] sm:min-h-[210px] py-1">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 items-center justify-center min-h-[190px] sm:min-h-[220px] py-1">
           {/* Position 1 (Start) */}
           <div className="flex flex-col items-center justify-center">
             <div className="h-44 sm:h-52 w-full flex items-center justify-center">
@@ -263,126 +256,159 @@ export default function AnatomicalMannequin2Step({
 
 /**
  * FluidHumanMannequin
- * Renders anatomical human figures with medical muscle shading:
- * - Men: Incline DB Bench Press (Image 1) with sculpted chest, delts, abs, dumbbells
- * - Women: Wipers (Image 2) with ponytail, sports bra, contoured abs/obliques
- * Smoothly interpolates joints and dumbbells based on progress (0 -> 1)
+ * Renders anatomical figures with realistic shading and muscle fibers:
+ * - Men: Incline DB Bench Press (Image 1) - muscular male torso on incline bench, defined abs, quadriceps, dumbbells
+ * - Women: Wipers (Image 2) - female athlete lying flat, contoured torso, sports bra, ponytail, legs swiveling together
  */
 function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = true }) {
-  // Biomechanical medical palette matching Images 1 & 2
-  const bodyTone = isLight ? '#CBD5E1' : '#334155';
-  const muscleShadow = isLight ? '#94A3B8' : '#1E293B';
-  const muscleLine = isLight ? '#64748B' : '#0F172A';
-  const targetRed = '#EF4444';
-  const targetRedLight = '#F87171';
-  const shortsDark = isFemale ? (isLight ? '#E11D48' : '#9F1239') : (isLight ? '#1E293B' : '#0F172A');
-  const dumbbellPlate = isLight ? '#1E293B' : '#0F172A';
-  const dumbbellChrome = '#E2E8F0';
-  const benchPad = isLight ? '#334155' : '#1E293B';
+  // Medical anatomy color scheme
+  const skinTone = isLight ? '#E2E8F0' : '#334155';
+  const muscleLine = isLight ? '#475569' : '#0F172A';
+  const muscleFiber = isLight ? '#94A3B8' : '#1E293B';
+  const activeRed = '#EF4444';
+  const activeRedDark = '#B91C1C';
+  const hairDark = isLight ? '#1E293B' : '#020617';
+  const benchColor = isLight ? '#475569' : '#1E293B';
+  const shortsDark = isFemale ? (isLight ? '#1E293B' : '#0F172A') : (isLight ? '#1E293B' : '#0F172A');
+  const ironWeight = isLight ? '#0F172A' : '#020617';
+  const chromeBar = '#CBD5E1';
 
-  // Interpolation helper
   const lerp = (a, b) => a + (b - a) * progress;
 
   // -------------------------------------------------------------------------
   // 1. INCLINE BENCH PRESS / DUMBBELL (Exact Match for Image 1)
   // -------------------------------------------------------------------------
   if (type === 'incline-bench') {
-    // DB Height: Lowered at chest stretch (y=52) -> Pressed overhead (y=22)
-    const leftArmX = lerp(45, 38);
-    const leftArmY = lerp(52, 22);
-    const rightArmX = lerp(120, 108);
-    const rightArmY = lerp(50, 24);
+    // Left DB pressed high vs lowered
+    // In Image 1: Right figure has dumbbells lower near chest, Left figure has dumbbells high
+    const leftArmX = lerp(48, 40);
+    const leftArmY = lerp(54, 22);
+    const rightArmX = lerp(118, 106);
+    const rightArmY = lerp(52, 24);
 
     return (
       <svg viewBox="0 0 170 125" className="w-full h-full object-contain drop-shadow-md">
-        {/* Bench Structure (45° Incline Bench as in Image 1) */}
-        <polygon points="55,108 120,45 110,40 45,103" fill={benchPad} />
-        <line x1="50" y1="105" x2="35" y2="118" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
-        <line x1="105" y1="60" x2="115" y2="118" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
-        <line x1="25" y1="118" x2="140" y2="118" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="4 4" />
+        <defs>
+          {/* Muscle fiber hatching pattern for anatomical depth */}
+          <pattern id="muscleHatch" width="4" height="4" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="4" stroke={activeRedDark} strokeWidth="1" opacity="0.6" />
+          </pattern>
+        </defs>
 
-        {/* Athlete Torso leaning back against incline bench */}
-        <ellipse cx="80" cy="72" rx="26" ry="12" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" transform="rotate(-38 80 72)" />
-        
-        {/* Detailed Muscular Abdominals (Image 1) */}
-        <path d="M 66 74 Q 72 82 78 88" stroke={muscleLine} strokeWidth="1.2" fill="none" />
-        <ellipse cx="74" cy="80" rx="4" ry="3" fill={muscleShadow} opacity="0.6" />
-        <ellipse cx="78" cy="85" rx="4" ry="3" fill={muscleShadow} opacity="0.6" />
+        {/* 45-degree Incline Bench Frame (matching Image 1) */}
+        <polygon points="52,106 122,44 114,38 44,100" fill={benchColor} />
+        <line x1="48" y1="102" x2="35" y2="120" stroke="#64748B" strokeWidth="4.5" strokeLinecap="round" />
+        <line x1="106" y1="58" x2="116" y2="120" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
+        <line x1="25" y1="120" x2="145" y2="120" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="4 4" />
 
-        {/* Athlete Legs & Shorts (Planting feet firmly on floor) */}
-        <ellipse cx="58" cy="94" rx="14" ry="9" fill={shortsDark} stroke={muscleLine} strokeWidth="1.2" transform="rotate(-20 58 94)" />
-        <path d="M 52 98 Q 44 108 42 118" stroke={bodyTone} strokeWidth="7" strokeLinecap="round" />
-        <path d="M 52 98 Q 44 108 42 118" stroke={muscleLine} strokeWidth="1.2" fill="none" />
-        <path d="M 68 98 Q 72 108 74 118" stroke={bodyTone} strokeWidth="7" strokeLinecap="round" />
-        <path d="M 68 98 Q 72 108 74 118" stroke={muscleLine} strokeWidth="1.2" fill="none" />
+        {/* Legs & Planted Feet (Muscular Quadriceps & Calves as in Image 1) */}
+        {/* Left Quad */}
+        <path d="M 52 94 C 44 100 38 108 38 118 C 44 120 48 116 52 110 Z" fill={skinTone} stroke={muscleLine} strokeWidth="1.2" />
+        {/* Left Thigh Muscle Lines */}
+        <path d="M 45 100 C 42 108 42 114 44 118" stroke={muscleFiber} strokeWidth="1" fill="none" />
+        {/* Right Quad */}
+        <path d="M 68 94 C 72 104 74 112 76 120 C 80 120 82 114 80 108 C 76 100 72 96 68 94 Z" fill={skinTone} stroke={muscleLine} strokeWidth="1.2" />
+        <path d="M 72 98 C 74 106 75 114 76 118" stroke={muscleFiber} strokeWidth="1" fill="none" />
 
-        {/* Sculpted Head & Face looking up at weights (Image 1) */}
-        <circle cx="106" cy="46" r="10" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" />
-        <path d="M 112 44 Q 116 46 114 49" stroke={muscleLine} strokeWidth="1.2" fill="none" />
+        {/* Athlete Shorts (Dark athletic brief in Image 1) */}
+        <ellipse cx="60" cy="92" rx="14" ry="10" fill={shortsDark} stroke={muscleLine} strokeWidth="1.2" transform="rotate(-25 60 92)" />
 
-        {/* CHEST / PECTORALS & FRONT DELTOIDS (HIGHLIGHTED IN VIVID RED) */}
-        {/* Left Pectoral */}
+        {/* Muscular Torso leaning against incline bench */}
+        <ellipse cx="80" cy="70" rx="26" ry="13" fill={skinTone} stroke={muscleLine} strokeWidth="1.4" transform="rotate(-38 80 70)" />
+
+        {/* Anatomical 6-Pack Abs & Serratus Contours (Image 1) */}
+        <g stroke={muscleLine} strokeWidth="1.2" fill="none">
+          {/* Linea Alba */}
+          <path d="M 66 73 Q 73 80 78 86" />
+          {/* Abdominal Intersections */}
+          <path d="M 64 78 Q 70 82 74 80" />
+          <path d="M 70 84 Q 76 87 79 84" />
+          {/* Serratus / Ribs */}
+          <path d="M 60 70 Q 64 74 68 76" stroke={muscleFiber} />
+          <path d="M 57 74 Q 61 78 65 80" stroke={muscleFiber} />
+        </g>
+
+        {/* Sculpted Head & Jaw Looking Up (Image 1) */}
+        <circle cx="106" cy="44" r="10.5" fill={skinTone} stroke={muscleLine} strokeWidth="1.4" />
+        {/* Hair cut */}
+        <path d="M 104 34 C 112 34 116 38 116 44 C 114 42 110 40 104 40 Z" fill={hairDark} />
+        {/* Nose & Jaw */}
+        <path d="M 113 42 L 117 45 L 114 48 L 109 52" stroke={muscleLine} strokeWidth="1.2" fill="none" />
+
+        {/* ============================================================== */}
+        {/* ACTIVE MUSCLES IN VIBRANT RED: CHEST & ANTERIOR DELTOIDS       */}
+        {/* (Matching Image 1 Red Shading Pattern)                          */}
+        {/* ============================================================== */}
+        {/* Left Pectoral (Incline Upper Pec Squeeze) */}
         <path 
-          d="M 75 58 Q 88 50 94 62 Q 85 70 73 66 Z" 
-          fill={targetRed} 
-          stroke={targetRedLight} 
-          strokeWidth="1.5" 
-          transform="rotate(-38 84 62)"
+          d="M 74 56 C 84 48 90 54 94 62 C 86 68 76 68 72 63 Z" 
+          fill={activeRed} 
+          stroke={activeRedDark} 
+          strokeWidth="1.2" 
+          transform="rotate(-38 83 60)"
         />
         {/* Right Pectoral */}
         <path 
-          d="M 88 50 Q 102 44 106 56 Q 96 64 86 58 Z" 
-          fill={targetRed} 
-          stroke={targetRedLight} 
-          strokeWidth="1.5" 
-          transform="rotate(-38 96 54)"
+          d="M 88 48 C 98 42 104 48 106 56 C 98 62 88 62 85 55 Z" 
+          fill={activeRed} 
+          stroke={activeRedDark} 
+          strokeWidth="1.2" 
+          transform="rotate(-38 95 52)"
         />
+        {/* Left Deltoid in Red */}
+        <circle cx="68" cy="54" r="7" fill={activeRed} stroke={activeRedDark} strokeWidth="1.2" />
+        {/* Right Deltoid in Red */}
+        <circle cx="98" cy="44" r="7" fill={activeRed} stroke={activeRedDark} strokeWidth="1.2" />
 
-        {/* Left Arm & Shoulder holding Left Dumbbell */}
+        {/* Left Arm driving Left Dumbbell */}
         <path 
-          d={`M 70 54 Q ${leftArmX + 10} ${leftArmY + 15} ${leftArmX} ${leftArmY}`} 
-          stroke={bodyTone} 
+          d={`M 70 54 Q ${leftArmX + 12} ${leftArmY + 16} ${leftArmX} ${leftArmY}`} 
+          stroke={skinTone} 
           strokeWidth="8" 
           strokeLinecap="round" 
         />
         <path 
-          d={`M 70 54 Q ${leftArmX + 10} ${leftArmY + 15} ${leftArmX} ${leftArmY}`} 
+          d={`M 70 54 Q ${leftArmX + 12} ${leftArmY + 16} ${leftArmX} ${leftArmY}`} 
           stroke={muscleLine} 
           strokeWidth="1.2" 
           fill="none" 
         />
-        {/* Left Shoulder Deltoid in Red */}
-        <circle cx="68" cy="54" r="7" fill={targetRed} stroke={targetRedLight} strokeWidth="1.2" />
+        {/* Tricep muscle fiber indication */}
+        <path d={`M 66 58 Q ${leftArmX + 8} ${leftArmY + 18} ${leftArmX + 2} ${leftArmY + 6}`} stroke={muscleFiber} strokeWidth="1" fill="none" />
 
-        {/* Right Arm & Shoulder holding Right Dumbbell */}
+        {/* Right Arm driving Right Dumbbell */}
         <path 
-          d={`M 98 44 Q ${rightArmX - 5} ${rightArmY + 12} ${rightArmX} ${rightArmY}`} 
-          stroke={bodyTone} 
+          d={`M 98 44 Q ${rightArmX - 4} ${rightArmY + 14} ${rightArmX} ${rightArmY}`} 
+          stroke={skinTone} 
           strokeWidth="8" 
           strokeLinecap="round" 
         />
         <path 
-          d={`M 98 44 Q ${rightArmX - 5} ${rightArmY + 12} ${rightArmX} ${rightArmY}`} 
+          d={`M 98 44 Q ${rightArmX - 4} ${rightArmY + 14} ${rightArmX} ${rightArmY}`} 
           stroke={muscleLine} 
           strokeWidth="1.2" 
           fill="none" 
         />
-        {/* Right Shoulder Deltoid in Red */}
-        <circle cx="98" cy="44" r="7" fill={targetRed} stroke={targetRedLight} strokeWidth="1.2" />
+        <path d={`M 96 48 Q ${rightArmX - 2} ${rightArmY + 16} ${rightArmX - 2} ${rightArmY + 6}`} stroke={muscleFiber} strokeWidth="1" fill="none" />
 
-        {/* DUMBBELLS (Heavy Round Iron Plates matching Image 1) */}
+        {/* HEAVY ROUND IRON DUMBBELLS (Image 1) */}
         {/* Left Dumbbell */}
-        <g transform={`translate(${leftArmX - 12}, ${leftArmY - 14})`}>
-          <rect x="10" y="4" width="4" height="18" rx="1" fill={dumbbellChrome} />
-          <ellipse cx="6" cy="13" rx="5" ry="9" fill={dumbbellPlate} stroke="#64748B" strokeWidth="1" />
-          <ellipse cx="18" cy="13" rx="5" ry="9" fill={dumbbellPlate} stroke="#64748B" strokeWidth="1" />
+        <g transform={`translate(${leftArmX - 14}, ${leftArmY - 14})`}>
+          <rect x="12" y="3" width="4" height="20" rx="1" fill={chromeBar} />
+          {/* Heavy round multi-plate dumbbell */}
+          <ellipse cx="7" cy="13" rx="5" ry="9.5" fill={ironWeight} stroke="#475569" strokeWidth="1" />
+          <ellipse cx="10" cy="13" rx="3" ry="8" fill="#334155" />
+          <ellipse cx="21" cy="13" rx="5" ry="9.5" fill={ironWeight} stroke="#475569" strokeWidth="1" />
+          <ellipse cx="18" cy="13" rx="3" ry="8" fill="#334155" />
         </g>
 
         {/* Right Dumbbell */}
-        <g transform={`translate(${rightArmX - 12}, ${rightArmY - 14})`}>
-          <rect x="10" y="4" width="4" height="18" rx="1" fill={dumbbellChrome} />
-          <ellipse cx="6" cy="13" rx="5" ry="9" fill={dumbbellPlate} stroke="#64748B" strokeWidth="1" />
-          <ellipse cx="18" cy="13" rx="5" ry="9" fill={dumbbellPlate} stroke="#64748B" strokeWidth="1" />
+        <g transform={`translate(${rightArmX - 14}, ${rightArmY - 14})`}>
+          <rect x="12" y="3" width="4" height="20" rx="1" fill={chromeBar} />
+          <ellipse cx="7" cy="13" rx="5" ry="9.5" fill={ironWeight} stroke="#475569" strokeWidth="1" />
+          <ellipse cx="10" cy="13" rx="3" ry="8" fill="#334155" />
+          <ellipse cx="21" cy="13" rx="5" ry="9.5" fill={ironWeight} stroke="#475569" strokeWidth="1" />
+          <ellipse cx="18" cy="13" rx="3" ry="8" fill="#334155" />
         </g>
       </svg>
     );
@@ -392,62 +418,83 @@ function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = t
   // 2. WIPERS / ABS & OBLIQUES (Exact Match for Image 2)
   // -------------------------------------------------------------------------
   if (type === 'wipers') {
-    // Legs rotate from vertical (angle=90) to floor side (angle=20)
-    const legAngle = lerp(90, 25);
-    const legLength = 48;
-    const hipX = 95;
+    // In Image 2:
+    // Left figure: Legs are vertical (angle = 85°)
+    // Right figure: Legs are swivelled to the side flat near floor (angle = 20°)
+    const legAngle = lerp(85, 20);
+    const legLength = 52;
+    const hipX = 94;
     const hipY = 82;
-    // Calculate leg tip coordinates
     const rad = (legAngle * Math.PI) / 180;
+    const kneeX = hipX + Math.cos(rad) * (legLength * 0.55);
+    const kneeY = hipY - Math.sin(rad) * (legLength * 0.55);
     const footX = hipX + Math.cos(rad) * legLength;
     const footY = hipY - Math.sin(rad) * legLength;
 
     return (
       <svg viewBox="0 0 170 125" className="w-full h-full object-contain drop-shadow-md">
         {/* Floor Line */}
-        <line x1="15" y1="94" x2="155" y2="94" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="3 3" />
+        <line x1="12" y1="94" x2="160" y2="94" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="3 3" />
 
-        {/* Female Athlete Head with Ponytail (Image 2) */}
-        <circle cx="36" cy="80" r="9" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" />
-        {/* Ponytail hair */}
-        <path d="M 28 82 Q 22 88 20 94 Q 26 92 30 86 Z" fill={isLight ? '#475569' : '#0F172A'} />
+        {/* Female Athlete with Ponytail & Realistic Profile (Image 2) */}
+        <circle cx="36" cy="80" r="9.5" fill={skinTone} stroke={muscleLine} strokeWidth="1.4" />
+        {/* Ponytail draped back */}
+        <path d="M 27 82 C 20 86 16 93 18 96 C 24 95 28 90 31 85 Z" fill={hairDark} />
+        {/* Profile jawline and nose looking up */}
+        <path d="M 43 78 L 47 79 L 45 82 L 42 84" stroke={muscleLine} strokeWidth="1" fill="none" />
 
-        {/* Torso flat on back on floor */}
-        <rect x="44" y="76" width="50" height="12" rx="5" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" />
+        {/* Outstretched Arms to sides for floor grip (Image 2) */}
+        <path d="M 52 82 C 42 86 28 89 24 90" stroke={skinTone} strokeWidth="6" strokeLinecap="round" />
+        <path d="M 52 82 C 42 86 28 89 24 90" stroke={muscleLine} strokeWidth="1.2" fill="none" />
+        {/* Palm flat on ground */}
+        <ellipse cx="23" cy="91" rx="4" ry="2.5" fill={skinTone} stroke={muscleLine} strokeWidth="1" />
+
+        {/* Torso lying flat on back */}
+        <rect x="44" y="75" width="50" height="13" rx="5" fill={skinTone} stroke={muscleLine} strokeWidth="1.4" />
 
         {/* Sports Bra Top (Image 2) */}
-        <rect x="46" y="76" width="18" height="12" rx="3" fill={shortsDark} stroke={muscleLine} strokeWidth="1" />
+        <rect x="45" y="75" width="18" height="13" rx="3" fill={shortsDark} stroke={muscleLine} strokeWidth="1.2" />
 
-        {/* Athletic Shorts */}
-        <rect x="84" y="76" width="16" height="12" rx="3" fill={shortsDark} stroke={muscleLine} strokeWidth="1" />
+        {/* Athletic Shorts (Image 2) */}
+        <rect x="83" y="75" width="18" height="13" rx="3" fill={shortsDark} stroke={muscleLine} strokeWidth="1.2" />
 
-        {/* Outstretched Arms to sides for floor stabilization (Image 2) */}
-        <path d="M 52 82 Q 42 86 28 88" stroke={bodyTone} strokeWidth="5.5" strokeLinecap="round" />
-        <path d="M 52 82 Q 42 86 28 88" stroke={muscleLine} strokeWidth="1" fill="none" />
+        {/* ============================================================== */}
+        {/* ACTIVE MUSCLES IN VIBRANT RED: ABDOMINALS & OBLIQUES (Image 2) */}
+        {/* ============================================================== */}
+        <rect x="63" y="74" width="20" height="15" rx="3" fill={activeRed} stroke={activeRedDark} strokeWidth="1.4" />
+        {/* Contoured muscle fiber lines across the 6-pack & obliques */}
+        <g stroke="#B91C1C" strokeWidth="1.2">
+          <line x1="68" y1="75" x2="68" y2="88" />
+          <line x1="73" y1="75" x2="73" y2="88" />
+          <line x1="78" y1="75" x2="78" y2="88" />
+          {/* Horizontal tendon intersections */}
+          <line x1="64" y1="79" x2="82" y2="79" />
+          <line x1="64" y1="84" x2="82" y2="84" />
+        </g>
 
-        {/* ABDOMINALS & OBLIQUES IN VIBRANT RED (Image 2) */}
-        <rect x="64" y="75" width="20" height="13" rx="3" fill={targetRed} stroke={targetRedLight} strokeWidth="1.5" />
-        {/* Contoured muscle fiber lines across abs */}
-        <line x1="68" y1="76" x2="68" y2="87" stroke="#DC2626" strokeWidth="1.2" />
-        <line x1="74" y1="76" x2="74" y2="87" stroke="#DC2626" strokeWidth="1.2" />
-        <line x1="80" y1="76" x2="80" y2="87" stroke="#DC2626" strokeWidth="1.2" />
-
-        {/* Legs moving together smoothly like a human windshield wiper */}
+        {/* Legs Moving Together as a Windshield Wiper (Image 2) */}
+        {/* Both legs pinned tightly together */}
         <path 
-          d={`M ${hipX} ${hipY} Q ${(hipX + footX) / 2} ${(hipY + footY) / 2 + 4} ${footX} ${footY}`} 
-          stroke={bodyTone} 
-          strokeWidth="10" 
+          d={`M ${hipX} ${hipY} Q ${kneeX} ${kneeY} ${footX} ${footY}`} 
+          stroke={skinTone} 
+          strokeWidth="11" 
           strokeLinecap="round" 
         />
         <path 
-          d={`M ${hipX} ${hipY} Q ${(hipX + footX) / 2} ${(hipY + footY) / 2 + 4} ${footX} ${footY}`} 
+          d={`M ${hipX} ${hipY} Q ${kneeX} ${kneeY} ${footX} ${footY}`} 
           stroke={muscleLine} 
           strokeWidth="1.2" 
           fill="none" 
         />
-        {/* Muscular thigh contours & feet */}
-        <ellipse cx={(hipX + footX) / 2} cy={(hipY + footY) / 2} rx="6" ry="4" fill={muscleShadow} opacity="0.5" />
-        <ellipse cx={footX} cy={footY} rx="4" ry="3" fill={bodyTone} stroke={muscleLine} strokeWidth="1" />
+        {/* Muscle definition along quads & calves */}
+        <path 
+          d={`M ${hipX} ${hipY} Q ${kneeX} ${kneeY} ${footX} ${footY}`} 
+          stroke={muscleFiber} 
+          strokeWidth="1" 
+          fill="none" 
+        />
+        {/* Feet & Toes together */}
+        <ellipse cx={footX} cy={footY} rx="4" ry="3.5" fill={skinTone} stroke={muscleLine} strokeWidth="1" />
       </svg>
     );
   }
@@ -461,26 +508,20 @@ function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = t
   return (
     <svg viewBox="0 0 170 125" className="w-full h-full object-contain drop-shadow-md">
       <line x1="20" y1="114" x2="150" y2="114" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="3 3" />
-      {/* Head */}
-      <circle cx="85" cy={squatHipY - 32} r="9" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" />
-      {/* Female Ponytail if female */}
+      <circle cx="85" cy={squatHipY - 32} r="9" fill={skinTone} stroke={muscleLine} strokeWidth="1.4" />
       {isFemale && (
-        <path d={`M 77 ${squatHipY - 30} Q 70 ${squatHipY - 24} 68 ${squatHipY - 18}`} stroke={isLight ? '#475569' : '#0F172A'} strokeWidth="3" strokeLinecap="round" fill="none" />
+        <path d={`M 77 ${squatHipY - 30} Q 70 ${squatHipY - 24} 68 ${squatHipY - 18}`} stroke={hairDark} strokeWidth="3" strokeLinecap="round" fill="none" />
       )}
-      {/* Spine / Torso */}
-      <line x1="85" y1={squatHipY - 23} x2="85" y2={squatHipY} stroke={bodyTone} strokeWidth="10" strokeLinecap="round" />
+      <line x1="85" y1={squatHipY - 23} x2="85" y2={squatHipY} stroke={skinTone} strokeWidth="10" strokeLinecap="round" />
       <line x1="85" y1={squatHipY - 23} x2="85" y2={squatHipY} stroke={muscleLine} strokeWidth="1.2" />
-      {/* Shorts */}
       <rect x="76" y={squatHipY - 6} width="18" height="14" rx="3" fill={shortsDark} stroke={muscleLine} strokeWidth="1" />
-      {/* QUADS & GLUTES IN VIVID RED */}
-      <ellipse cx="85" cy={squatHipY + 2} rx="12" ry="7" fill={targetRed} stroke={targetRedLight} strokeWidth="1.5" />
-      {/* Legs driving through knees & heels */}
-      <path d={`M 80 ${squatHipY} L 72 ${squatKneeY} L 74 112`} stroke={bodyTone} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d={`M 90 ${squatHipY} L 98 ${squatKneeY} L 96 112`} stroke={bodyTone} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Barbell across traps */}
+      <ellipse cx="85" cy={squatHipY + 2} rx="12" ry="7" fill={activeRed} stroke={activeRedDark} strokeWidth="1.5" />
+      <path d={`M 80 ${squatHipY} L 72 ${squatKneeY} L 74 112`} stroke={skinTone} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={`M 90 ${squatHipY} L 98 ${squatKneeY} L 96 112`} stroke={skinTone} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
       <line x1="45" y1={squatHipY - 22} x2="125" y2={squatHipY - 22} stroke="#475569" strokeWidth="4" />
-      <circle cx="45" cy={squatHipY - 22} r="8" fill={dumbbellPlate} stroke="#64748B" strokeWidth="1.2" />
-      <circle cx="125" cy={squatHipY - 22} r="8" fill={dumbbellPlate} stroke="#64748B" strokeWidth="1.2" />
+      <circle cx="45" cy={squatHipY - 22} r="8" fill={ironWeight} stroke="#64748B" strokeWidth="1.2" />
+      <circle cx="125" cy={squatHipY - 22} r="8" fill={ironWeight} stroke="#64748B" strokeWidth="1.2" />
     </svg>
   );
 }
+
