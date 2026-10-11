@@ -34,7 +34,10 @@ const useAuthStore = create(
         const existingAccount = get().registeredUsers?.[cleanEmail];
 
         if (!existingAccount) {
-          return { success: false, error: 'No account found with this email. Please create an account first.' };
+          return { 
+            success: false, 
+            error: 'No account found on this device. Please tap "Create an Account" below to register on this device first.' 
+          };
         }
 
         // 2. Verify password matches what was stored during registration
