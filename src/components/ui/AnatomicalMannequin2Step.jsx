@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, RotateCcw, Sparkles, Activity } from 'lucide-react';
 import useThemeStore from '../../store/useThemeStore';
 
 /**
  * AnatomicalMannequin2Step Component
  * Highly detailed medical-grade anatomical mannequins:
- * - Men ♂️: Incline Dumbbell Bench Press, Push-ups, Squats, Rows (matching Image 1)
- * - Women ♀️: Wipers, Hip Thrust, Squats, Pullovers (matching Image 2)
- * - Smooth, continuous, human-like animation cadence (with natural tempo & stretch/squeeze)
- * - Pure white or dark card background based on global theme!
+ * - Men ♂️: Incline Dumbbell Bench Press, Push-ups, Squats, Bicep Curls (matching Image 1)
+ * - Women ♀️: Wipers, Hip Thrusts, Squats, Crunches (matching Image 2)
+ * - Fluid, human-cadence sinusoidal motion loop (stretch, drive, peak contraction)
+ * - Supports both [🎬 Smooth Human Reps] and [📷 2-Step Form Breakdown] modes
+ * - Dual Theme: Crisp White (#FFFFFF) & Pure Dark (#121422)
  */
 export default function AnatomicalMannequin2Step({
   exerciseName = '',
@@ -17,8 +18,13 @@ export default function AnatomicalMannequin2Step({
   gender = 'male',
   className = ''
 }) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [viewMode, setViewMode] = useState('motion'); // 'motion' | 'sideBySide'
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [speed, setSpeed] = useState(1); // 1 = normal (3.2s rep), 0.5 = slow-mo (6.4s rep)
   const [motionProgress, setMotionProgress] = useState(0); // 0 (start) to 1 (finish)
+  const [repCount, setRepCount] = useState(1);
+  const lastCycleRef = useRef(0);
+  
   const isFemale = gender === 'female';
   const { theme } = useThemeStore();
   const isLight = theme === 'light';
@@ -27,15 +33,24 @@ export default function AnatomicalMannequin2Step({
   useEffect(() => {
     let animId;
     let startTime = null;
-    const cycleDuration = 3200; // 3.2s total rep time (realistic lifting cadence)
+    const baseCycleDuration = 3200; // 3.2s per human repetition
 
     const animateLoop = (timestamp) => {
       if (!startTime) startTime = timestamp;
+      const cycleDuration = baseCycleDuration / speed;
       const elapsed = timestamp - startTime;
+      const totalCycles = Math.floor(elapsed / cycleDuration);
+      
+      if (totalCycles > lastCycleRef.current) {
+        lastCycleRef.current = totalCycles;
+        setRepCount(prev => (prev >= 99 ? 1 : prev + 1));
+      }
+
       const cycleProgress = (elapsed % cycleDuration) / cycleDuration;
       
-      // Natural human lifting curve: ease-in, peak hold, smooth eccentric return
-      // Cosine creates smooth deceleration at the top and bottom
+      // Biomechanical Human Cadence Curve:
+      // Uses Cosine interpolation to create realistic physiological acceleration and deceleration:
+      // Smooth turnaround at full stretch -> progressive acceleration -> deceleration at peak squeeze
       const smoothVal = (1 - Math.cos(cycleProgress * 2 * Math.PI)) / 2;
       setMotionProgress(smoothVal);
 
@@ -46,14 +61,12 @@ export default function AnatomicalMannequin2Step({
 
     if (isPlaying) {
       animId = requestAnimationFrame(animateLoop);
-    } else {
-      setMotionProgress(0);
     }
 
     return () => {
       if (animId) cancelAnimationFrame(animId);
     };
-  }, [isPlaying]);
+  }, [isPlaying, speed]);
 
   const clean = (exerciseName || '').toLowerCase();
 
@@ -68,31 +81,82 @@ export default function AnatomicalMannequin2Step({
     if (clean.includes('pull up') || clean.includes('pullup')) return 'pullups';
     if (clean.includes('squat')) return 'squats';
     if (clean.includes('thrust') || clean.includes('bridge') || clean.includes('glute') || clean.includes('butt')) return 'hip-thrust';
-    if (clean.includes('shoulder') || clean.includes('overhead') || clean.includes('lateral')) return 'incline-bench';
     if (clean.includes('bicep') || clean.includes('curl')) return 'bicep-curls';
-    if (clean.includes('ab') || clean.includes('core')) return 'wipers';
+    if (clean.includes('ab') || clean.includes('core') || clean.includes('crunch')) return 'wipers';
     return isFemale ? 'wipers' : 'incline-bench';
   };
 
   const type = getExerciseType();
 
+  // Dynamic Phase Description
+  const getPhaseText = () => {
+    if (motionProgress > 0.75) return '🔥 Peak Squeeze & Maximum Contraction';
+    if (motionProgress > 0.3) return '⚡ Concentric Drive Phase';
+    return '🌱 Controlled Eccentric Stretch';
+  };
+
   return (
     <div className={`relative rounded-3xl p-4 sm:p-5 shadow-sm overflow-hidden select-none border transition-colors ${
       isLight 
-        ? 'bg-white border-gray-200' 
+        ? 'bg-white border-gray-200 shadow-slate-100' 
         : 'bg-[#121422] border-white/10'
     } ${className}`}>
-      {isPlaying ? (
-        /* FLUID HUMAN-LIKE CONTINUOUS ANIMATION */
-        <div className="flex flex-col items-center justify-center py-2 min-h-[170px] sm:min-h-[200px]">
+
+      {/* Mode Switcher Tabs */}
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="flex items-center bg-gray-100 dark:bg-white/5 p-1 rounded-xl text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => { setViewMode('motion'); setIsPlaying(true); }}
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              viewMode === 'motion'
+                ? 'bg-red-500 text-white shadow-sm'
+                : (isLight ? 'text-gray-600 hover:text-black' : 'text-gray-400 hover:text-white')
+            }`}
+          >
+            <span>🎬</span> Smooth Motion
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('sideBySide')}
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+              viewMode === 'sideBySide'
+                ? 'bg-red-500 text-white shadow-sm'
+                : (isLight ? 'text-gray-600 hover:text-black' : 'text-gray-400 hover:text-white')
+            }`}
+          >
+            <span>📷</span> 2-Step Breakdown
+          </button>
+        </div>
+
+        {/* Rep Counter / Form Badge */}
+        {viewMode === 'motion' && (
+          <div className="flex items-center gap-1.5">
+            <span className={`text-[11px] font-extrabold px-2.5 py-1 rounded-full border ${
+              isLight 
+                ? 'bg-red-50 text-red-600 border-red-200' 
+                : 'bg-red-500/10 text-red-400 border-red-500/20'
+            }`}>
+              Rep #{repCount}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* CONTENT AREA */}
+      {viewMode === 'motion' ? (
+        /* FLUID HUMAN-LIKE CONTINUOUS ANIMATION (Auto-playing 60 FPS) */
+        <div className="flex flex-col items-center justify-center py-1 min-h-[180px] sm:min-h-[210px]">
+          {/* Phase Status Banner */}
           <div className="text-[11px] font-extrabold uppercase tracking-wider mb-2 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            <span className={motionProgress > 0.5 ? 'text-red-500' : (isLight ? 'text-gray-500' : 'text-gray-400')}>
-              {motionProgress > 0.6 ? 'Peak Contraction & Squeeze 🔥' : 'Controlled Eccentric Stretch'}
+            <span className={`w-2 h-2 rounded-full ${motionProgress > 0.7 ? 'bg-red-500 animate-ping' : 'bg-blue-400'}`} />
+            <span className={motionProgress > 0.7 ? 'text-red-500 font-black' : (isLight ? 'text-gray-600' : 'text-gray-300')}>
+              {getPhaseText()}
             </span>
           </div>
 
-          <div className="w-full flex items-center justify-center h-44 sm:h-52">
+          {/* SVG Anatomical Mannequin Drawing */}
+          <div className="w-full flex items-center justify-center h-48 sm:h-56">
             <FluidHumanMannequin
               type={type}
               progress={motionProgress}
@@ -100,13 +164,69 @@ export default function AnatomicalMannequin2Step({
               isLight={isLight}
             />
           </div>
+
+          {/* Live Controls Bar */}
+          <div className="w-full flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/5 mt-2">
+            {/* Play / Pause button */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsPlaying(!isPlaying)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  isPlaying
+                    ? (isLight ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-white/10 text-white border-white/10')
+                    : 'bg-red-500 text-white border-red-500'
+                }`}
+              >
+                {isPlaying ? <Pause size={14} /> : <Play size={14} className="fill-current" />}
+                <span>{isPlaying ? 'Pause' : 'Play Reps'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setRepCount(1); lastCycleRef.current = 0; }}
+                className={`p-1.5 rounded-xl text-xs transition-all border ${
+                  isLight ? 'bg-gray-100 text-gray-600 border-gray-200' : 'bg-white/10 text-gray-300 border-white/10'
+                }`}
+                title="Reset Rep Counter"
+              >
+                <RotateCcw size={14} />
+              </button>
+            </div>
+
+            {/* Speed Options */}
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-white/5 p-0.5 rounded-xl text-[10px] font-bold">
+              <button
+                type="button"
+                onClick={() => setSpeed(1)}
+                className={`px-2 py-1 rounded-lg transition-all ${
+                  speed === 1 
+                    ? 'bg-white dark:bg-dark-700 text-red-500 shadow-xs' 
+                    : (isLight ? 'text-gray-500' : 'text-gray-400')
+                }`}
+              >
+                1.0x Normal
+              </button>
+              <button
+                type="button"
+                onClick={() => setSpeed(0.5)}
+                className={`px-2 py-1 rounded-lg transition-all ${
+                  speed === 0.5 
+                    ? 'bg-white dark:bg-dark-700 text-red-500 shadow-xs' 
+                    : (isLight ? 'text-gray-500' : 'text-gray-400')
+                }`}
+              >
+                0.5x Slow-Mo
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         /* SIDE-BY-SIDE POSITION 1 & POSITION 2 (Exact match for Images 1 & 2) */
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 items-center justify-center min-h-[170px] sm:min-h-[200px]">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 items-center justify-center min-h-[180px] sm:min-h-[210px] py-1">
           {/* Position 1 (Start) */}
           <div className="flex flex-col items-center justify-center">
-            <div className="h-40 sm:h-48 w-full flex items-center justify-center">
+            <div className="h-44 sm:h-52 w-full flex items-center justify-center">
               <FluidHumanMannequin
                 type={type}
                 progress={0}
@@ -115,7 +235,7 @@ export default function AnatomicalMannequin2Step({
               />
             </div>
             <span className={`text-[10px] font-bold mt-1 uppercase tracking-wider ${
-              isLight ? 'text-gray-400' : 'text-gray-500'
+              isLight ? 'text-gray-500' : 'text-gray-400'
             }`}>
               Start Position
             </span>
@@ -123,7 +243,7 @@ export default function AnatomicalMannequin2Step({
 
           {/* Position 2 (Finish / Peak Squeeze in Red) */}
           <div className="flex flex-col items-center justify-center">
-            <div className="h-40 sm:h-48 w-full flex items-center justify-center">
+            <div className="h-44 sm:h-52 w-full flex items-center justify-center">
               <FluidHumanMannequin
                 type={type}
                 progress={1}
@@ -132,29 +252,11 @@ export default function AnatomicalMannequin2Step({
               />
             </div>
             <span className="text-[10px] font-bold text-red-500 mt-1 uppercase tracking-wider flex items-center gap-1">
-              Peak Squeeze (Red)
+              Peak Squeeze (Active) 🔥
             </span>
           </div>
         </div>
       )}
-
-      {/* Video / Play button in bottom-right corner (Matching user screenshot!) */}
-      <button
-        type="button"
-        onClick={() => setIsPlaying(!isPlaying)}
-        className={`absolute bottom-3 right-3 sm:bottom-4 sm:right-4 w-10 h-10 rounded-full border shadow-md flex items-center justify-center transition-all active:scale-90 group ${
-          isLight
-            ? 'bg-white border-gray-300 text-gray-800 hover:text-red-500 hover:border-red-400'
-            : 'bg-dark-800 border-white/20 text-white hover:text-red-400 hover:border-red-500'
-        }`}
-        title={isPlaying ? "Pause Fluid Movement" : "Play Smooth Human Movement"}
-      >
-        {isPlaying ? (
-          <Pause size={18} className="text-red-500" />
-        ) : (
-          <Play size={18} className="fill-current ml-0.5" />
-        )}
-      </button>
     </div>
   );
 }
@@ -167,13 +269,13 @@ export default function AnatomicalMannequin2Step({
  * Smoothly interpolates joints and dumbbells based on progress (0 -> 1)
  */
 function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = true }) {
-  // Palette matching Images 1 & 2
-  const bodyTone = isLight ? '#E2E8F0' : '#334155';
+  // Biomechanical medical palette matching Images 1 & 2
+  const bodyTone = isLight ? '#CBD5E1' : '#334155';
   const muscleShadow = isLight ? '#94A3B8' : '#1E293B';
   const muscleLine = isLight ? '#64748B' : '#0F172A';
   const targetRed = '#EF4444';
   const targetRedLight = '#F87171';
-  const shortsDark = isFemale ? (isLight ? '#F43F5E' : '#9F1239') : (isLight ? '#1E293B' : '#0F172A');
+  const shortsDark = isFemale ? (isLight ? '#E11D48' : '#9F1239') : (isLight ? '#1E293B' : '#0F172A');
   const dumbbellPlate = isLight ? '#1E293B' : '#0F172A';
   const dumbbellChrome = '#E2E8F0';
   const benchPad = isLight ? '#334155' : '#1E293B';
@@ -185,19 +287,19 @@ function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = t
   // 1. INCLINE BENCH PRESS / DUMBBELL (Exact Match for Image 1)
   // -------------------------------------------------------------------------
   if (type === 'incline-bench') {
-    // DB Height: Lowered at chest stretch (y=50) -> Pressed overhead (y=20)
+    // DB Height: Lowered at chest stretch (y=52) -> Pressed overhead (y=22)
     const leftArmX = lerp(45, 38);
     const leftArmY = lerp(52, 22);
     const rightArmX = lerp(120, 108);
     const rightArmY = lerp(50, 24);
 
     return (
-      <svg viewBox="0 0 170 120" className="w-full h-full object-contain drop-shadow-md">
+      <svg viewBox="0 0 170 125" className="w-full h-full object-contain drop-shadow-md">
         {/* Bench Structure (45° Incline Bench as in Image 1) */}
         <polygon points="55,108 120,45 110,40 45,103" fill={benchPad} />
-        <line x1="50" y1="105" x2="35" y2="116" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
-        <line x1="105" y1="60" x2="115" y2="116" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
-        <line x1="25" y1="116" x2="140" y2="116" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="4 4" />
+        <line x1="50" y1="105" x2="35" y2="118" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
+        <line x1="105" y1="60" x2="115" y2="118" stroke="#64748B" strokeWidth="4" strokeLinecap="round" />
+        <line x1="25" y1="118" x2="140" y2="118" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="4 4" />
 
         {/* Athlete Torso leaning back against incline bench */}
         <ellipse cx="80" cy="72" rx="26" ry="12" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" transform="rotate(-38 80 72)" />
@@ -209,10 +311,10 @@ function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = t
 
         {/* Athlete Legs & Shorts (Planting feet firmly on floor) */}
         <ellipse cx="58" cy="94" rx="14" ry="9" fill={shortsDark} stroke={muscleLine} strokeWidth="1.2" transform="rotate(-20 58 94)" />
-        <path d="M 52 98 Q 44 106 42 116" stroke={bodyTone} strokeWidth="7" strokeLinecap="round" />
-        <path d="M 52 98 Q 44 106 42 116" stroke={muscleLine} strokeWidth="1.2" fill="none" />
-        <path d="M 68 98 Q 72 106 74 116" stroke={bodyTone} strokeWidth="7" strokeLinecap="round" />
-        <path d="M 68 98 Q 72 106 74 116" stroke={muscleLine} strokeWidth="1.2" fill="none" />
+        <path d="M 52 98 Q 44 108 42 118" stroke={bodyTone} strokeWidth="7" strokeLinecap="round" />
+        <path d="M 52 98 Q 44 108 42 118" stroke={muscleLine} strokeWidth="1.2" fill="none" />
+        <path d="M 68 98 Q 72 108 74 118" stroke={bodyTone} strokeWidth="7" strokeLinecap="round" />
+        <path d="M 68 98 Q 72 108 74 118" stroke={muscleLine} strokeWidth="1.2" fill="none" />
 
         {/* Sculpted Head & Face looking up at weights (Image 1) */}
         <circle cx="106" cy="46" r="10" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" />
@@ -301,9 +403,9 @@ function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = t
     const footY = hipY - Math.sin(rad) * legLength;
 
     return (
-      <svg viewBox="0 0 170 120" className="w-full h-full object-contain drop-shadow-md">
+      <svg viewBox="0 0 170 125" className="w-full h-full object-contain drop-shadow-md">
         {/* Floor Line */}
-        <line x1="15" y1="92" x2="155" y2="92" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="3 3" />
+        <line x1="15" y1="94" x2="155" y2="94" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="3 3" />
 
         {/* Female Athlete Head with Ponytail (Image 2) */}
         <circle cx="36" cy="80" r="9" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" />
@@ -357,10 +459,14 @@ function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = t
   const squatKneeY = lerp(75, 78);
 
   return (
-    <svg viewBox="0 0 170 120" className="w-full h-full object-contain drop-shadow-md">
-      <line x1="20" y1="112" x2="150" y2="112" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="3 3" />
+    <svg viewBox="0 0 170 125" className="w-full h-full object-contain drop-shadow-md">
+      <line x1="20" y1="114" x2="150" y2="114" stroke={isLight ? '#CBD5E1' : '#475569'} strokeWidth="2" strokeDasharray="3 3" />
       {/* Head */}
       <circle cx="85" cy={squatHipY - 32} r="9" fill={bodyTone} stroke={muscleLine} strokeWidth="1.4" />
+      {/* Female Ponytail if female */}
+      {isFemale && (
+        <path d={`M 77 ${squatHipY - 30} Q 70 ${squatHipY - 24} 68 ${squatHipY - 18}`} stroke={isLight ? '#475569' : '#0F172A'} strokeWidth="3" strokeLinecap="round" fill="none" />
+      )}
       {/* Spine / Torso */}
       <line x1="85" y1={squatHipY - 23} x2="85" y2={squatHipY} stroke={bodyTone} strokeWidth="10" strokeLinecap="round" />
       <line x1="85" y1={squatHipY - 23} x2="85" y2={squatHipY} stroke={muscleLine} strokeWidth="1.2" />
@@ -369,8 +475,8 @@ function FluidHumanMannequin({ type, progress = 0, isFemale = false, isLight = t
       {/* QUADS & GLUTES IN VIVID RED */}
       <ellipse cx="85" cy={squatHipY + 2} rx="12" ry="7" fill={targetRed} stroke={targetRedLight} strokeWidth="1.5" />
       {/* Legs driving through knees & heels */}
-      <path d={`M 80 ${squatHipY} L 72 ${squatKneeY} L 74 110`} stroke={bodyTone} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d={`M 90 ${squatHipY} L 98 ${squatKneeY} L 96 110`} stroke={bodyTone} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={`M 80 ${squatHipY} L 72 ${squatKneeY} L 74 112`} stroke={bodyTone} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={`M 90 ${squatHipY} L 98 ${squatKneeY} L 96 112`} stroke={bodyTone} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
       {/* Barbell across traps */}
       <line x1="45" y1={squatHipY - 22} x2="125" y2={squatHipY - 22} stroke="#475569" strokeWidth="4" />
       <circle cx="45" cy={squatHipY - 22} r="8" fill={dumbbellPlate} stroke="#64748B" strokeWidth="1.2" />

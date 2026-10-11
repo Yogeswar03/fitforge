@@ -15,6 +15,8 @@ import Modal from '../components/ui/Modal';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { syncProfileToCloud } from '../lib/supabaseSync';
 import { formatNumber, calculateBMR, calculateBMI } from '../utils/calculations';
+import ThemeToggle from '../components/ui/ThemeToggle';
+import useThemeStore from '../store/useThemeStore';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -451,6 +453,18 @@ export default function Profile() {
             <span className="capitalize font-semibold text-white">{profile?.dietPreference || 'Non-Vegetarian'}</span>
           </div>
         </div>
+      </div>
+
+      {/* Theme Settings Toggle */}
+      <div className="bg-dark-800 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Settings size={22} className="text-accent" />
+          <div>
+            <div className="font-semibold text-xs text-white">App Appearance & Theme</div>
+            <div className="text-[10px] text-gray-400">Toggle between Crisp White and Pure Dark theme</div>
+          </div>
+        </div>
+        <ThemeToggle />
       </div>
 
       {/* System & Storage Status */}

@@ -22,6 +22,7 @@ import Profile from './pages/Profile';
 import ExpenseTracker from './pages/ExpenseTracker';
 import ExerciseGuide from './pages/ExerciseGuide';
 import useExpenseStore from './store/useExpenseStore';
+import useThemeStore from './store/useThemeStore';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -55,6 +56,12 @@ export default function App() {
       useExpenseStore.getState().setCurrentUser(email);
     }
   }, [isAuthenticated, user?.email]);
+
+  // Apply theme class on initial mount
+  useEffect(() => {
+    const currentTheme = useThemeStore.getState().theme;
+    useThemeStore.getState().setTheme(currentTheme || 'dark');
+  }, []);
 
   return (
     <Routes>

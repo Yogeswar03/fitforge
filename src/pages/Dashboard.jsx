@@ -21,6 +21,7 @@ import ExerciseModal from '../components/ui/ExerciseModal';
 import PartnerDietModal from '../components/ui/PartnerDietModal';
 import AiMealAgentModal from '../components/ui/AiMealAgentModal';
 import AppLogo from '../components/ui/AppLogo';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import { getExerciseDetails } from '../data/exerciseDatabase';
 
 const TRAINER_MESSAGES = [
@@ -239,7 +240,9 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Nav Icon Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <ThemeToggle className="scale-90" />
+
           <button 
             onClick={() => navigate('/exercises')}
             className="w-9 h-9 rounded-xl bg-dark-800 hover:bg-dark-700 flex items-center justify-center transition-colors border border-purple-500/30 text-purple-400 hover:text-purple-300 shadow-sm"
