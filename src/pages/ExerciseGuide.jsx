@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { WORKOUT_CATEGORIES, EXERCISE_DATABASE, getExerciseDetails } from '../data/exerciseDatabase';
 import ExerciseModal from '../components/ui/ExerciseModal';
+import ThemeToggle from '../components/ui/ThemeToggle';
+import useThemeStore from '../store/useThemeStore';
 import useDailyLogStore from '../store/useDailyLogStore';
 import useUserStore from '../store/useUserStore';
 import { getTodayStr, generateId } from '../utils/calculations';
@@ -24,6 +26,8 @@ import { getTodayStr, generateId } from '../utils/calculations';
 export default function ExerciseGuide() {
   const navigate = useNavigate();
   const { profile } = useUserStore();
+  const { theme } = useThemeStore();
+  const isLight = theme === 'light';
   const defaultGender = profile?.gender === 'female' ? 'female' : 'male';
   
   // State
@@ -68,7 +72,9 @@ export default function ExerciseGuide() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 pb-36 font-sans">
+    <div className={`min-h-screen pb-36 font-sans transition-colors ${
+      isLight ? 'bg-gray-50 text-gray-900' : 'bg-dark-900 text-white'
+    }`}>
       {/* Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
@@ -76,7 +82,9 @@ export default function ExerciseGuide() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white font-extrabold text-xs sm:text-sm px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 border border-white/20"
+            className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 font-extrabold text-xs sm:text-sm px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 border ${
+              isLight ? 'bg-black text-white border-white/20' : 'bg-white text-dark-900 border-gray-200'
+            }`}
           >
             <Sparkles size={16} className="text-amber-400" />
             <span>{toastMessage}</span>
@@ -97,12 +105,17 @@ export default function ExerciseGuide() {
             {/* Top Bar (Screenshot 5) */}
             <div className="flex items-center justify-between pb-1">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+                <h1 className={`text-2xl sm:text-3xl font-black tracking-tight ${
+                  isLight ? 'text-gray-900' : 'text-white'
+                }`}>
                   Gym Workout
                 </h1>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                {/* Theme Toggle Button */}
+                <ThemeToggle />
+
                 {/* Crown / Pro Badge */}
                 <span className="text-2xl" title="FitForge Elite">👑</span>
                 
@@ -110,7 +123,9 @@ export default function ExerciseGuide() {
                 <button
                   type="button"
                   onClick={() => navigate('/profile')}
-                  className="w-10 h-10 rounded-full bg-gray-200 border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors shadow-sm"
+                  className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors shadow-sm ${
+                    isLight ? 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300' : 'bg-dark-800 border-white/10 text-gray-300 hover:bg-dark-700'
+                  }`}
                   title="Profile"
                 >
                   <User size={20} />
@@ -119,8 +134,10 @@ export default function ExerciseGuide() {
             </div>
 
             {/* Info / Onboarding Banner (Screenshot 5) */}
-            <div className="bg-red-50/90 border border-red-100 rounded-2xl p-3 sm:p-4 flex items-center justify-between gap-3 shadow-xs">
-              <div className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-gray-800">
+            <div className={`border rounded-2xl p-3 sm:p-4 flex items-center justify-between gap-3 shadow-xs ${
+              isLight ? 'bg-red-50/90 border-red-100 text-gray-800' : 'bg-red-950/40 border-red-500/20 text-gray-200'
+            }`}>
+              <div className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold">
                 <span className="text-base sm:text-lg">⚠️</span>
                 <span>Set up your body info to unlock your ideal training plan!</span>
               </div>
@@ -135,17 +152,21 @@ export default function ExerciseGuide() {
 
             {/* Men / Women Switcher Bar */}
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+              <span className={`text-xs font-bold uppercase tracking-wider ${
+                isLight ? 'text-gray-500' : 'text-gray-400'
+              }`}>
                 Model: {activeGender === 'female' ? 'Women ♀️' : 'Men ♂️'}
               </span>
-              <div className="flex items-center bg-gray-200/80 p-1 rounded-full border border-gray-300/60 shadow-inner">
+              <div className={`flex items-center p-1 rounded-full border shadow-inner ${
+                isLight ? 'bg-gray-200/80 border-gray-300/60' : 'bg-dark-800 border-white/10'
+              }`}>
                 <button
                   type="button"
                   onClick={() => setActiveGender('male')}
                   className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                     activeGender === 'male'
-                      ? 'bg-black text-white shadow-sm font-black'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? (isLight ? 'bg-black text-white font-black shadow-sm' : 'bg-white text-dark-900 font-black shadow-sm')
+                      : (isLight ? 'text-gray-600 hover:text-gray-900' : 'text-gray-400 hover:text-white')
                   }`}
                 >
                   ♂️ Men
@@ -155,8 +176,8 @@ export default function ExerciseGuide() {
                   onClick={() => setActiveGender('female')}
                   className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                     activeGender === 'female'
-                      ? 'bg-black text-white shadow-sm font-black'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? (isLight ? 'bg-black text-white font-black shadow-sm' : 'bg-white text-dark-900 font-black shadow-sm')
+                      : (isLight ? 'text-gray-600 hover:text-gray-900' : 'text-gray-400 hover:text-white')
                   }`}
                 >
                   ♀️ Women
@@ -170,11 +191,17 @@ export default function ExerciseGuide() {
                 <div
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className="bg-white rounded-3xl p-3.5 sm:p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between group active:scale-[0.99]"
+                  className={`rounded-3xl p-3.5 sm:p-4 border transition-all cursor-pointer flex items-center justify-between group active:scale-[0.99] ${
+                    isLight
+                      ? 'bg-white border-gray-100 shadow-sm hover:shadow-md text-gray-900'
+                      : 'bg-dark-800/90 border-white/10 text-white hover:border-white/20 shadow-md'
+                  }`}
                 >
                   {/* Left: Real Muscular Athlete Thumbnail */}
                   <div className="flex items-center gap-3.5">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 shadow-xs border border-gray-100">
+                    <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden flex-shrink-0 shadow-xs border ${
+                      isLight ? 'bg-gray-100 border-gray-100' : 'bg-dark-900 border-white/5'
+                    }`}>
                       <img
                         src={cat.image}
                         alt={cat.name}
@@ -188,17 +215,23 @@ export default function ExerciseGuide() {
 
                     {/* Middle: Title & Exercise Count */}
                     <div>
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-snug">
+                      <h3 className={`text-base sm:text-lg font-bold leading-snug ${
+                        isLight ? 'text-gray-900' : 'text-white'
+                      }`}>
                         {cat.name}
                       </h3>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-0.5 font-medium">
+                      <p className={`text-xs sm:text-sm mt-0.5 font-medium ${
+                        isLight ? 'text-gray-500' : 'text-gray-400'
+                      }`}>
                         {cat.count} exercises
                       </p>
                     </div>
                   </div>
 
-                  {/* Right: Sleek Black Circle with White Arrow (Screenshot 5) */}
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                  {/* Right: Sleek Circle with White Arrow (Screenshot 5) */}
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform ${
+                    isLight ? 'bg-black text-white' : 'bg-white text-dark-900'
+                  }`}>
                     <ChevronRight size={18} />
                   </div>
                 </div>
@@ -214,41 +247,55 @@ export default function ExerciseGuide() {
             animate={{ opacity: 1, x: 0 }}
             className="space-y-4 pb-24"
           >
-            {/* Top Bar with Back Arrow */}
+            {/* Top Bar with Back Arrow & Theme Toggle */}
             <div className="flex items-center justify-between pb-1">
               <button
                 type="button"
                 onClick={() => setSelectedCategory(null)}
-                className="w-10 h-10 rounded-full bg-white hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-800 transition-colors shadow-sm"
+                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors shadow-sm ${
+                  isLight ? 'bg-white hover:bg-gray-100 border-gray-200 text-gray-800' : 'bg-dark-800 hover:bg-dark-700 border-white/10 text-white'
+                }`}
                 title="Back to All Workouts"
               >
                 <ArrowLeft size={20} />
               </button>
 
-              <div className="flex items-center bg-gray-200/80 p-1 rounded-full border border-gray-300/60">
-                <button
-                  type="button"
-                  onClick={() => setActiveGender('male')}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                    activeGender === 'male' ? 'bg-black text-white font-black' : 'text-gray-600'
-                  }`}
-                >
-                  ♂️ Men
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveGender('female')}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                    activeGender === 'female' ? 'bg-black text-white font-black' : 'text-gray-600'
-                  }`}
-                >
-                  ♀️ Women
-                </button>
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+
+                <div className={`flex items-center p-1 rounded-full border shadow-inner ${
+                  isLight ? 'bg-gray-200/80 border-gray-300/60' : 'bg-dark-800 border-white/10'
+                }`}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveGender('male')}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                      activeGender === 'male'
+                        ? (isLight ? 'bg-black text-white font-black shadow-sm' : 'bg-white text-dark-900 font-black shadow-sm')
+                        : (isLight ? 'text-gray-600' : 'text-gray-400')
+                    }`}
+                  >
+                    ♂️ Men
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveGender('female')}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                      activeGender === 'female'
+                        ? (isLight ? 'bg-black text-white font-black shadow-sm' : 'bg-white text-dark-900 font-black shadow-sm')
+                        : (isLight ? 'text-gray-600' : 'text-gray-400')
+                    }`}
+                  >
+                    ♀️ Women
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Hero Muscular Athlete Banner (Screenshot 4) */}
-            <div className="relative rounded-3xl overflow-hidden shadow-md h-48 sm:h-56 bg-gray-900 border border-gray-200">
+            <div className={`relative rounded-3xl overflow-hidden shadow-md h-48 sm:h-56 border ${
+              isLight ? 'border-gray-200 bg-gray-900' : 'border-white/10 bg-dark-950'
+            }`}>
               <img
                 src={currentCategoryData?.heroImage || currentCategoryData?.image}
                 alt={currentCategoryData?.name}
@@ -271,10 +318,14 @@ export default function ExerciseGuide() {
 
             {/* Exercises List Header (Screenshot 4) */}
             <div className="pt-2 px-1 flex items-center justify-between">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900">
+              <h3 className={`text-base sm:text-lg font-bold ${
+                isLight ? 'text-gray-900' : 'text-white'
+              }`}>
                 Exercises ({categoryExercises.length} Exercises)
               </h3>
-              <span className="text-xs font-semibold text-gray-500">
+              <span className={`text-xs font-semibold ${
+                isLight ? 'text-gray-500' : 'text-gray-400'
+              }`}>
                 Tap card for instructions
               </span>
             </div>
@@ -286,10 +337,16 @@ export default function ExerciseGuide() {
                   <div
                     key={exercise.id}
                     onClick={() => setSelectedExerciseName(exercise.name)}
-                    className="bg-white rounded-3xl p-3 sm:p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center gap-4 group active:scale-[0.99]"
+                    className={`rounded-3xl p-3 sm:p-4 border transition-all cursor-pointer flex items-center gap-4 group active:scale-[0.99] ${
+                      isLight
+                        ? 'bg-white border-gray-100 shadow-sm hover:shadow-md text-gray-900'
+                        : 'bg-dark-800/90 border-white/10 text-white hover:border-white/20 shadow-md'
+                    }`}
                   >
                     {/* Left: Anatomical Mannequin Figure on Clean White Box with Highlighted Red Muscle */}
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white border border-gray-200 flex items-center justify-center p-1 flex-shrink-0 shadow-xs">
+                    <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border flex items-center justify-center p-1 flex-shrink-0 shadow-xs ${
+                      isLight ? 'bg-white border-gray-200' : 'bg-dark-900 border-white/10'
+                    }`}>
                       <MiniMannequinThumb
                         name={exercise.name}
                         gender={activeGender}
@@ -298,16 +355,22 @@ export default function ExerciseGuide() {
 
                     {/* Middle: Exercise Name & Sets x Reps (Screenshot 4) */}
                     <div className="flex-1">
-                      <h4 className="text-sm sm:text-base font-bold text-gray-900 leading-snug group-hover:text-red-600 transition-colors">
+                      <h4 className={`text-sm sm:text-base font-bold leading-snug transition-colors ${
+                        isLight ? 'text-gray-900 group-hover:text-red-600' : 'text-white group-hover:text-red-400'
+                      }`}>
                         {exercise.name}
                       </h4>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
+                      <p className={`text-xs sm:text-sm mt-1 font-medium ${
+                        isLight ? 'text-gray-500' : 'text-gray-400'
+                      }`}>
                         {exercise.defaultSetsReps || '4 Sets × 8 reps'}
                       </p>
                     </div>
 
                     {/* Quick Chevron */}
-                    <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 group-hover:text-black flex items-center justify-center flex-shrink-0 transition-colors">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                      isLight ? 'bg-gray-100 text-gray-500 group-hover:text-black' : 'bg-dark-700 text-gray-400 group-hover:text-white'
+                    }`}>
                       <ChevronRight size={16} />
                     </div>
                   </div>
@@ -320,7 +383,9 @@ export default function ExerciseGuide() {
               <button
                 type="button"
                 onClick={handleStartWorkout}
-                className="pointer-events-auto w-full py-4 bg-black hover:bg-gray-800 text-white font-extrabold text-base sm:text-lg rounded-full shadow-2xl active:scale-95 transition-all text-center tracking-wider"
+                className={`pointer-events-auto w-full py-4 font-extrabold text-base sm:text-lg rounded-full shadow-2xl active:scale-95 transition-all text-center tracking-wider ${
+                  isLight ? 'bg-black hover:bg-gray-800 text-white' : 'bg-white hover:bg-gray-200 text-dark-900'
+                }`}
               >
                 START
               </button>

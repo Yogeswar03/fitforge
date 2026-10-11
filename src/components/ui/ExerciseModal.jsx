@@ -7,6 +7,8 @@ import {
 import { getExerciseDetails } from '../../data/exerciseDatabase';
 import AnatomicalMannequin2Step from './AnatomicalMannequin2Step';
 import AnatomicalBodyMap from './AnatomicalBodyMap';
+import ThemeToggle from './ThemeToggle';
+import useThemeStore from '../../store/useThemeStore';
 import useUserStore from '../../store/useUserStore';
 import useDailyLogStore from '../../store/useDailyLogStore';
 import { getTodayStr, generateId } from '../../utils/calculations';
@@ -31,6 +33,8 @@ export default function ExerciseModal({
   initialGender 
 }) {
   const { profile } = useUserStore();
+  const { theme } = useThemeStore();
+  const isLight = theme === 'light';
   const defaultGender = initialGender || profile?.gender || 'male';
   const [currentGender, setCurrentGender] = useState(defaultGender);
   
@@ -193,65 +197,83 @@ export default function ExerciseModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          className="w-full max-w-lg bg-white text-gray-900 rounded-t-[32px] sm:rounded-3xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl relative font-sans"
+          className={`w-full max-w-lg rounded-t-[32px] sm:rounded-3xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl relative font-sans transition-colors ${
+            isLight ? 'bg-white text-gray-900' : 'bg-[#121422] text-white border border-white/10'
+          }`}
         >
           {/* Header Drag Handle on Mobile */}
-          <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mt-3 sm:hidden" />
+          <div className={`w-12 h-1.5 rounded-full mx-auto mt-3 sm:hidden ${
+            isLight ? 'bg-gray-300' : 'bg-gray-600'
+          }`} />
 
-          {/* Top Bar with Title and Back/Close Arrow */}
-          <div className="p-4 sm:p-5 pb-2 flex items-center justify-between border-b border-gray-100">
+          {/* Top Bar with Title, Theme Toggle, Men/Women, Back/Close Arrow */}
+          <div className={`p-4 sm:p-5 pb-2 flex items-center justify-between border-b ${
+            isLight ? 'border-gray-100' : 'border-white/10'
+          }`}>
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-700 transition-colors"
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  isLight ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-dark-800 hover:bg-dark-700 text-gray-200'
+                }`}
                 title="Back"
               >
                 <ArrowLeft size={20} />
               </button>
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight leading-tight">
+                <h2 className={`text-xl sm:text-2xl font-black tracking-tight leading-tight ${
+                  isLight ? 'text-gray-900' : 'text-white'
+                }`}>
                   {details.name}
                 </h2>
               </div>
             </div>
 
-            {/* Men / Women Switcher (Header level) */}
-            <div className="flex items-center bg-gray-100 p-1 rounded-full border border-gray-200">
-              <button
-                type="button"
-                onClick={() => setCurrentGender('male')}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                  currentGender === 'male'
-                    ? 'bg-black text-white shadow-sm font-black'
-                    : 'text-gray-500 hover:text-gray-900'
-                }`}
-              >
-                ♂️ Men
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentGender('female')}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                  currentGender === 'female'
-                    ? 'bg-black text-white shadow-sm font-black'
-                    : 'text-gray-500 hover:text-gray-900'
-                }`}
-              >
-                ♀️ Women
-              </button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+
+              {/* Men / Women Switcher (Header level) */}
+              <div className={`flex items-center p-1 rounded-full border ${
+                isLight ? 'bg-gray-100 border-gray-200' : 'bg-dark-800 border-white/10'
+              }`}>
+                <button
+                  type="button"
+                  onClick={() => setCurrentGender('male')}
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                    currentGender === 'male'
+                      ? (isLight ? 'bg-black text-white font-black shadow-sm' : 'bg-white text-dark-900 font-black shadow-sm')
+                      : (isLight ? 'text-gray-500 hover:text-gray-900' : 'text-gray-400 hover:text-white')
+                  }`}
+                >
+                  ♂️ Men
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentGender('female')}
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                    currentGender === 'female'
+                      ? (isLight ? 'bg-black text-white font-black shadow-sm' : 'bg-white text-dark-900 font-black shadow-sm')
+                      : (isLight ? 'text-gray-500 hover:text-gray-900' : 'text-gray-400 hover:text-white')
+                  }`}
+                >
+                  ♀️ Women
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Top Tabs: Instructions | Record (Matching Screenshot 1 & 3) */}
-          <div className="flex px-6 border-b border-gray-100 bg-white">
+          <div className={`flex px-6 border-b transition-colors ${
+            isLight ? 'border-gray-100 bg-white' : 'border-white/10 bg-[#121422]'
+          }`}>
             <button
               type="button"
               onClick={() => setMainTab('instructions')}
               className={`py-3 px-4 font-bold text-sm sm:text-base transition-all relative ${
                 mainTab === 'instructions'
-                  ? 'text-gray-900'
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? (isLight ? 'text-gray-900' : 'text-white')
+                  : (isLight ? 'text-gray-400 hover:text-gray-600' : 'text-gray-400 hover:text-gray-200')
               }`}
             >
               Instructions
@@ -259,14 +281,14 @@ export default function ExerciseModal({
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 rounded-full" />
               )}
             </button>
-            <div className="w-px h-6 bg-gray-200 my-auto mx-2" />
+            <div className={`w-px h-6 my-auto mx-2 ${isLight ? 'bg-gray-200' : 'bg-gray-700'}`} />
             <button
               type="button"
               onClick={() => setMainTab('record')}
               className={`py-3 px-4 font-bold text-sm sm:text-base transition-all relative ${
                 mainTab === 'record'
-                  ? 'text-gray-900'
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? (isLight ? 'text-gray-900' : 'text-white')
+                  : (isLight ? 'text-gray-400 hover:text-gray-600' : 'text-gray-400 hover:text-gray-200')
               }`}
             >
               Record
@@ -277,7 +299,9 @@ export default function ExerciseModal({
           </div>
 
           {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 bg-white">
+          <div className={`flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 transition-colors ${
+            isLight ? 'bg-white text-gray-900' : 'bg-[#121422] text-gray-100'
+          }`}>
             {mainTab === 'instructions' ? (
               <>
                 {/* 1. ANATOMICAL DEMONSTRATION BOX (Side-by-side with play video button) */}
@@ -287,14 +311,16 @@ export default function ExerciseModal({
                 />
 
                 {/* 2. SEGMENTED CONTROL: [ Muscle ] | [ How to do ] (Screenshot 1 & 2) */}
-                <div className="flex bg-gray-100 p-1 rounded-full border border-gray-200">
+                <div className={`flex p-1 rounded-full border ${
+                  isLight ? 'bg-gray-100 border-gray-200' : 'bg-dark-800 border-white/10'
+                }`}>
                   <button
                     type="button"
                     onClick={() => setSubSection('muscle')}
                     className={`flex-1 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all text-center ${
                       subSection === 'muscle'
-                        ? 'bg-black text-white shadow-sm'
-                        : 'text-gray-700 hover:text-gray-900'
+                        ? (isLight ? 'bg-black text-white shadow-sm font-black' : 'bg-white text-dark-900 shadow-sm font-black')
+                        : (isLight ? 'text-gray-700 hover:text-gray-900' : 'text-gray-300 hover:text-white')
                     }`}
                   >
                     Muscle
@@ -304,8 +330,8 @@ export default function ExerciseModal({
                     onClick={() => setSubSection('how-to-do')}
                     className={`flex-1 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all text-center ${
                       subSection === 'how-to-do'
-                        ? 'bg-black text-white shadow-sm'
-                        : 'text-gray-700 hover:text-gray-900'
+                        ? (isLight ? 'bg-black text-white shadow-sm font-black' : 'bg-white text-dark-900 shadow-sm font-black')
+                        : (isLight ? 'text-gray-700 hover:text-gray-900' : 'text-gray-300 hover:text-white')
                     }`}
                   >
                     How to do
@@ -335,7 +361,9 @@ export default function ExerciseModal({
                     </div>
 
                     {/* Front & Back Anatomical Body Map with Red Target Muscles */}
-                    <div className="bg-gray-50/70 border border-gray-100 rounded-3xl p-3">
+                    <div className={`border rounded-3xl p-3 ${
+                      isLight ? 'bg-gray-50/80 border-gray-100' : 'bg-dark-900/60 border-white/5'
+                    }`}>
                       <AnatomicalBodyMap
                         focusAreas={focusBadges}
                         primaryMuscle={details.muscle || details.category}
@@ -345,8 +373,12 @@ export default function ExerciseModal({
 
                     {/* Equipment Section */}
                     <div>
-                      <h4 className="text-sm font-bold text-gray-900 mb-1.5">Equipment</h4>
-                      <span className="inline-block px-3.5 py-1.5 rounded-full bg-gray-100 text-gray-800 text-xs sm:text-sm font-semibold">
+                      <h4 className={`text-sm font-bold mb-1.5 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                        Equipment
+                      </h4>
+                      <span className={`inline-block px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold ${
+                        isLight ? 'bg-gray-100 text-gray-800' : 'bg-dark-800 text-gray-200'
+                      }`}>
                         {details.equipment || 'Body weight'}
                       </span>
                     </div>
@@ -358,23 +390,23 @@ export default function ExerciseModal({
                   <div className="space-y-4">
                     {/* Preparation */}
                     <div>
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5">
+                      <h3 className={`text-base sm:text-lg font-bold mb-1.5 ${isLight ? 'text-gray-900' : 'text-white'}`}>
                         Preparation
                       </h3>
-                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                      <p className={`text-xs sm:text-sm leading-relaxed ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
                         {getPreparationText()}
                       </p>
                     </div>
 
                     {/* Execution */}
                     <div>
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5">
+                      <h3 className={`text-base sm:text-lg font-bold mb-1.5 ${isLight ? 'text-gray-900' : 'text-white'}`}>
                         Execution
                       </h3>
                       <div className="space-y-2">
                         {getExecutionSteps().map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-gray-700 leading-relaxed">
-                            <span className="font-bold text-gray-900">{idx + 1}.</span>
+                          <div key={idx} className={`flex items-start gap-2 text-xs sm:text-sm leading-relaxed ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+                            <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{idx + 1}.</span>
                             <span>{step}</span>
                           </div>
                         ))}
@@ -383,13 +415,13 @@ export default function ExerciseModal({
 
                     {/* Key tips */}
                     <div>
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5">
+                      <h3 className={`text-base sm:text-lg font-bold mb-1.5 ${isLight ? 'text-gray-900' : 'text-white'}`}>
                         Key tips
                       </h3>
                       <div className="space-y-2">
                         {getKeyTips().map((tip, idx) => (
-                          <div key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-gray-700 leading-relaxed">
-                            <span className="font-bold text-gray-900">{idx + 1}.</span>
+                          <div key={idx} className={`flex items-start gap-2 text-xs sm:text-sm leading-relaxed ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+                            <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{idx + 1}.</span>
                             <span>{tip}</span>
                           </div>
                         ))}
@@ -401,34 +433,42 @@ export default function ExerciseModal({
             ) : (
               /* RECORD TAB */
               <div className="space-y-4 py-2">
-                <div className="bg-gray-50 p-4 rounded-3xl border border-gray-100 space-y-3">
-                  <h3 className="text-base font-bold text-gray-900">Log Exercise Performance</h3>
+                <div className={`p-4 rounded-3xl border space-y-3 ${
+                  isLight ? 'bg-gray-50 border-gray-100 text-gray-900' : 'bg-dark-800/80 border-white/5 text-white'
+                }`}>
+                  <h3 className={`text-base font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>Log Exercise Performance</h3>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 block mb-1">Sets</label>
+                      <label className="text-xs font-semibold text-gray-400 block mb-1">Sets</label>
                       <input
                         type="number"
                         value={logSets}
                         onChange={(e) => setLogSets(e.target.value)}
-                        className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-center font-bold text-gray-900 text-sm"
+                        className={`w-full border rounded-xl py-2 px-3 text-center font-bold text-sm ${
+                          isLight ? 'bg-white border-gray-200 text-gray-900' : 'bg-dark-900 border-white/10 text-white'
+                        }`}
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 block mb-1">Reps</label>
+                      <label className="text-xs font-semibold text-gray-400 block mb-1">Reps</label>
                       <input
                         type="number"
                         value={logReps}
                         onChange={(e) => setLogReps(e.target.value)}
-                        className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-center font-bold text-gray-900 text-sm"
+                        className={`w-full border rounded-xl py-2 px-3 text-center font-bold text-sm ${
+                          isLight ? 'bg-white border-gray-200 text-gray-900' : 'bg-dark-900 border-white/10 text-white'
+                        }`}
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 block mb-1">Weight (kg)</label>
+                      <label className="text-xs font-semibold text-gray-400 block mb-1">Weight (kg)</label>
                       <input
                         type="number"
                         value={logWeight}
                         onChange={(e) => setLogWeight(e.target.value)}
-                        className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-center font-bold text-gray-900 text-sm"
+                        className={`w-full border rounded-xl py-2 px-3 text-center font-bold text-sm ${
+                          isLight ? 'bg-white border-gray-200 text-gray-900' : 'bg-dark-900 border-white/10 text-white'
+                        }`}
                       />
                     </div>
                   </div>
@@ -443,7 +483,7 @@ export default function ExerciseModal({
                 </div>
 
                 {loggedToast && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-xs font-bold text-center">
+                  <div className="p-3 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-2xl text-xs font-bold text-center">
                     ✅ Recorded to today's workout log!
                   </div>
                 )}
@@ -452,11 +492,17 @@ export default function ExerciseModal({
           </div>
 
           {/* Sticky Bottom Pill Button: "Done" (Matching Screenshot 1 & 2) */}
-          <div className="p-4 sm:p-5 pt-3 border-t border-gray-100 bg-white">
+          <div className={`p-4 sm:p-5 pt-3 border-t transition-colors ${
+            isLight ? 'border-gray-100 bg-white' : 'border-white/10 bg-[#121422]'
+          }`}>
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-3.5 bg-black hover:bg-gray-800 text-white font-bold text-base rounded-full shadow-lg active:scale-95 transition-all text-center"
+              className={`w-full py-3.5 font-bold text-base rounded-full shadow-lg active:scale-95 transition-all text-center ${
+                isLight 
+                  ? 'bg-black hover:bg-gray-800 text-white' 
+                  : 'bg-white hover:bg-gray-200 text-dark-900 font-extrabold'
+              }`}
             >
               Done
             </button>
