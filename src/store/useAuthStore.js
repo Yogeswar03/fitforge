@@ -26,12 +26,37 @@ const useAuthStore = create(
       login: async (email, password) => {
         const cleanEmail = (email || '').trim().toLowerCase();
         
-        // 1. Switch all local stores to this user's data
+        if (!cleanEmail || !password) {
+          return { success: false, error: 'Email and password are required.' };
+        }
+
+        // 1. Check if user exists in local registeredUsers
+        const existingAccount = get().registeredUsers?.[cleanEmail];
+
+        if (!existingAccount) {
+          return { success: false, error: 'No account found with this email. Please create an account first.' };
+        }
+
+        // 2. Verify password matches what was stored during registration
+        const storedPassword = existingAccount.passwordHash;
+        if (storedPassword) {
+          try {
+            const decodedStored = atob(storedPassword);
+            if (decodedStored !== password) {
+              return { success: false, error: 'Incorrect password. Please try again.' };
+            }
+          } catch {
+            // If decoding fails, reject login
+            return { success: false, error: 'Incorrect password. Please try again.' };
+          }
+        }
+
+        // 3. Switch all local stores to this user's data
         syncUserToAllStores(cleanEmail);
 
-        let userId = Date.now().toString();
+        let userId = existingAccount?.user?.id || Date.now().toString();
 
-        // 2. If Supabase is configured, authenticate with Supabase Cloud
+        // 4. If Supabase is configured, authenticate with Supabase Cloud
         if (isSupabaseConfigured && supabase) {
           try {
             const { data, error } = await supabase.auth.signInWithPassword({
@@ -51,7 +76,6 @@ const useAuthStore = create(
           }
         }
 
-        const existingAccount = get().registeredUsers?.[cleanEmail];
         const userProfile = useUserStore.getState().profiles?.[cleanEmail];
 
         const loggedInUser = {
@@ -66,12 +90,13 @@ const useAuthStore = create(
         set((state) => ({
           user: loggedInUser,
           isAuthenticated: true,
-          isOnboarded: true,
+          isOnboarded: existingAccount?.isOnboarded ?? true,
           registeredUsers: {
             ...state.registeredUsers,
             [cleanEmail]: {
+              ...state.registeredUsers[cleanEmail],
               user: loggedInUser,
-              isOnboarded: true,
+              isOnboarded: existingAccount?.isOnboarded ?? true,
             },
           },
         }));
@@ -82,6 +107,21 @@ const useAuthStore = create(
       // New User Registration (Directs to Onboarding wizard)
       register: async (name, email, password) => {
         const cleanEmail = (email || '').trim().toLowerCase();
+        
+        if (!name?.trim() || !cleanEmail || !password) {
+          return { success: false, error: 'All fields are required.' };
+        }
+
+        if (password.length < 6) {
+          return { success: false, error: 'Password must be at least 6 characters.' };
+        }
+
+        // Check if email is already registered
+        const existingAccount = get().registeredUsers?.[cleanEmail];
+        if (existingAccount) {
+          return { success: false, error: 'An account with this email already exists. Please log in instead.' };
+        }
+
         let userId = Date.now().toString();
 
         // 1. Switch all stores to fresh data for this new user
@@ -116,6 +156,9 @@ const useAuthStore = create(
           avatar: null,
         };
 
+        // Store password as base64 for local validation (not production-grade, but works for local-only auth)
+        const passwordHash = btoa(password);
+
         // Brand new registration: not onboarded yet
         set((state) => ({
           user: newUser,
@@ -126,6 +169,7 @@ const useAuthStore = create(
             [cleanEmail]: {
               user: newUser,
               isOnboarded: false,
+              passwordHash,
             },
           },
         }));

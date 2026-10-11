@@ -46,8 +46,12 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await register(name.trim(), email.trim(), password);
-      navigate('/onboarding');
+      const res = await register(name.trim(), email.trim(), password);
+      if (res?.success) {
+        navigate('/onboarding');
+      } else {
+        setError(res?.error || 'Failed to create account. Please try again.');
+      }
     } catch (err) {
       setError('Failed to create account. Please try again.');
     } finally {
