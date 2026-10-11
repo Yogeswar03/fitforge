@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Trash2, Copy, Dumbbell, Utensils, Check, X, 
-  Save, Sparkles, AlertCircle 
+  Save, Sparkles, AlertCircle, Share2, Download 
 } from 'lucide-react';
 import useWorkoutStore from '../store/useWorkoutStore';
 import useDietStore from '../store/useDietStore';
@@ -52,8 +52,56 @@ export default function WorkoutPlan() {
   const [newExReps, setNewExReps] = useState('12');
   const [newExWeight, setNewExWeight] = useState('0');
 
-  // Exercise Guide Modal
-  const [selectedExerciseForModal, setSelectedExerciseForModal] = useState(null);
+  // Share & Import Routine State
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importCodeText, setImportCodeText] = useState('');
+  const [copiedShareCode, setCopiedShareCode] = useState(false);
+
+  const getShareableCode = () => {
+    try {
+      return btoa(unescape(encodeURIComponent(JSON.stringify(weeklyPlan || {}))));
+    } catch {
+      return '';
+    }
+  };
+
+  const handleCopyShareCode = () => {
+    const code = getShareableCode();
+    if (!code) return;
+    navigator.clipboard?.writeText(code);
+    setCopiedShareCode(true);
+    triggerNotification('📋 Workout routine code copied to clipboard!');
+    setTimeout(() => setCopiedShareCode(false), 3000);
+  };
+
+  const handleApplyImportCode = () => {
+    if (!importCodeText.trim()) {
+      alert('Please paste the workout code first.');
+      return;
+    }
+    try {
+      const decodedStr = decodeURIComponent(escape(atob(importCodeText.trim())));
+      const parsedPlan = JSON.parse(decodedStr);
+      if (typeof parsedPlan !== 'object') throw new Error('Invalid format');
+
+      // Apply to weeklyPlan for each day
+      Object.keys(parsedPlan).forEach((dayKey) => {
+        setDayPlan(Number(dayKey), parsedPlan[dayKey]);
+      });
+
+      // If today is affected, sync
+      if (parsedPlan[todayDayOfWeek]) {
+        syncPlan(todayStr, parsedPlan[todayDayOfWeek], dietWeeklyPlan?.[todayDayOfWeek] || { meals: [] });
+      }
+
+      setIsImportModalOpen(false);
+      setImportCodeText('');
+      triggerNotification('🎉 Workout routine imported successfully!');
+    } catch (err) {
+      alert('Invalid workout code. Please check that you copied the complete code.');
+    }
+  };
 
   const triggerNotification = (msg) => {
     setNotification(msg);
@@ -171,11 +219,27 @@ export default function WorkoutPlan() {
           <div className="flex items-center gap-2">
             <ThemeToggle className="scale-90" />
             <button
-              onClick={handleSavePlan}
-              className="flex items-center gap-2 bg-accent text-dark-900 font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-accent/20 active:scale-95 transition-all text-sm"
+              onClick={() => setIsShareModalOpen(true)}
+              className="flex items-center gap-1.5 bg-dark-800 hover:bg-dark-700 text-gray-200 border border-white/10 font-bold px-3 py-2 rounded-2xl active:scale-95 transition-all text-xs"
+              title="Share or send this workout plan to a friend"
             >
-              <Save size={18} />
-              <span>Save Plan</span>
+              <Share2 size={15} className="text-accent2" />
+              <span className="hidden sm:inline">Share</span>
+            </button>
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="flex items-center gap-1.5 bg-dark-800 hover:bg-dark-700 text-gray-200 border border-white/10 font-bold px-3 py-2 rounded-2xl active:scale-95 transition-all text-xs"
+              title="Import a workout routine code"
+            >
+              <Download size={15} className="text-accent" />
+              <span className="hidden sm:inline">Import</span>
+            </button>
+            <button
+              onClick={handleSavePlan}
+              className="flex items-center gap-1.5 bg-accent text-dark-900 font-bold px-4 py-2 rounded-2xl shadow-lg shadow-accent/20 active:scale-95 transition-all text-xs sm:text-sm"
+            >
+              <Save size={16} />
+              <span>Save</span>
             </button>
           </div>
         </div>
@@ -694,6 +758,85 @@ export default function WorkoutPlan() {
                 </Button>
                 <Button variant="primary" fullWidth onClick={handleCopyDay}>
                   Confirm Copy
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
+        {/* SHARE ROUTINE MODAL */}
+        {isShareModalOpen && (
+          <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Workout Routine">
+            <div className="space-y-4">
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Send your created workout routine to your friend! They can paste this code into their app to instantly load all workouts.
+              </p>
+
+              <div className="bg-dark-900/80 p-3 rounded-2xl border border-white/10 space-y-2">
+                <div className="flex justify-between items-center text-xs text-gray-400 font-semibold">
+                  <span>WORKOUT ROUTINE CODE</span>
+                  <span>{copiedShareCode ? '✅ Copied!' : ''}</span>
+                </div>
+                <textarea
+                  readOnly
+                  rows={4}
+                  value={getShareableCode()}
+                  onClick={(e) => e.target.select()}
+                  className="w-full bg-dark-800 text-xs text-accent font-mono p-3 rounded-xl border border-white/5 resize-none outline-none select-all"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  variant="primary" 
+                  fullWidth 
+                  onClick={handleCopyShareCode}
+                  icon={<Copy size={16} />}
+                >
+                  {copiedShareCode ? 'Copied to Clipboard!' : 'Copy Routine Code'}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setIsShareModalOpen(false)}
+                >
+                  Done
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
+
+        {/* IMPORT ROUTINE MODAL */}
+        {isImportModalOpen && (
+          <Modal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} title="Import Workout Routine">
+            <div className="space-y-4">
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Paste the workout routine code your friend sent you to load their exercises into your account:
+              </p>
+
+              <div>
+                <textarea
+                  rows={4}
+                  placeholder="Paste workout routine code here..."
+                  value={importCodeText}
+                  onChange={(e) => setImportCodeText(e.target.value)}
+                  className="w-full bg-dark-700 text-xs text-white font-mono p-3 rounded-xl border border-white/10 resize-none outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  variant="primary" 
+                  fullWidth 
+                  onClick={handleApplyImportCode}
+                  icon={<Download size={16} />}
+                >
+                  Apply & Load Routine
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => { setIsImportModalOpen(false); setImportCodeText(''); }}
+                >
+                  Cancel
                 </Button>
               </div>
             </div>
