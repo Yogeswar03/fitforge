@@ -24,6 +24,7 @@ import {
 import useDailyLogStore from '../store/useDailyLogStore';
 import useUserStore from '../store/useUserStore';
 import ExerciseModal from '../components/ui/ExerciseModal';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import { getExerciseDetails } from '../data/exerciseDatabase';
 import Button from '../components/ui/Button';
 
@@ -140,13 +141,16 @@ export default function CalendarView() {
           </p>
         </div>
 
-        <button
-          onClick={() => navigate('/history')}
-          className="flex items-center gap-1.5 bg-dark-800 hover:bg-dark-700 text-accent font-bold px-3.5 py-2 rounded-2xl border border-white/5 text-xs transition-colors"
-        >
-          <History size={16} />
-          <span>List History</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle className="scale-90" />
+          <button
+            onClick={() => navigate('/history')}
+            className="flex items-center gap-1.5 bg-dark-800 hover:bg-dark-700 text-accent font-bold px-3.5 py-2 rounded-2xl border border-white/5 text-xs transition-colors"
+          >
+            <History size={16} />
+            <span>List History</span>
+          </button>
+        </div>
       </div>
 
       {/* Progress Journey Card */}

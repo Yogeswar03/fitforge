@@ -11,6 +11,7 @@ import useDailyLogStore from '../store/useDailyLogStore';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import PartnerDietModal from '../components/ui/PartnerDietModal';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import { generateId, getTodayStr, DAYS_OF_WEEK, getDayName } from '../utils/calculations';
 import { searchFoods } from '../data/foodDatabase';
 import { syncDietPlanToCloud } from '../lib/supabaseSync';
@@ -139,7 +140,8 @@ export default function DietPlan() {
             <p className="text-gray-400 text-sm">Organize which meals you eat on each day</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <ThemeToggle className="scale-90" />
             <button
               onClick={() => setIsPartnerModalOpen(true)}
               className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 border ${

@@ -13,6 +13,7 @@ import useDietStore from '../store/useDietStore';
 import useExpenseStore, { EXPENSE_CATEGORIES } from '../store/useExpenseStore';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import { getTodayStr, formatNumber } from '../utils/calculations';
 
 const POPULAR_GYM_EXPENSES = [
@@ -154,17 +155,20 @@ export default function ExpenseTracker() {
           <ArrowLeft size={16} /> Home
         </button>
 
-        <button
-          onClick={() => {
-            setNewPartnerNameInput(partnerName);
-            setIsEditPartnerOpen(true);
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/15 border border-accent/40 rounded-full text-accent text-xs font-bold hover:bg-accent/25 transition-all shadow-sm"
-          title="Change gym friend name"
-        >
-          <span>👫 {partnerName}</span>
-          <span className="text-[10px] text-accent/80 font-normal">Edit</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle className="scale-90" />
+          <button
+            onClick={() => {
+              setNewPartnerNameInput(partnerName);
+              setIsEditPartnerOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/15 border border-accent/40 rounded-full text-accent text-xs font-bold hover:bg-accent/25 transition-all shadow-sm"
+            title="Change gym friend name"
+          >
+            <span>👫 {partnerName}</span>
+            <span className="text-[10px] text-accent/80 font-normal">Edit</span>
+          </button>
+        </div>
       </div>
 
       <div>

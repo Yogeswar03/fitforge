@@ -10,6 +10,7 @@ import useUserStore from '../store/useUserStore';
 import { searchFoods } from '../data/foodDatabase';
 import Button from '../components/ui/Button';
 import AiMealAgentModal from '../components/ui/AiMealAgentModal';
+import ThemeToggle from '../components/ui/ThemeToggle';
 
 export default function DailyLog() {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
@@ -142,9 +143,12 @@ export default function DailyLog() {
       className="min-h-screen bg-dark-900 text-white pb-32 px-4 md:px-6 pt-6 max-w-xl mx-auto space-y-6"
     >
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold gradient-accent-text">Daily Log</h1>
-        <p className="text-gray-400">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold gradient-accent-text">Daily Log</h1>
+          <p className="text-gray-400 text-xs mt-0.5">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
+        </div>
+        <ThemeToggle className="scale-90" />
       </div>
 
       {/* Success Notification */}

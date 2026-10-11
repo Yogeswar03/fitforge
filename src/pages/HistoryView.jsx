@@ -12,6 +12,7 @@ import useDailyLogStore from '../store/useDailyLogStore';
 import useUserStore from '../store/useUserStore';
 import Button from '../components/ui/Button';
 import ExerciseModal from '../components/ui/ExerciseModal';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import { getExerciseDetails } from '../data/exerciseDatabase';
 
 export default function HistoryView() {
@@ -63,13 +64,16 @@ export default function HistoryView() {
           </p>
         </div>
 
-        <button
-          onClick={() => navigate('/calendar')}
-          className="flex items-center gap-1.5 bg-dark-800 hover:bg-dark-700 text-accent font-bold px-3.5 py-2 rounded-2xl border border-white/5 text-xs transition-colors"
-        >
-          <Calendar size={16} />
-          <span>Calendar</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle className="scale-90" />
+          <button
+            onClick={() => navigate('/calendar')}
+            className="flex items-center gap-1.5 bg-dark-800 hover:bg-dark-700 text-accent font-bold px-3.5 py-2 rounded-2xl border border-white/5 text-xs transition-colors"
+          >
+            <Calendar size={16} />
+            <span>Calendar</span>
+          </button>
+        </div>
       </div>
 
       {/* Top Stats Overview */}

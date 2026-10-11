@@ -6,6 +6,7 @@ import useAuthStore from '../store/useAuthStore';
 import useUserStore from '../store/useUserStore';
 import { syncProfileToCloud } from '../lib/supabaseSync';
 import Button from '../components/ui/Button';
+import ThemeToggle from '../components/ui/ThemeToggle';
 
 const goals = [
   { id: 'lose', icon: '🔥', title: 'Lose Weight', desc: 'Burn fat and get leaner' },
@@ -73,7 +74,12 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 text-white flex flex-col px-6 pt-12 pb-24 safe-bottom">
+    <div className="min-h-screen bg-dark-900 text-white flex flex-col px-6 pt-8 pb-24 safe-bottom">
+      <div className="flex items-center justify-between mb-6">
+        <span className="text-xs font-bold uppercase tracking-wider text-accent">Personal Setup</span>
+        <ThemeToggle className="scale-90" />
+      </div>
+
       <div className="mb-8">
         <div className="flex justify-between text-sm text-gray-400 mb-2">
           <span>Step {step} of 4</span>

@@ -11,6 +11,7 @@ import useDailyLogStore from '../store/useDailyLogStore';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import ExerciseModal from '../components/ui/ExerciseModal';
+import ThemeToggle from '../components/ui/ThemeToggle';
 import { generateId, getTodayStr, DAYS_OF_WEEK, getDayName } from '../utils/calculations';
 import { syncWorkoutPlanToCloud } from '../lib/supabaseSync';
 import { EXERCISE_DATABASE as DB_EXERCISES, getExerciseDetails } from '../data/exerciseDatabase';
@@ -166,14 +167,17 @@ export default function WorkoutPlan() {
             <p className="text-gray-400 text-sm">Design which workouts you do on each day</p>
           </div>
 
-          {/* Prominent Save Button */}
-          <button
-            onClick={handleSavePlan}
-            className="flex items-center gap-2 bg-accent text-dark-900 font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-accent/20 active:scale-95 transition-all text-sm"
-          >
-            <Save size={18} />
-            <span>Save Plan</span>
-          </button>
+          {/* Header Actions */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle className="scale-90" />
+            <button
+              onClick={handleSavePlan}
+              className="flex items-center gap-2 bg-accent text-dark-900 font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-accent/20 active:scale-95 transition-all text-sm"
+            >
+              <Save size={18} />
+              <span>Save Plan</span>
+            </button>
+          </div>
         </div>
 
         {/* Tab Switcher: Workout vs Diet */}

@@ -22,6 +22,7 @@ import PartnerDietModal from '../components/ui/PartnerDietModal';
 import AiMealAgentModal from '../components/ui/AiMealAgentModal';
 import AppLogo from '../components/ui/AppLogo';
 import ThemeToggle from '../components/ui/ThemeToggle';
+import useThemeStore from '../store/useThemeStore';
 import { getExerciseDetails } from '../data/exerciseDatabase';
 
 const TRAINER_MESSAGES = [
@@ -55,6 +56,8 @@ export default function Dashboard() {
 
   // Active View Tab to eliminate congestion ('all' | 'workout' | 'diet' | 'macros')
   const [activeTab, setActiveTab] = useState('all');
+  const { theme } = useThemeStore();
+  const isLight = theme === 'light';
 
   // Templates for today
   const todayWorkoutTemplate = workoutWeeklyPlan?.[dayOfWeek] || { name: 'Workout Day', isRestDay: false, exercises: [] };
@@ -220,7 +223,9 @@ export default function Dashboard() {
     <motion.div 
       initial={{ opacity: 0, y: 10 }} 
       animate={{ opacity: 1, y: 0 }} 
-      className="min-h-screen bg-dark-900 text-white p-4 md:p-6 pb-36 max-w-2xl mx-auto space-y-5"
+      className={`min-h-screen p-4 md:p-6 pb-36 max-w-2xl mx-auto space-y-5 transition-colors duration-200 ${
+        isLight ? 'bg-[#F8FAFC] text-gray-900' : 'bg-dark-900 text-white'
+      }`}
     >
       {/* ============================================================== */}
       {/* TOP HEADER: Clean Brand & Fast Navigation Icons */}

@@ -1,10 +1,13 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, ClipboardList, Plus, History, User } from 'lucide-react';
+import useThemeStore from '../../store/useThemeStore';
 
 const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { theme } = useThemeStore();
+  const isLight = theme === 'light';
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },
@@ -22,7 +25,11 @@ const BottomNav = () => {
 
   return (
     <div className="fixed bottom-0 left-0 w-full z-30 safe-bottom">
-      <div className="glass-strong border-t border-white/5 px-2 py-2">
+      <div className={`transition-colors duration-200 border-t px-2 py-2 ${
+        isLight 
+          ? 'bg-white/95 backdrop-blur-xl border-gray-200 shadow-[0_-4px_20px_-2px_rgba(0,0,0,0.06)]' 
+          : 'glass-strong border-white/5'
+      }`}>
         <div className="flex justify-around items-end max-w-md mx-auto">
           {navItems.map((item) => {
             const active = isActive(item.path);
@@ -35,8 +42,12 @@ const BottomNav = () => {
                   onClick={() => navigate(item.path)}
                   className="relative flex flex-col items-center justify-center -top-6 outline-none"
                 >
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-accent/20 transition-transform active:scale-90 ${
-                    active ? 'gradient-accent text-dark-900' : 'bg-dark-700 text-accent border-2 border-accent'
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90 ${
+                    active 
+                      ? 'gradient-accent text-dark-900 shadow-accent/30' 
+                      : (isLight 
+                          ? 'bg-emerald-500 text-white shadow-emerald-500/25' 
+                          : 'bg-dark-700 text-accent border-2 border-accent shadow-accent/20')
                   }`}>
                     <Icon size={28} />
                   </div>
@@ -50,10 +61,18 @@ const BottomNav = () => {
                 onClick={() => navigate(item.path)}
                 className="flex flex-col items-center justify-center py-2 px-3 outline-none min-w-[64px]"
               >
-                <div className={`mb-1 transition-colors duration-300 ${active ? 'text-accent' : 'text-gray-400'}`}>
-                  <Icon size={28} />
+                <div className={`mb-1 transition-colors duration-300 ${
+                  active 
+                    ? 'text-accent scale-110 font-bold' 
+                    : (isLight ? 'text-gray-400 hover:text-gray-600' : 'text-gray-400 hover:text-gray-200')
+                }`}>
+                  <Icon size={24} />
                 </div>
-                <span className={`text-[10px] sm:text-xs font-medium transition-colors duration-300 ${active ? 'text-accent' : 'text-gray-400'}`}>
+                <span className={`text-[10px] sm:text-xs font-semibold transition-colors duration-300 ${
+                  active 
+                    ? (isLight ? 'text-emerald-600 font-extrabold' : 'text-accent font-bold') 
+                    : (isLight ? 'text-gray-500' : 'text-gray-400')
+                }`}>
                   {item.label}
                 </span>
               </button>

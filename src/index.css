@@ -129,6 +129,14 @@ html.light-theme .bg-dark-900 {
   color: #0F172A !important;
 }
 
+html.light-theme .bg-dark-900\/50,
+html.light-theme .bg-dark-900\/60,
+html.light-theme .bg-dark-900\/80,
+html.light-theme .bg-dark-900\/90 {
+  background-color: rgba(248, 250, 252, 0.95) !important;
+  color: #0F172A !important;
+}
+
 html.light-theme .bg-dark-800 {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
@@ -136,10 +144,34 @@ html.light-theme .bg-dark-800 {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+html.light-theme .bg-dark-800\/50,
+html.light-theme .bg-dark-800\/60,
+html.light-theme .bg-dark-800\/80,
+html.light-theme .bg-dark-800\/90 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #0F172A !important;
+  border-color: #E2E8F0 !important;
+}
+
 html.light-theme .bg-dark-700 {
   background-color: #F1F5F9 !important;
   color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light-theme .bg-dark-700\/50,
+html.light-theme .bg-dark-700\/80 {
+  background-color: rgba(241, 245, 249, 0.9) !important;
+  color: #0F172A !important;
   border-color: #E2E8F0 !important;
+}
+
+html.light-theme .hover\:bg-dark-700:hover {
+  background-color: #E2E8F0 !important;
+}
+
+html.light-theme .hover\:bg-dark-800:hover {
+  background-color: #F8FAFC !important;
 }
 
 html.light-theme .glass {
@@ -148,6 +180,7 @@ html.light-theme .glass {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(226, 232, 240, 0.9) !important;
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  color: #0F172A !important;
 }
 
 html.light-theme .glass-strong {
@@ -156,16 +189,31 @@ html.light-theme .glass-strong {
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(226, 232, 240, 0.9) !important;
   box-shadow: 0 -4px 20px -2px rgba(0, 0, 0, 0.04);
+  color: #0F172A !important;
 }
 
+/* Border overrides in light theme */
 html.light-theme .border-white\/5,
 html.light-theme .border-white\/10,
-html.light-theme .border-white\/20 {
-  border-color: rgba(226, 232, 240, 0.9) !important;
+html.light-theme .border-white\/20,
+html.light-theme .border-white\/30,
+html.light-theme .border-white\/40 {
+  border-color: #E2E8F0 !important;
 }
 
+html.light-theme .border-dark-600,
+html.light-theme .border-dark-700 {
+  border-color: #E2E8F0 !important;
+}
+
+/* Text color contrast overrides */
 html.light-theme .text-white {
   color: #0F172A !important;
+}
+
+html.light-theme .text-gray-100,
+html.light-theme .text-gray-200 {
+  color: #1E293B !important;
 }
 
 html.light-theme .text-gray-300,
@@ -177,6 +225,33 @@ html.light-theme .text-gray-500 {
   color: #64748B !important;
 }
 
+/* Form controls in light theme */
+html.light-theme input:not([type='checkbox']):not([type='radio']),
+html.light-theme textarea,
+html.light-theme select {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light-theme input::placeholder,
+html.light-theme textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Secondary & ghost pills in light theme */
+html.light-theme .bg-white\/5,
+html.light-theme .bg-white\/10 {
+  background-color: #F1F5F9 !important;
+  color: #334155 !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light-theme .hover\:bg-white\/10:hover {
+  background-color: #E2E8F0 !important;
+}
+
+/* Scrollbars in light theme */
 html.light-theme ::-webkit-scrollbar-track {
   background: #F1F5F9;
 }
@@ -184,4 +259,9 @@ html.light-theme ::-webkit-scrollbar-track {
 html.light-theme ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
 }
+
+html.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
 

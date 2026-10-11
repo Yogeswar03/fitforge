@@ -1,51 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dumbbell, Mail, Lock, Phone, KeyRound, ArrowRight, ShieldCheck, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
+import useThemeStore from '../store/useThemeStore';
 import Button from '../components/ui/Button';
 import AppLogo from '../components/ui/AppLogo';
+import ThemeToggle from '../components/ui/ThemeToggle';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, sendPhoneOtp, verifyPhoneOtp } = useAuthStore();
+  const { login } = useAuthStore();
+  const { theme } = useThemeStore();
+  const isLight = theme === 'light';
 
-  const [authMethod, setAuthMethod] = useState('phone'); // 'phone' | 'email'
-  
-  // Email state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  // Phone OTP state
-  const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+91');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [generatedOtp, setGeneratedOtp] = useState('');
-  const [countdown, setCountdown] = useState(0);
-  
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [infoMessage, setInfoMessage] = useState('');
-
-  // Countdown timer for OTP resend
-  useEffect(() => {
-    let timer;
-    if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(c => c - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [countdown]);
 
   // Handle standard email login
   const handleEmailLogin = async (e) => {
     e.preventDefault();
-    if (!email || password.length < 6) {
-      setError('Please provide a valid email and password (min 6 chars).');
+    if (!email || !email.includes('@')) {
+      setError('Please provide a valid email address.');
+      return;
+    }
+    if (!password || password.length < 6) {
+      setError('Password must be at least 6 characters.');
       return;
     }
     setError('');
     setLoading(true);
+
     try {
       const res = await login(email, password);
       if (res?.success) {
@@ -60,95 +48,37 @@ export default function Login() {
     }
   };
 
-  // Handle sending OTP to phone
-  const handleSendOtp = async (e) => {
-    e?.preventDefault();
-    const cleanDigits = phone.replace(/\D/g, '');
-    if (cleanDigits.length < 10) {
-      setError('Please enter a valid 10-digit mobile number.');
-      return;
-    }
-    setError('');
-    setInfoMessage('');
-    setLoading(true);
-
-    const fullPhone = `${countryCode}${cleanDigits.slice(-10)}`;
-    const res = await sendPhoneOtp(fullPhone);
-    setLoading(false);
-
-    if (res.success) {
-      setOtpSent(true);
-      setGeneratedOtp(res.otp || '123456');
-      setCountdown(30);
-      setInfoMessage(`Verification code sent to ${fullPhone}`);
-    } else {
-      setError(res.error || 'Failed to send OTP. Please verify your phone number.');
-    }
-  };
-
-  // Handle verifying OTP
-  const handleVerifyOtp = async (e) => {
-    e?.preventDefault();
-    if (!otpCode || otpCode.trim().length !== 6) {
-      setError('Please enter the 6-digit OTP code.');
-      return;
-    }
-    setError('');
-    setLoading(true);
-
-    const fullPhone = `${countryCode}${phone.replace(/\D/g, '').slice(-10)}`;
-    const res = await verifyPhoneOtp(fullPhone, otpCode.trim());
-    setLoading(false);
-
-    if (res.success) {
-      if (res.isNewUser) {
-        navigate('/onboarding');
-      } else {
-        navigate('/');
-      }
-    } else {
-      setError(res.error || 'Invalid OTP code. Please enter the correct code.');
-    }
-  };
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }} 
       animate={{ opacity: 1, y: 0 }} 
-      className="min-h-screen bg-dark-900 text-white flex flex-col justify-center px-4 md:px-6 py-12 max-w-md mx-auto"
+      className="min-h-screen flex flex-col justify-center px-4 md:px-6 py-12 max-w-md mx-auto relative select-none"
     >
-      {/* Brand Header */}
-      <div className="flex flex-col items-center mb-6 text-center">
-        <AppLogo size={68} animated={true} className="mb-3" />
-        <h1 className="text-3xl font-extrabold tracking-tight">FitForge</h1>
-        <p className="text-accent2 text-sm mt-0.5 font-medium">Forge Your Ultimate Fitness & Nutrition</p>
+      {/* Top Bar with Theme Toggle */}
+      <div className="absolute top-6 right-4 sm:right-6">
+        <ThemeToggle showLabel={true} />
       </div>
 
-      <div className="glass p-6 rounded-3xl border border-white/10 shadow-2xl">
-        {/* Method Switcher Tabs */}
-        <div className="flex bg-dark-800/90 p-1 rounded-2xl border border-white/5 mb-6">
-          <button
-            type="button"
-            onClick={() => { setAuthMethod('phone'); setError(''); }}
-            className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-              authMethod === 'phone'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-dark-900 shadow-md'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            <Phone size={14} /> Phone OTP
-          </button>
-          <button
-            type="button"
-            onClick={() => { setAuthMethod('email'); setError(''); }}
-            className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-              authMethod === 'email'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-dark-900 shadow-md'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            <Mail size={14} /> Email & Password
-          </button>
+      {/* Brand Header */}
+      <div className="flex flex-col items-center mb-7 text-center">
+        <AppLogo size={68} animated={true} className="mb-3" />
+        <h1 className="text-3xl font-black tracking-tight gradient-accent-text">FitForge</h1>
+        <p className={`text-xs mt-1 font-medium ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+          Forge Your Ultimate Fitness & Nutrition
+        </p>
+      </div>
+
+      {/* Login Card */}
+      <div className={`p-6 sm:p-7 rounded-3xl border shadow-xl transition-colors ${
+        isLight 
+          ? 'bg-white border-gray-200 shadow-slate-100 text-gray-900' 
+          : 'glass border-white/10 text-white shadow-2xl'
+      }`}>
+        <div className="mb-6">
+          <h2 className="text-xl font-extrabold tracking-tight">Welcome Back 👋</h2>
+          <p className={`text-xs mt-1 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
+            Sign in with your email and password to access your workouts and diet.
+          </p>
         </div>
 
         {/* Error notification */}
@@ -158,7 +88,7 @@ export default function Login() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-2xl text-xs font-semibold mb-4 flex items-center gap-2"
+              className="text-rose-500 bg-rose-500/10 border border-rose-500/20 p-3 rounded-2xl text-xs font-semibold mb-4 flex items-center gap-2"
             >
               <span>⚠️</span>
               <span>{error}</span>
@@ -166,181 +96,89 @@ export default function Login() {
           )}
         </AnimatePresence>
 
-        {/* ============================================================== */}
-        {/* PHONE NUMBER OTP AUTHENTICATION */}
-        {/* ============================================================== */}
-        {authMethod === 'phone' && (
-          <div className="space-y-4">
-            {!otpSent ? (
-              <form onSubmit={handleSendOtp} className="space-y-4">
-                <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1.5">
-                    Mobile Phone Number
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="bg-dark-800 border border-white/10 rounded-2xl px-3 flex items-center text-sm font-bold text-accent">
-                      {countryCode}
-                    </div>
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input
-                        type="tel"
-                        maxLength="10"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3.5 pl-11 pr-4 text-white font-mono text-base tracking-wider focus:outline-none focus:border-accent transition-colors"
-                        placeholder="9876543210"
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1">
-                    <ShieldCheck size={13} className="text-accent" />
-                    Instant SMS verification with one-tap sign in
-                  </p>
-                </div>
-
-                <Button 
-                  type="submit" 
-                  variant="primary" 
-                  fullWidth 
-                  loading={loading}
-                  className="py-3.5 mt-2"
-                >
-                  Send OTP Code
-                </Button>
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyOtp} className="space-y-4">
-                {/* Instant Verification Code Display Card */}
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="font-bold text-xs text-emerald-400 flex items-center gap-1.5">
-                      <CheckCircle2 size={16} /> Verification Code Ready
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => { setOtpSent(false); setOtpCode(''); setError(''); }}
-                      className="text-[11px] text-accent underline font-semibold hover:opacity-80"
-                    >
-                      Change Number
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between bg-dark-900/80 p-2.5 rounded-xl border border-white/5">
-                    <div>
-                      <div className="text-[10px] text-gray-400 font-medium">Your 6-Digit OTP:</div>
-                      <div className="font-mono text-2xl font-black tracking-[0.2em] text-accent">
-                        {generatedOtp || '123456'}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOtpCode(generatedOtp || '123456')}
-                      className="px-3 py-2 rounded-xl bg-accent text-dark-900 text-xs font-black hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 shadow-sm"
-                    >
-                      <Sparkles size={14} /> Auto-Fill
-                    </button>
-                  </div>
-
-                  <div className="text-[10px] text-gray-400 leading-tight">
-                    📱 Sent to <span className="text-white font-mono">{countryCode} {phone}</span>. (Or use instant test code <span className="text-accent font-bold cursor-pointer underline" onClick={() => setOtpCode('123456')}>123456</span>)
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1.5">
-                    Enter 6-Digit OTP
-                  </label>
-                  <div className="relative">
-                    <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type="text"
-                      maxLength="6"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                      className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3.5 pl-11 pr-4 text-white font-mono text-xl tracking-[0.3em] font-extrabold text-center focus:outline-none focus:border-accent transition-colors"
-                      placeholder="••••••"
-                      autoFocus
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-gray-400 pt-1">
-                  <span>Didn't receive code?</span>
-                  {countdown > 0 ? (
-                    <span className="text-gray-500 font-medium">Resend in {countdown}s</span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSendOtp}
-                      className="text-accent hover:underline font-bold flex items-center gap-1"
-                    >
-                      <RefreshCw size={12} /> Resend OTP
-                    </button>
-                  )}
-                </div>
-
-                <Button 
-                  type="submit" 
-                  variant="primary" 
-                  fullWidth 
-                  loading={loading}
-                  className="py-3.5 mt-2"
-                >
-                  Verify & Log In
-                </Button>
-              </form>
-            )}
+        <form onSubmit={handleEmailLogin} className="space-y-4">
+          {/* Email input */}
+          <div className="space-y-1.5">
+            <label className={`text-xs font-bold block ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm font-medium border focus:outline-none focus:border-accent transition-colors ${
+                  isLight 
+                    ? 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400' 
+                    : 'bg-dark-800 border-white/10 text-white placeholder-gray-500'
+                }`}
+                placeholder="athlete@fitforge.com"
+                required
+                autoComplete="email"
+                autoFocus
+              />
+            </div>
           </div>
-        )}
 
-        {/* ============================================================== */}
-        {/* EMAIL & PASSWORD AUTHENTICATION */}
-        {/* ============================================================== */}
-        {authMethod === 'email' && (
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-semibold">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-accent transition-colors"
-                  placeholder="athlete@fitforge.com"
-                />
-              </div>
+          {/* Password input */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className={`text-xs font-bold ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+                Password
+              </label>
             </div>
-
-            <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-semibold">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-accent transition-colors"
-                  placeholder="••••••••"
-                />
-              </div>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full rounded-2xl py-3.5 pl-11 pr-11 text-sm font-medium border focus:outline-none focus:border-accent transition-colors ${
+                  isLight 
+                    ? 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400' 
+                    : 'bg-dark-800 border-white/10 text-white placeholder-gray-500'
+                }`}
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
+          </div>
 
-            <Button type="submit" variant="primary" fullWidth loading={loading} className="py-3.5 mt-2">
-              Log In
-            </Button>
-          </form>
-        )}
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            variant="primary" 
+            fullWidth 
+            size="lg"
+            loading={loading} 
+            className="py-3.5 mt-2"
+          >
+            <span>Sign In</span>
+            <ArrowRight size={16} />
+          </Button>
+        </form>
 
         {/* Footer sign up link */}
-        <p className="text-center mt-6 text-gray-400 text-xs">
-          New to FitForge?{' '}
+        <p className={`text-center mt-6 text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+          Don't have an account?{' '}
           <Link to="/register" className="text-accent font-bold hover:underline">
             Create an Account
           </Link>
         </p>
+      </div>
+
+      <div className={`mt-6 text-center text-[11px] flex items-center justify-center gap-1.5 ${isLight ? 'text-gray-500' : 'text-gray-500'}`}>
+        <ShieldCheck size={14} className="text-accent" />
+        <span>End-to-End Encrypted Fitness Cloud Sync</span>
       </div>
     </motion.div>
   );

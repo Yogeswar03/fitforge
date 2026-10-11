@@ -1,49 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dumbbell, User, Mail, Lock, Phone, KeyRound, ShieldCheck, Sparkles, CheckCircle2, RefreshCw } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, Check } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
+import useThemeStore from '../store/useThemeStore';
 import Button from '../components/ui/Button';
 import AppLogo from '../components/ui/AppLogo';
+import ThemeToggle from '../components/ui/ThemeToggle';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register, sendPhoneOtp, verifyPhoneOtp } = useAuthStore();
+  const { register } = useAuthStore();
+  const { theme } = useThemeStore();
+  const isLight = theme === 'light';
 
-  const [authMethod, setAuthMethod] = useState('phone'); // 'phone' | 'email'
-  
   // Form states
   const [name, setName] = useState('');
-  
-  // Email states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
-  // Phone OTP states
-  const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+91');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [generatedOtp, setGeneratedOtp] = useState('');
-  const [countdown, setCountdown] = useState(0);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    let timer;
-    if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(c => c - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [countdown]);
 
   // Handle email registration
   const handleEmailRegister = async (e) => {
     e.preventDefault();
-    if (!name || !email || !password || !confirmPassword) {
-      setError('All fields are required.');
+    if (!name.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address.');
       return;
     }
     if (password.length < 6) {
@@ -56,62 +44,14 @@ export default function Register() {
     }
     setError('');
     setLoading(true);
+
     try {
-      await register(name, email, password);
+      await register(name.trim(), email.trim(), password);
       navigate('/onboarding');
     } catch (err) {
-      setError('Failed to create account.');
+      setError('Failed to create account. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Handle send OTP for phone registration
-  const handleSendPhoneOtp = async (e) => {
-    e?.preventDefault();
-    if (!name.trim()) {
-      setError('Please enter your full name first.');
-      return;
-    }
-    const cleanDigits = phone.replace(/\D/g, '');
-    if (cleanDigits.length < 10) {
-      setError('Please enter a valid 10-digit mobile number.');
-      return;
-    }
-    setError('');
-    setLoading(true);
-
-    const fullPhone = `${countryCode}${cleanDigits.slice(-10)}`;
-    const res = await sendPhoneOtp(fullPhone);
-    setLoading(false);
-
-    if (res.success) {
-      setOtpSent(true);
-      setGeneratedOtp(res.otp || '123456');
-      setCountdown(30);
-    } else {
-      setError(res.error || 'Failed to send OTP.');
-    }
-  };
-
-  // Handle verify OTP for phone registration
-  const handleVerifyPhoneOtp = async (e) => {
-    e?.preventDefault();
-    if (!otpCode || otpCode.trim().length !== 6) {
-      setError('Please enter the 6-digit OTP code.');
-      return;
-    }
-    setError('');
-    setLoading(true);
-
-    const fullPhone = `${countryCode}${phone.replace(/\D/g, '').slice(-10)}`;
-    const res = await verifyPhoneOtp(fullPhone, otpCode.trim(), name.trim());
-    setLoading(false);
-
-    if (res.success) {
-      navigate('/onboarding');
-    } else {
-      setError(res.error || 'Invalid OTP code.');
     }
   };
 
@@ -119,41 +59,28 @@ export default function Register() {
     <motion.div 
       initial={{ opacity: 0, y: 10 }} 
       animate={{ opacity: 1, y: 0 }} 
-      className="min-h-screen bg-dark-900 text-white flex flex-col justify-center px-4 md:px-6 py-12 max-w-md mx-auto"
+      className="min-h-screen flex flex-col justify-center px-4 md:px-6 py-12 max-w-md mx-auto relative select-none"
     >
-      <div className="flex flex-col items-center mb-6 text-center">
-        <AppLogo size={60} animated={true} className="mb-3" />
-        <h1 className="text-3xl font-extrabold tracking-tight">Join FitForge</h1>
-        <p className="text-gray-400 text-xs mt-1">Start your science-backed fitness journey</p>
+      {/* Top Bar with Theme Toggle */}
+      <div className="absolute top-6 right-4 sm:right-6">
+        <ThemeToggle showLabel={true} />
       </div>
 
-      <div className="glass p-6 rounded-3xl border border-white/10 shadow-2xl">
-        {/* Method Switcher Tabs */}
-        <div className="flex bg-dark-800/90 p-1 rounded-2xl border border-white/5 mb-6">
-          <button
-            type="button"
-            onClick={() => { setAuthMethod('phone'); setError(''); }}
-            className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-              authMethod === 'phone'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-dark-900 shadow-md'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            <Phone size={14} /> Phone OTP
-          </button>
-          <button
-            type="button"
-            onClick={() => { setAuthMethod('email'); setError(''); }}
-            className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-              authMethod === 'email'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-dark-900 shadow-md'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            <Mail size={14} /> Email Signup
-          </button>
-        </div>
+      {/* Brand Header */}
+      <div className="flex flex-col items-center mb-6 text-center">
+        <AppLogo size={60} animated={true} className="mb-3" />
+        <h1 className="text-3xl font-black tracking-tight gradient-accent-text">Join FitForge</h1>
+        <p className={`text-xs mt-1 font-medium ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
+          Create your account and start your science-backed journey
+        </p>
+      </div>
 
+      {/* Register Card */}
+      <div className={`p-6 sm:p-7 rounded-3xl border shadow-xl transition-colors ${
+        isLight 
+          ? 'bg-white border-gray-200 shadow-slate-100 text-gray-900' 
+          : 'glass border-white/10 text-white shadow-2xl'
+      }`}>
         {/* Error notification */}
         <AnimatePresence>
           {error && (
@@ -161,7 +88,7 @@ export default function Register() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-2xl text-xs font-semibold mb-4 flex items-center gap-2"
+              className="text-rose-500 bg-rose-500/10 border border-rose-500/20 p-3 rounded-2xl text-xs font-semibold mb-4 flex items-center gap-2"
             >
               <span>⚠️</span>
               <span>{error}</span>
@@ -169,208 +96,132 @@ export default function Register() {
           )}
         </AnimatePresence>
 
-        {/* ============================================================== */}
-        {/* PHONE OTP SIGNUP */}
-        {/* ============================================================== */}
-        {authMethod === 'phone' && (
-          <div className="space-y-4">
-            {!otpSent ? (
-              <form onSubmit={handleSendPhoneOtp} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-400 font-semibold">Full Name</label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-accent transition-colors"
-                      placeholder="Alex Turner"
-                      autoFocus
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1.5">Mobile Number</label>
-                  <div className="flex gap-2">
-                    <div className="bg-dark-800 border border-white/10 rounded-2xl px-3 flex items-center text-sm font-bold text-accent">
-                      {countryCode}
-                    </div>
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input
-                        type="tel"
-                        maxLength="10"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white font-mono text-sm tracking-wider focus:outline-none focus:border-accent transition-colors"
-                        placeholder="9876543210"
-                      />
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1">
-                    <ShieldCheck size={13} className="text-accent" />
-                    We will send a 6-digit SMS verification code
-                  </p>
-                </div>
-
-                <Button type="submit" variant="primary" fullWidth loading={loading} className="py-3.5 mt-2">
-                  Send Verification Code
-                </Button>
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyPhoneOtp} className="space-y-4">
-                {/* Instant Verification Code Display Card */}
-                <div className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="font-bold text-xs text-emerald-400 flex items-center gap-1.5">
-                      <CheckCircle2 size={16} /> Verification Code Ready
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => { setOtpSent(false); setOtpCode(''); setError(''); }}
-                      className="text-[11px] text-accent underline font-semibold hover:opacity-80"
-                    >
-                      Change Number
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between bg-dark-900/80 p-2.5 rounded-xl border border-white/5">
-                    <div>
-                      <div className="text-[10px] text-gray-400 font-medium">Your 6-Digit OTP:</div>
-                      <div className="font-mono text-2xl font-black tracking-[0.2em] text-accent">
-                        {generatedOtp || '123456'}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOtpCode(generatedOtp || '123456')}
-                      className="px-3 py-2 rounded-xl bg-accent text-dark-900 text-xs font-black hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 shadow-sm"
-                    >
-                      <Sparkles size={14} /> Auto-Fill
-                    </button>
-                  </div>
-
-                  <div className="text-[10px] text-gray-400 leading-tight">
-                    📱 Sent to <span className="text-white font-mono">{countryCode} {phone}</span>. (Or use instant test code <span className="text-accent font-bold cursor-pointer underline" onClick={() => setOtpCode('123456')}>123456</span>)
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs text-gray-400 font-semibold block mb-1.5">
-                    Enter 6-Digit OTP
-                  </label>
-                  <div className="relative">
-                    <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type="text"
-                      maxLength="6"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                      className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white font-mono text-xl tracking-[0.3em] font-extrabold text-center focus:outline-none focus:border-accent transition-colors"
-                      placeholder="••••••"
-                      autoFocus
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-gray-400 pt-1">
-                  <span>Didn't receive code?</span>
-                  {countdown > 0 ? (
-                    <span className="text-gray-500 font-medium">Resend in {countdown}s</span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSendPhoneOtp}
-                      className="text-accent hover:underline font-bold flex items-center gap-1"
-                    >
-                      <RefreshCw size={12} /> Resend OTP
-                    </button>
-                  )}
-                </div>
-
-                <Button type="submit" variant="primary" fullWidth loading={loading} className="py-3.5 mt-2">
-                  Verify & Create Account
-                </Button>
-              </form>
-            )}
+        <form onSubmit={handleEmailRegister} className="space-y-4">
+          {/* Full Name */}
+          <div className="space-y-1.5">
+            <label className={`text-xs font-bold block ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+              Full Name
+            </label>
+            <div className="relative">
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={`w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm font-medium border focus:outline-none focus:border-accent transition-colors ${
+                  isLight 
+                    ? 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400' 
+                    : 'bg-dark-800 border-white/10 text-white placeholder-gray-500'
+                }`}
+                placeholder="Alex Morgan"
+                required
+                autoFocus
+              />
+            </div>
           </div>
-        )}
 
-        {/* ============================================================== */}
-        {/* EMAIL & PASSWORD SIGNUP */}
-        {/* ============================================================== */}
-        {authMethod === 'email' && (
-          <form onSubmit={handleEmailRegister} className="space-y-3.5">
-            <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-semibold">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-accent transition-colors"
-                  placeholder="Alex Turner"
-                />
-              </div>
+          {/* Email Address */}
+          <div className="space-y-1.5">
+            <label className={`text-xs font-bold block ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm font-medium border focus:outline-none focus:border-accent transition-colors ${
+                  isLight 
+                    ? 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400' 
+                    : 'bg-dark-800 border-white/10 text-white placeholder-gray-500'
+                }`}
+                placeholder="alex@example.com"
+                required
+                autoComplete="email"
+              />
             </div>
+          </div>
 
-            <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-semibold">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-accent transition-colors"
-                  placeholder="athlete@fitforge.com"
-                />
-              </div>
+          {/* Password */}
+          <div className="space-y-1.5">
+            <label className={`text-xs font-bold block ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+              Password (min 6 chars)
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full rounded-2xl py-3.5 pl-11 pr-11 text-sm font-medium border focus:outline-none focus:border-accent transition-colors ${
+                  isLight 
+                    ? 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400' 
+                    : 'bg-dark-800 border-white/10 text-white placeholder-gray-500'
+                }`}
+                placeholder="••••••••"
+                required
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
+          </div>
 
-            <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-semibold">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-accent transition-colors"
-                  placeholder="Min 6 characters"
-                />
-              </div>
+          {/* Confirm Password */}
+          <div className="space-y-1.5">
+            <label className={`text-xs font-bold block ${isLight ? 'text-gray-700' : 'text-gray-300'}`}>
+              Confirm Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm font-medium border focus:outline-none focus:border-accent transition-colors ${
+                  isLight 
+                    ? 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400' 
+                    : 'bg-dark-800 border-white/10 text-white placeholder-gray-500'
+                }`}
+                placeholder="••••••••"
+                required
+                autoComplete="new-password"
+              />
             </div>
+          </div>
 
-            <div className="space-y-1">
-              <label className="text-xs text-gray-400 font-semibold">Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-dark-800 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-accent transition-colors"
-                  placeholder="Repeat password"
-                />
-              </div>
-            </div>
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            variant="primary" 
+            fullWidth 
+            size="lg"
+            loading={loading} 
+            className="py-3.5 mt-2"
+          >
+            <span>Create Account</span>
+            <ArrowRight size={16} />
+          </Button>
+        </form>
 
-            <Button type="submit" variant="primary" fullWidth loading={loading} className="py-3.5 mt-2">
-              Create Account
-            </Button>
-          </form>
-        )}
-
-        <p className="text-center mt-6 text-gray-400 text-xs">
+        {/* Footer sign in link */}
+        <p className={`text-center mt-6 text-xs ${isLight ? 'text-gray-600' : 'text-gray-400'}`}>
           Already have an account?{' '}
           <Link to="/login" className="text-accent font-bold hover:underline">
             Log In
           </Link>
         </p>
+      </div>
+
+      <div className={`mt-6 text-center text-[11px] flex items-center justify-center gap-1.5 ${isLight ? 'text-gray-500' : 'text-gray-500'}`}>
+        <ShieldCheck size={14} className="text-accent" />
+        <span>Free Forever &bull; No credit card required</span>
       </div>
     </motion.div>
   );
