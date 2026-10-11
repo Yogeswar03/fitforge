@@ -20,6 +20,7 @@ import Modal from '../components/ui/Modal';
 import ExerciseModal from '../components/ui/ExerciseModal';
 import PartnerDietModal from '../components/ui/PartnerDietModal';
 import AiMealAgentModal from '../components/ui/AiMealAgentModal';
+import AppLogo from '../components/ui/AppLogo';
 import { getExerciseDetails } from '../data/exerciseDatabase';
 
 const TRAINER_MESSAGES = [
@@ -225,7 +226,8 @@ export default function Dashboard() {
       {/* ============================================================== */}
       <header className="flex justify-between items-center">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            <AppLogo size={32} showGlow={false} />
             <h1 className="text-2xl font-black gradient-accent-text tracking-tight">FitForge</h1>
             {streak > 0 && (
               <span className="text-[11px] bg-orange-500/20 text-orange-400 font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">

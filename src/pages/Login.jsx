@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Dumbbell, Mail, Lock, Phone, KeyRound, ArrowRight, ShieldCheck, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import Button from '../components/ui/Button';
+import AppLogo from '../components/ui/AppLogo';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -116,9 +117,7 @@ export default function Login() {
     >
       {/* Brand Header */}
       <div className="flex flex-col items-center mb-6 text-center">
-        <div className="w-16 h-16 rounded-2xl gradient-accent flex items-center justify-center shadow-xl shadow-accent/20 mb-3">
-          <Dumbbell size={36} className="text-dark-900" />
-        </div>
+        <AppLogo size={68} animated={true} className="mb-3" />
         <h1 className="text-3xl font-extrabold tracking-tight">FitForge</h1>
         <p className="text-accent2 text-sm mt-0.5 font-medium">Forge Your Ultimate Fitness & Nutrition</p>
       </div>

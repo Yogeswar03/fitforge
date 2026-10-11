@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Dumbbell, User, Mail, Lock, Phone, KeyRound, ShieldCheck, Sparkles, CheckCircle2, RefreshCw } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import Button from '../components/ui/Button';
+import AppLogo from '../components/ui/AppLogo';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -119,9 +120,7 @@ export default function Register() {
       className="min-h-screen bg-dark-900 text-white flex flex-col justify-center px-4 md:px-6 py-12 max-w-md mx-auto"
     >
       <div className="flex flex-col items-center mb-6 text-center">
-        <div className="w-14 h-14 rounded-2xl gradient-accent flex items-center justify-center shadow-xl shadow-accent/20 mb-3">
-          <Dumbbell size={28} className="text-dark-900" />
-        </div>
+        <AppLogo size={60} animated={true} className="mb-3" />
         <h1 className="text-3xl font-extrabold tracking-tight">Join FitForge</h1>
         <p className="text-gray-400 text-xs mt-1">Start your science-backed fitness journey</p>
       </div>
