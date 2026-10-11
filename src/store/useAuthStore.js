@@ -7,22 +7,6 @@ import useWorkoutStore from './useWorkoutStore';
 import useDietStore from './useDietStore';
 import useDailyLogStore from './useDailyLogStore';
 
-const formatPhoneNumber = (phone) => {
-  if (!phone) return null;
-  const cleaned = phone.replace(/[\s\-\(\)]/g, '').trim();
-  if (cleaned.startsWith('+')) {
-    return cleaned;
-  }
-  // If 10-digit standard Indian mobile, prepend +91
-  if (/^\d{10}$/.test(cleaned)) {
-    return `+91${cleaned}`;
-  }
-  if (/^\d{11,15}$/.test(cleaned)) {
-    return `+${cleaned}`;
-  }
-  return null;
-};
-
 const syncUserToAllStores = (identifier) => {
   useUserStore.getState().setCurrentUser(identifier);
   useWorkoutStore.getState().setCurrentUser(identifier);
@@ -36,13 +20,9 @@ const useAuthStore = create(
       user: null,
       isAuthenticated: false,
       isOnboarded: false,
-      registeredUsers: {}, // { [identifier]: { user, isOnboarded } }
+      registeredUsers: {}, // { [email]: { user, isOnboarded: boolean } }
 
-      // Phone OTP verification state
-      pendingOtpPhone: null,
-      pendingOtpCode: null,
-      otpSentAt: null,
-
+      // Standard Email & Password Login (For existing users)
       login: async (email, password) => {
         const cleanEmail = (email || '').trim().toLowerCase();
         
@@ -73,26 +53,25 @@ const useAuthStore = create(
 
         const existingAccount = get().registeredUsers?.[cleanEmail];
         const userProfile = useUserStore.getState().profiles?.[cleanEmail];
-        
-        const hasExistingProfile = !!(userProfile && userProfile.weight && userProfile.height);
-        const isUserAlreadyOnboarded = existingAccount ? existingAccount.isOnboarded : hasExistingProfile;
 
         const loggedInUser = {
           id: userId,
           email: cleanEmail,
-          name: existingAccount?.user?.name || cleanEmail.split('@')[0],
+          name: existingAccount?.user?.name || userProfile?.name || cleanEmail.split('@')[0],
           avatar: null,
         };
 
+        // An existing user logging into their account is ALWAYS treated as onboarded
+        // so they go straight to their home dashboard and are never asked to signup again.
         set((state) => ({
           user: loggedInUser,
           isAuthenticated: true,
-          isOnboarded: isUserAlreadyOnboarded,
+          isOnboarded: true,
           registeredUsers: {
             ...state.registeredUsers,
             [cleanEmail]: {
               user: loggedInUser,
-              isOnboarded: isUserAlreadyOnboarded,
+              isOnboarded: true,
             },
           },
         }));
@@ -100,6 +79,7 @@ const useAuthStore = create(
         return { success: true };
       },
 
+      // New User Registration (Directs to Onboarding wizard)
       register: async (name, email, password) => {
         const cleanEmail = (email || '').trim().toLowerCase();
         let userId = Date.now().toString();
@@ -122,7 +102,6 @@ const useAuthStore = create(
               console.warn('Supabase signUp warning:', error.message);
             } else if (data?.user) {
               userId = data.user.id;
-              // Create initial profile row in Supabase
               await syncProfileToCloud(userId, cleanEmail, { name: name.trim() });
             }
           } catch (err) {
@@ -137,6 +116,7 @@ const useAuthStore = create(
           avatar: null,
         };
 
+        // Brand new registration: not onboarded yet
         set((state) => ({
           user: newUser,
           isAuthenticated: true,
@@ -153,148 +133,6 @@ const useAuthStore = create(
         return { success: true };
       },
 
-      sendPhoneOtp: async (rawPhone) => {
-        const formattedPhone = formatPhoneNumber(rawPhone);
-        if (!formattedPhone) {
-          return { success: false, error: 'Please enter a valid 10-digit mobile number.' };
-        }
-
-        // Generate 6-digit OTP code (e.g. 583920)
-        const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        let supabaseAttempted = false;
-        let supabaseSuccess = false;
-
-        if (isSupabaseConfigured && supabase) {
-          try {
-            supabaseAttempted = true;
-            const { error } = await supabase.auth.signInWithOtp({
-              phone: formattedPhone,
-            });
-            if (!error) {
-              supabaseSuccess = true;
-            } else {
-              console.warn('Supabase SMS OTP notice:', error.message);
-            }
-          } catch (err) {
-            console.warn('Supabase SMS OTP attempt error:', err);
-          }
-        }
-
-        set({
-          pendingOtpPhone: formattedPhone,
-          pendingOtpCode: generatedOtp,
-          otpSentAt: Date.now(),
-        });
-
-        return {
-          success: true,
-          phone: formattedPhone,
-          otp: generatedOtp,
-          supabaseAttempted,
-          supabaseSuccess,
-        };
-      },
-
-      verifyPhoneOtp: async (rawPhone, otpCode, optionalName = '') => {
-        const formattedPhone = formatPhoneNumber(rawPhone) || get().pendingOtpPhone;
-        if (!formattedPhone) {
-          return { success: false, error: 'Phone number is required.' };
-        }
-
-        const cleanOtp = (otpCode || '').trim();
-        if (cleanOtp.length !== 6) {
-          return { success: false, error: 'Please enter a 6-digit verification code.' };
-        }
-
-        let isVerified = false;
-        let userId = Date.now().toString();
-
-        // 1. Try Supabase verification if configured
-        if (isSupabaseConfigured && supabase) {
-          try {
-            const { data, error } = await supabase.auth.verifyOtp({
-              phone: formattedPhone,
-              token: cleanOtp,
-              type: 'sms',
-            });
-            if (!error && data?.user) {
-              isVerified = true;
-              userId = data.user.id;
-              await loadAllUserDataFromCloud(userId, formattedPhone);
-            } else {
-              console.warn('Supabase OTP verification message:', error?.message);
-            }
-          } catch (err) {
-            console.warn('Supabase verifyOtp err:', err);
-          }
-        }
-
-        // 2. Fallback / direct verification check against generated OTP or universal testing code '123456'
-        const expectedOtp = get().pendingOtpCode;
-        if (!isVerified && (cleanOtp === expectedOtp || cleanOtp === '123456')) {
-          isVerified = true;
-        }
-
-        if (!isVerified) {
-          return { success: false, error: 'Incorrect or expired OTP code. Please try again.' };
-        }
-
-        // Sync local stores to this user's phone identifier
-        const userIdentifier = formattedPhone;
-        syncUserToAllStores(userIdentifier);
-
-        const existingAccount = get().registeredUsers?.[userIdentifier];
-        const userProfile = useUserStore.getState().profiles?.[userIdentifier];
-        const hasExistingProfile = !!(userProfile && userProfile.weight && userProfile.height);
-        const isUserAlreadyOnboarded = existingAccount ? existingAccount.isOnboarded : hasExistingProfile;
-
-        const displayName =
-          existingAccount?.user?.name ||
-          (optionalName && optionalName.trim()) ||
-          `Athlete (${formattedPhone.slice(-4)})`;
-
-        const loggedInUser = {
-          id: userId,
-          phone: formattedPhone,
-          email: `${formattedPhone.replace(/\D/g, '')}@phone.fitforge.app`,
-          name: displayName,
-          avatar: null,
-        };
-
-        // If Supabase is connected, ensure profile row exists in cloud
-        if (isSupabaseConfigured && supabase) {
-          try {
-            await syncProfileToCloud(userId, userIdentifier, { name: displayName });
-          } catch (e) {}
-        }
-
-        set((state) => ({
-          user: loggedInUser,
-          isAuthenticated: true,
-          isOnboarded: isUserAlreadyOnboarded,
-          pendingOtpPhone: null,
-          pendingOtpCode: null,
-          otpSentAt: null,
-          registeredUsers: {
-            ...state.registeredUsers,
-            [userIdentifier]: {
-              user: loggedInUser,
-              isOnboarded: isUserAlreadyOnboarded,
-            },
-          },
-        }));
-
-        return { success: true, isNewUser: !isUserAlreadyOnboarded };
-      },
-
-      clearOtpState: () => {
-        set({
-          pendingOtpPhone: null,
-          pendingOtpCode: null,
-          otpSentAt: null,
-        });
-      },
-
       logout: async () => {
         if (isSupabaseConfigured && supabase) {
           try {
@@ -308,27 +146,27 @@ const useAuthStore = create(
         set({
           user: null,
           isAuthenticated: false,
-          pendingOtpPhone: null,
-          pendingOtpCode: null,
-          otpSentAt: null,
+          isOnboarded: false,
         });
       },
 
       setOnboarded: () => {
         set((state) => {
-          const identifier = (state.user?.phone || state.user?.email || '').toLowerCase();
+          const email = (state.user?.email || '').toLowerCase();
           const updatedUsers = { ...state.registeredUsers };
-          if (identifier && updatedUsers[identifier]) {
-            updatedUsers[identifier] = {
-              ...updatedUsers[identifier],
+          
+          if (email) {
+            updatedUsers[email] = {
+              ...(updatedUsers[email] || {}),
+              user: state.user || updatedUsers[email]?.user,
               isOnboarded: true,
             };
           }
 
           // If user exists and Supabase configured, sync profile to cloud
-          if (state.user?.id && identifier) {
+          if (state.user?.id && email) {
             const profile = useUserStore.getState().profile;
-            syncProfileToCloud(state.user.id, identifier, profile);
+            syncProfileToCloud(state.user.id, email, profile);
           }
 
           return {
@@ -345,9 +183,9 @@ const useAuthStore = create(
     {
       name: 'fitforge-auth',
       onRehydrateStorage: () => (state) => {
-        const identifier = state?.user?.phone || state?.user?.email;
-        if (identifier && state.isAuthenticated) {
-          syncUserToAllStores(identifier);
+        const email = state?.user?.email;
+        if (email && state.isAuthenticated) {
+          syncUserToAllStores(email);
         }
       },
     }
