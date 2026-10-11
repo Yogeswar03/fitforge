@@ -25,6 +25,7 @@ export default function Register() {
   const [countryCode, setCountryCode] = useState('+91');
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
+  const [generatedOtp, setGeneratedOtp] = useState('');
   const [countdown, setCountdown] = useState(0);
 
   const [loading, setLoading] = useState(false);
@@ -86,6 +87,7 @@ export default function Register() {
 
     if (res.success) {
       setOtpSent(true);
+      setGeneratedOtp(res.otp || '123456');
       setCountdown(30);
     } else {
       setError(res.error || 'Failed to send OTP.');
@@ -219,22 +221,40 @@ export default function Register() {
               </form>
             ) : (
               <form onSubmit={handleVerifyPhoneOtp} className="space-y-4">
-                <div className="p-3 bg-accent/10 border border-accent/20 rounded-2xl text-xs text-accent flex items-center justify-between">
-                  <div>
-                    <div className="font-bold flex items-center gap-1">
-                      <CheckCircle2 size={14} /> Code Sent!
+                {/* Instant Verification Code Display Card */}
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="font-bold text-xs text-emerald-400 flex items-center gap-1.5">
+                      <CheckCircle2 size={16} /> Verification Code Ready
                     </div>
-                    <div className="text-[11px] text-gray-300 mt-0.5">
-                      Sent to {countryCode} {phone}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setOtpSent(false); setOtpCode(''); setError(''); }}
+                      className="text-[11px] text-accent underline font-semibold hover:opacity-80"
+                    >
+                      Change Number
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => { setOtpSent(false); setOtpCode(''); setError(''); }}
-                    className="text-[11px] text-accent underline font-semibold hover:opacity-80"
-                  >
-                    Change
-                  </button>
+
+                  <div className="flex items-center justify-between bg-dark-900/80 p-2.5 rounded-xl border border-white/5">
+                    <div>
+                      <div className="text-[10px] text-gray-400 font-medium">Your 6-Digit OTP:</div>
+                      <div className="font-mono text-2xl font-black tracking-[0.2em] text-accent">
+                        {generatedOtp || '123456'}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setOtpCode(generatedOtp || '123456')}
+                      className="px-3 py-2 rounded-xl bg-accent text-dark-900 text-xs font-black hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 shadow-sm"
+                    >
+                      <Sparkles size={14} /> Auto-Fill
+                    </button>
+                  </div>
+
+                  <div className="text-[10px] text-gray-400 leading-tight">
+                    📱 Sent to <span className="text-white font-mono">{countryCode} {phone}</span>. (Or use instant test code <span className="text-accent font-bold cursor-pointer underline" onClick={() => setOtpCode('123456')}>123456</span>)
+                  </div>
                 </div>
 
                 <div>
